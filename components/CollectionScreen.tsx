@@ -3,7 +3,8 @@ import { StyleSheet, View, Text, TouchableOpacity, ScrollView } from 'react-nati
 import Svg, { Line, Defs, RadialGradient, Stop, Circle, G } from 'react-native-svg';
 import { useGame } from '../gameState';
 import { TreeSpecies } from '../data/treeSpecies';
-import { EnergyIcon, CoinIcon, SeedIcon, GrowthRateIcon } from './Icons';
+import { EnergyIcon, CoinIcon, GemIcon, GrowthRateIcon } from './Icons';
+import { QUESTS } from '../data/quests';
 
 interface CollectionScreenProps {
     onClose: () => void;
@@ -102,13 +103,34 @@ const getRarityInfo = (rarity: string): { label: string; stars: string; color: s
 
 export const CollectionScreen: React.FC<CollectionScreenProps> = ({ onClose }) => {
     const { state, switchTree, unlockTree, allSpecies } = useGame();
+    const [statusMsg, setStatusMsg] = React.useState<{ text: string, type: 'error' | 'info' } | null>(null);
 
     const handleTreePress = (species: TreeSpecies) => {
         if (state.unlockedTrees.includes(species.id)) {
             switchTree(species.id);
             onClose();
-        } else if (state.seeds >= species.unlockCost) {
-            unlockTree(species.id);
+            return;
+        }
+
+        // Check Quest Requirement
+        if (species.unlockQuest && !state.completedQuests.includes(species.unlockQuest)) {
+            const quest = QUESTS[species.unlockQuest];
+            if (quest) {
+                setStatusMsg({ text: `🔒 ${quest.description}`, type: 'error' });
+                setTimeout(() => setStatusMsg(null), 3000);
+                return;
+            }
+        }
+
+        if (state.gems >= species.unlockCost) {
+            const success = unlockTree(species.id);
+            if (success) {
+                setStatusMsg({ text: `✨ ${species.name} Unlocked!`, type: 'info' });
+                setTimeout(() => setStatusMsg(null), 2000);
+            }
+        } else {
+            setStatusMsg({ text: `❌ Not enough gems! Need ${species.unlockCost}`, type: 'error' });
+            setTimeout(() => setStatusMsg(null), 2000);
         }
     };
 
@@ -124,17 +146,23 @@ export const CollectionScreen: React.FC<CollectionScreenProps> = ({ onClose }) =
 
                 <View style={styles.subtitleRow}>
                     <Text style={styles.subtitle}>Collected: {state.unlockedTrees.length}/{allSpecies.length}</Text>
-                    <View style={styles.seedsDisplay}>
-                        <SeedIcon size={16} />
-                        <Text style={styles.seedsValue}>{state.seeds}</Text>
+                    <View style={styles.gemsDisplay}>
+                        <GemIcon size={16} />
+                        <Text style={styles.gemsValue}>{state.gems}</Text>
                     </View>
                 </View>
+
+                {statusMsg && (
+                    <View style={[styles.statusBox, statusMsg.type === 'error' ? styles.statusBoxError : styles.statusBoxInfo]}>
+                        <Text style={styles.statusText}>{statusMsg.text}</Text>
+                    </View>
+                )}
 
                 <ScrollView style={styles.grid} contentContainerStyle={styles.gridContent}>
                     {allSpecies.map(species => {
                         const isUnlocked = state.unlockedTrees.includes(species.id);
                         const isSelected = state.currentTreeId === species.id;
-                        const canAfford = state.seeds >= species.unlockCost;
+                        const canAfford = state.gems >= species.unlockCost;
                         const stats = state.treeStats[species.id];
                         const level = stats?.level || 1;
                         const height = stats?.height || 50;
@@ -185,9 +213,14 @@ export const CollectionScreen: React.FC<CollectionScreenProps> = ({ onClose }) =
                                         {isSelected && <Text style={styles.selectedBadge}>ACTIVE</Text>}
                                     </View>
                                 ) : (
-                                    <View style={styles.costContainer}>
-                                        <SeedIcon size={14} />
-                                        <Text style={[styles.costText, !canAfford && styles.costTextRed]}>{species.unlockCost}</Text>
+                                    <View style={styles.lockedContainer}>
+                                        {species.unlockQuest && !state.completedQuests.includes(species.unlockQuest) && (
+                                            <Text style={styles.questLockedText}>Reach Level 5 first</Text>
+                                        )}
+                                        <View style={styles.costContainer}>
+                                            <GemIcon size={14} />
+                                            <Text style={[styles.costText, !canAfford && styles.costTextRed]}>{species.unlockCost}</Text>
+                                        </View>
                                     </View>
                                 )}
 
@@ -259,7 +292,7 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
     subtitle: { color: '#888', fontSize: 13 },
-    seedsDisplay: {
+    gemsDisplay: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 4,
@@ -268,7 +301,7 @@ const styles = StyleSheet.create({
         paddingVertical: 4,
         borderRadius: 10,
     },
-    seedsValue: { color: '#4ade80', fontSize: 14, fontWeight: 'bold' },
+    gemsValue: { color: '#4ade80', fontSize: 14, fontWeight: 'bold' },
     grid: { flex: 1 },
     gridContent: {
         flexDirection: 'row',
@@ -351,7 +384,39 @@ const styles = StyleSheet.create({
         paddingVertical: 1,
         borderRadius: 4,
     },
-    costContainer: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 3 },
+    statusBox: {
+        padding: 10,
+        borderRadius: 12,
+        marginBottom: 12,
+        alignItems: 'center',
+    },
+    statusBoxError: {
+        backgroundColor: 'rgba(239, 68, 68, 0.15)',
+        borderWidth: 1,
+        borderColor: 'rgba(239, 68, 68, 0.3)',
+    },
+    statusBoxInfo: {
+        backgroundColor: 'rgba(34, 197, 94, 0.15)',
+        borderWidth: 1,
+        borderColor: 'rgba(34, 197, 94, 0.3)',
+    },
+    statusText: {
+        color: '#fff',
+        fontSize: 13,
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
+    lockedContainer: {
+        marginTop: 3,
+        height: 18,
+        justifyContent: 'center',
+    },
+    questLockedText: {
+        fontSize: 9,
+        color: '#fbbf24',
+        fontWeight: 'bold',
+    },
+    costContainer: { flexDirection: 'row', alignItems: 'center', gap: 4 },
     costText: { fontSize: 12, color: '#4ade80', fontWeight: 'bold' },
     costTextRed: { color: '#ef4444' },
     statsRow: { flexDirection: 'row', gap: 8, marginTop: 6 },

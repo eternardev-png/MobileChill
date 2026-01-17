@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Dimensions } from
 import Svg, { Line, Defs, RadialGradient, Stop, Circle, G, Path } from 'react-native-svg';
 import { useGame } from '../gameState';
 import { TreeSpecies } from '../data/treeSpecies';
-import { SeedIcon, GrowthRateIcon, CoinIcon, EnergyIcon } from './Icons';
+import { GemIcon, GrowthRateIcon, CoinIcon, EnergyIcon } from './Icons';
 import Slider from '@react-native-community/slider';
 
 const { width } = Dimensions.get('window');
@@ -180,18 +180,36 @@ export const TreeLab: React.FC<TreeLabProps> = ({ onClose }) => {
 
     useEffect(() => {
         let newCost = 50; // Base
+
+        // Multiplier analysis for exponential scale
+        const multipliers = [growthMult, coinMult, energyMult, timeMult];
+        const positiveMultipliers = multipliers.filter(m => m > 1);
+
         const calcFactor = (val: number) => {
-            if (val > 1) return (val - 1) * 150;
-            if (val < 1) return (val - 1) * 80;
+            if (val > 1) {
+                // Exponential increase for values > 1
+                return Math.pow(val, 2.5) * 100 - 100;
+            }
+            if (val < 1) {
+                // Linear decrease for values < 1
+                return (val - 1) * 80;
+            }
             return 0;
         };
 
-        newCost += calcFactor(growthMult) + calcFactor(coinMult) + calcFactor(energyMult) + calcFactor(timeMult);
+        let bonusTotal = calcFactor(growthMult) + calcFactor(coinMult) + calcFactor(energyMult) + calcFactor(timeMult);
+
+        // Extra penalty for stacking multiple positive buffs
+        if (positiveMultipliers.length > 1) {
+            bonusTotal *= Math.pow(1.5, positiveMultipliers.length);
+        }
+
+        newCost += bonusTotal;
 
         // Structure costs
         newCost += (branchCount - 2) * 50; // +50 per extra branch
-        if (decay > 0.8) newCost += 30;
-        if (asymmetry > 0.5) newCost += 20;
+        if (decay > 0.8) newCost += 50; // Increased
+        if (asymmetry > 0.5) newCost += 30; // Increased
 
         setCost(Math.max(10, Math.round(newCost)));
     }, [growthMult, coinMult, energyMult, timeMult, branchCount, decay, asymmetry]);
@@ -208,7 +226,7 @@ export const TreeLab: React.FC<TreeLabProps> = ({ onClose }) => {
     const rarityColors = { common: '#a3a3a3', rare: '#3b82f6', epic: '#a855f7', legendary: '#eab308' };
 
     const handleSynthesize = () => {
-        if (state.seeds < cost) return;
+        if (state.gems < cost) return;
 
         const rarity = getRarity(cost);
 
@@ -249,9 +267,9 @@ export const TreeLab: React.FC<TreeLabProps> = ({ onClose }) => {
                     <View>
                         <Text style={styles.title}>Tree Laboratory</Text>
                         <View style={styles.badgesRow}>
-                            <View style={[styles.costBadge, cost > state.seeds && styles.costBadgeRed]}>
+                            <View style={[styles.costBadge, cost > state.gems && styles.costBadgeRed]}>
                                 <Text style={styles.costText}>{cost}</Text>
-                                <SeedIcon size={14} color="#fff" />
+                                <GemIcon size={14} color="#fff" />
                             </View>
                             {/* Rarity Badge */}
                             <View style={[styles.rarityBadge, { backgroundColor: rarityColors[currentRarity] + '33', borderColor: rarityColors[currentRarity] }]}>
@@ -350,9 +368,9 @@ export const TreeLab: React.FC<TreeLabProps> = ({ onClose }) => {
 
                 <View style={styles.footer}>
                     <TouchableOpacity
-                        style={[styles.synthBtn, state.seeds < cost && styles.synthBtnDisabled]}
+                        style={[styles.synthBtn, state.gems < cost && styles.synthBtnDisabled]}
                         onPress={handleSynthesize}
-                        disabled={state.seeds < cost}
+                        disabled={state.gems < cost}
                     >
                         <Text style={styles.synthBtnText}>SYNTHESIZE SPECIES</Text>
                     </TouchableOpacity>

@@ -75,7 +75,8 @@ export const TREE_SPECIES: Record<string, TreeSpecies> = {
     growthRate: 1.3,
     energyPerTap: 0.8,
     coinMultiplier: 1.0,
-    unlockCost: 10,
+    unlockCost: 100,
+    unlockQuest: 'oak_level_5',
   },
 
   // 3. Maple (moved up)
@@ -96,30 +97,30 @@ export const TREE_SPECIES: Record<string, TreeSpecies> = {
     growthRate: 1.5,
     energyPerTap: 1.8,
     coinMultiplier: 1.0,
-    unlockCost: 25,
-    unlockQuest: 'first_unlock',
+    unlockCost: 250,
+    unlockQuest: 'pine_level_5',
   },
 
-  // 4. Cherry (moved down)
-  cherry: {
-    id: 'cherry',
-    name: 'Cherry Blossom',
-    emoji: '🌸',
-    description: 'Beautiful and energy-rich, but grows slowly.',
-    rarity: 'rare',
-    baseColor: { hue: 330, saturation: 80, lightness: 60 },
-    gradientStart: { hue: 330, saturation: 80, lightness: 50 }, // Standard Pink
-    gradientEnd: { hue: 350, saturation: 90, lightness: 85 },   // Light Red-Pink (Not Purple)
-    branchAngleRange: [25, 35],
-    branchCount: 3,
-    branchLengthMultiplier: 0.6,
-    asymmetryFactor: 0.25,
-    maxDepthBonus: 2,
+  // 4. Baobab
+  baobab: {
+    id: 'baobab',
+    name: 'Baobab Tree',
+    emoji: '🌴',
+    description: 'Ancient and powerful. Maximum energy per tap.',
+    rarity: 'epic',
+    baseColor: { hue: 35, saturation: 50, lightness: 45 },
+    gradientStart: { hue: 40, saturation: 90, lightness: 35 },  // Orange/Golden Trunk
+    gradientEnd: { hue: 0, saturation: 100, lightness: 60 },    // bright RED top
+    branchAngleRange: [35, 50],
+    branchCount: 4,
+    branchLengthMultiplier: 0.55,
+    asymmetryFactor: 0.35,
+    maxDepthBonus: 3,
     growthRate: 0.8,
     energyPerTap: 2.5,
     coinMultiplier: 1.0,
-    unlockCost: 35,
-    unlockQuest: 'collector',
+    unlockCost: 350,
+    unlockQuest: 'maple_level_5',
   },
 
   // 5. Money Tree
@@ -140,30 +141,30 @@ export const TREE_SPECIES: Record<string, TreeSpecies> = {
     growthRate: 0.5,
     energyPerTap: 0.5,
     coinMultiplier: 1.5,
-    unlockCost: 50,
-    unlockQuest: 'master_growth',
+    unlockCost: 350,
+    unlockQuest: 'baobab_level_5',
   },
 
-  // 6. Baobab
-  baobab: {
-    id: 'baobab',
-    name: 'Baobab Tree',
-    emoji: '🌴',
-    description: 'Ancient and powerful. Maximum energy per tap.',
+  // 6. Cherry Blossom
+  cherry: {
+    id: 'cherry',
+    name: 'Cherry Blossom',
+    emoji: '🌸',
+    description: 'Beautiful and energy-rich, but grows slowly.',
     rarity: 'legendary',
-    baseColor: { hue: 35, saturation: 50, lightness: 45 },
-    gradientStart: { hue: 40, saturation: 90, lightness: 35 },  // Orange/Golden Trunk
-    gradientEnd: { hue: 0, saturation: 100, lightness: 60 },    // bright RED top
-    branchAngleRange: [35, 50],
-    branchCount: 4,
-    branchLengthMultiplier: 0.55,
-    asymmetryFactor: 0.35,
-    maxDepthBonus: 3,
+    baseColor: { hue: 330, saturation: 80, lightness: 60 },
+    gradientStart: { hue: 330, saturation: 80, lightness: 50 }, // Standard Pink
+    gradientEnd: { hue: 350, saturation: 90, lightness: 85 },   // Light Red-Pink (Not Purple)
+    branchAngleRange: [25, 35],
+    branchCount: 3,
+    branchLengthMultiplier: 0.6,
+    asymmetryFactor: 0.25,
+    maxDepthBonus: 2,
     growthRate: 0.6,
     energyPerTap: 4.0,
     coinMultiplier: 1.0,
-    unlockCost: 100,
-    unlockQuest: 'tree_master',
+    unlockCost: 500,
+    unlockQuest: 'money_level_5',
   },
 };
 
@@ -177,8 +178,8 @@ export const getAllSpecies = (): TreeSpecies[] => {
     TREE_SPECIES.oak,
     TREE_SPECIES.pine,
     TREE_SPECIES.maple,
-    TREE_SPECIES.cherry,
-    TREE_SPECIES.money,
     TREE_SPECIES.baobab,
+    TREE_SPECIES.money,
+    TREE_SPECIES.cherry,
   ];
 };

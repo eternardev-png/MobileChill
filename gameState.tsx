@@ -23,7 +23,7 @@ export interface PrestigeState {
 export interface GameState {
     energy: number;
     coins: number;
-    seeds: number;
+    gems: number;
     grow: number; // New resource for roulette
     currentTreeId: string;
     totalTaps: number;
@@ -31,6 +31,12 @@ export interface GameState {
     totalSpins: number; // New metric
     totalUpgradesPurchased: number; // New metric
     totalLabTreesCreated: number; // New metric
+    labTreesByRarity: {
+        common: number;
+        rare: number;
+        epic: number;
+        legendary: number;
+    };
     unlockedTrees: string[];
     treeStats: Record<string, TreeStats>;
     upgradeLevels: Record<string, number>;
@@ -38,6 +44,7 @@ export interface GameState {
     lastSaveTime: number;
     prestige: PrestigeState;
     customTrees: Record<string, TreeSpecies>;
+    tutorialStep: number; // 0=None, 1=TapTree, 2=OpenShop, 3=BuyUpgrade, 4=CloseShop, 5=OpenQuests, 6=ClaimQuest, 7=CloseQuests, 8=OpenPrestige, 9=ClickReset, 10=ConfirmReset, 11=BuyUpgrade, 12=ClosePrestige, 13=Done
 }
 
 const defaultTreeStats: TreeStats = { level: 1, xp: 0, totalEnergy: 0, height: 50 };
@@ -46,7 +53,7 @@ const defaultPrestige: PrestigeState = { shards: 0, totalShards: 0, prestigeCoun
 const initialState: GameState = {
     energy: 0,
     coins: 50,
-    seeds: 0,
+    gems: 0,
     grow: 0,
     currentTreeId: 'oak',
     totalTaps: 0,
@@ -54,6 +61,7 @@ const initialState: GameState = {
     totalSpins: 0,
     totalUpgradesPurchased: 0,
     totalLabTreesCreated: 0,
+    labTreesByRarity: { common: 0, rare: 0, epic: 0, legendary: 0 },
     unlockedTrees: ['oak'],
     treeStats: { oak: { ...defaultTreeStats } },
     upgradeLevels: { tapPower: 0, growthSpeed: 0, autoEnergy: 0, autoGrowth: 0, coinBonus: 0 },
@@ -61,6 +69,7 @@ const initialState: GameState = {
     lastSaveTime: Date.now(),
     prestige: { ...defaultPrestige },
     customTrees: {},
+    tutorialStep: 0,
 };
 
 interface GameContextType {
@@ -75,7 +84,7 @@ interface GameContextType {
     claimQuestReward: (questId: string) => boolean;
     performPrestige: () => boolean;
     buyPrestigeUpgrade: (upgradeId: string) => boolean;
-    spendSeeds: (amount: number) => boolean;
+    spendGems: (amount: number) => boolean;
     awardRoulettePrize: (prizeType: string, prizeValue: number) => void;
     getPrestigeShardPreview: () => number;
     canPerformPrestige: () => boolean;
@@ -97,6 +106,10 @@ interface GameContextType {
     loadGame: () => void;
     resetGame: () => void;
     addResources: (money: number, energy: number) => void;
+
+    // Tutorial
+    tutorialStep: number;
+    advanceTutorial: (toStep?: number) => void;
 }
 
 const GameContext = createContext<GameContextType | null>(null);
@@ -130,8 +143,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     }
 
                     if (parsed.upgradeLevels) {
-                        const realUpgradeCount = Object.values(parsed.upgradeLevels).reduce((a: any, b: any) => a + b, 0);
-                        parsed.totalUpgradesPurchased = Math.max(parsed.totalUpgradesPurchased || 0, realUpgradeCount);
+                        const levels = parsed.upgradeLevels as Record<string, number>;
+                        const realUpgradeCount = Object.values(levels).reduce((a, b) => a + (Number(b) || 0), 0);
+                        parsed.totalUpgradesPurchased = Math.max(Number(parsed.totalUpgradesPurchased) || 0, realUpgradeCount);
                     }
 
                     // FIX: Register Dynamic Quests for Retroactive/Loaded Trees
@@ -143,7 +157,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                 description: `Level ${tree.name} to 5`,
                                 icon: tree.name.includes('Money') ? '💰' : '🧬',
                                 objective: { type: 'specific_tree_level', target: 5, treeId: tree.id },
-                                rewards: { coins: 100 * (tree.branchCount || 2), seeds: 10 },
+                                rewards: { coins: 100 * (tree.branchCount || 2), gems: 3 },
                             };
                             const q10 = {
                                 id: `${tree.id}_level_10`,
@@ -151,7 +165,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                 description: `Level ${tree.name} to 10`,
                                 icon: '⭐',
                                 objective: { type: 'specific_tree_level', target: 10, treeId: tree.id },
-                                rewards: { coins: 300 * (tree.branchCount || 2), seeds: 30 },
+                                rewards: { coins: 300 * (tree.branchCount || 2), gems: 10 },
                                 prerequisite: `${tree.id}_level_5`,
                             };
                             // @ts-ignore
@@ -247,15 +261,15 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     const energyBonus = 1 + getPrestigeEnergyBonus();
                     const gain = rate * currentSpecies.energyPerTap * energyBonus;
 
-                    const oldMilestone = Math.floor(prev.totalEnergyEarned / 1000);
-                    const newMilestone = Math.floor((prev.totalEnergyEarned + gain) / 1000);
-                    const seedsGain = newMilestone - oldMilestone;
+                    const oldMilestone = Math.floor(prev.totalEnergyEarned / 500);
+                    const newMilestone = Math.floor((prev.totalEnergyEarned + gain) / 500);
+                    const gemsGain = (newMilestone - oldMilestone) * 2; // 2 Gems per 500 Energy
 
                     return {
                         ...prev,
                         energy: prev.energy + gain,
                         totalEnergyEarned: prev.totalEnergyEarned + gain,
-                        seeds: prev.seeds + seedsGain
+                        gems: prev.gems + gemsGain
                     };
                 });
             }, 1000 / (currentSpecies.timeMultiplier || 1.0));
@@ -327,7 +341,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             // OR if user wants consistent income, maybe 1 seed per level?
             // Let's saferty keep it hard (Quests) to avoid breaking economy.
 
-            while (newXp >= xpForLevel(newLevel) && newLevel < 20) {
+            while (newXp >= xpForLevel(newLevel) && newLevel < 100) {
                 newXp -= xpForLevel(newLevel);
                 newLevel++;
                 coinReward += newLevel * 10 * coinMult * species.coinMultiplier;
@@ -335,25 +349,32 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             // Reward Calculation
             const levelsGained = newLevel - oldStats.level;
-            const seedsFromLevel = levelsGained; // 1 Seed per Level
+            const gemsFromLevel = levelsGained * 3; // +3 Gems per level up
 
-            const oldEnergyMilestone = Math.floor(prev.totalEnergyEarned / 1000);
-            const newEnergyMilestone = Math.floor((prev.totalEnergyEarned + energyGain) / 1000);
-            const seedsFromEnergy = newEnergyMilestone - oldEnergyMilestone; // 1 Seed per 1000 Energy
+            const oldEnergyMilestone = Math.floor(prev.totalEnergyEarned / 500);
+            const newEnergyMilestone = Math.floor((prev.totalEnergyEarned + energyGain) / 500);
+            const gemsFromEnergy = (newEnergyMilestone - oldEnergyMilestone) * 2; // 2 Gems per 500 Energy
 
             const oldTapMilestone = Math.floor(prev.totalTaps / 100);
             const newTapMilestone = Math.floor((prev.totalTaps + 1) / 100);
-            const seedsFromTaps = newTapMilestone - oldTapMilestone; // 1 Seed per 100 Taps
+            const gemsFromTaps = (newTapMilestone - oldTapMilestone) * 1; // 1 Gem per 100 Taps
 
-            const totalSeedsReward = seedsFromLevel + seedsFromEnergy + seedsFromTaps;
+            const totalGemsReward = gemsFromLevel + gemsFromEnergy + gemsFromTaps;
+
+            // Auto-advance tutorial if at Step 1
+            let newTutorialStep = prev.tutorialStep;
+            if (prev.tutorialStep === 1) {
+                newTutorialStep = 2; // Step 1 -> 2 Correctly advance tutorial
+            }
 
             return {
                 ...prev,
                 energy: prev.energy + energyGain,
                 coins: prev.coins + coinReward,
-                seeds: prev.seeds + totalSeedsReward,
+                gems: prev.gems + totalGemsReward,
                 totalTaps: prev.totalTaps + 1,
                 totalEnergyEarned: prev.totalEnergyEarned + energyGain,
+                tutorialStep: newTutorialStep,
                 treeStats: {
                     ...prev.treeStats,
                     [prev.currentTreeId]: { ...oldStats, xp: newXp, level: newLevel, totalEnergy: oldStats.totalEnergy + energyGain, height: oldStats.height + heightGain },
@@ -368,16 +389,19 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const unlockTree = useCallback((treeId: string): boolean => {
         const species = TREE_SPECIES[treeId];
-        if (!species || state.unlockedTrees.includes(treeId) || state.seeds < species.unlockCost) return false;
+        if (!species || state.unlockedTrees.includes(treeId) || state.gems < species.unlockCost) return false;
+
+        // Ensure quest is completed if required
+        if (species.unlockQuest && !state.completedQuests.includes(species.unlockQuest)) return false;
+
         setState(prev => ({
             ...prev,
-            seeds: prev.seeds - species.unlockCost,
-            // Removed grow reward
+            gems: prev.gems - species.unlockCost,
             unlockedTrees: [...prev.unlockedTrees, treeId],
             treeStats: { ...prev.treeStats, [treeId]: { ...defaultTreeStats } },
         }));
         return true;
-    }, [state.seeds, state.unlockedTrees]);
+    }, [state.gems, state.unlockedTrees, state.completedQuests]);
 
     const buyUpgrade = useCallback((upgradeId: string): boolean => {
         const upgrade = UPGRADES[upgradeId];
@@ -389,7 +413,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             ...prev,
             coins: prev.coins - cost,
             upgradeLevels: { ...prev.upgradeLevels, [upgradeId]: level + 1 },
-            totalUpgradesPurchased: (prev.totalUpgradesPurchased || 0) + 1
+            totalUpgradesPurchased: (prev.totalUpgradesPurchased || 0) + 1,
+            tutorialStep: prev.tutorialStep === 3 ? 4 : prev.tutorialStep
         }));
         return true;
     }, [state.coins, state.upgradeLevels]);
@@ -413,9 +438,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setState(prev => ({
             ...prev,
             coins: prev.coins + (quest.rewards.coins || 0),
-            seeds: prev.seeds + (quest.rewards.seeds || 0),
+            gems: prev.gems + (quest.rewards.gems || 0),
+            energy: prev.energy + (quest.rewards.energy || 0),
+            totalEnergyEarned: prev.totalEnergyEarned + (quest.rewards.energy || 0),
             grow: prev.grow + 5, // Earn grow for completing quests
             completedQuests: [...prev.completedQuests, questId],
+            tutorialStep: prev.tutorialStep === 6 ? 7 : prev.tutorialStep
         }));
         return true;
     }, [state]);
@@ -438,18 +466,19 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const getPrestigeShardPreview = useCallback(() => calculatePrestigeShards(state.totalEnergyEarned), [state.totalEnergyEarned]);
     const canPerformPrestige = useCallback(() => canPrestige(state.totalEnergyEarned), [state.totalEnergyEarned]);
 
-    const performPrestige = useCallback((): boolean => {
+    const performPrestige = useCallback(() => {
         if (!canPrestige(state.totalEnergyEarned)) return false;
         const shards = calculatePrestigeShards(state.totalEnergyEarned);
         setState(prev => ({
             ...initialState,
             prestige: { ...prev.prestige, shards: prev.prestige.shards + shards, totalShards: prev.prestige.totalShards + shards, prestigeCount: prev.prestige.prestigeCount + 1 },
             lastSaveTime: Date.now(),
+            tutorialStep: prev.tutorialStep === 10 ? 11 : prev.tutorialStep // 10(Confirm) -> 11(Buy Prestige Upgrade)
         }));
         return true;
     }, [state.totalEnergyEarned]);
 
-    const buyPrestigeUpgrade = useCallback((upgradeId: string): boolean => {
+    const buyPrestigeUpgrade = useCallback((upgradeId: string) => {
         const upgrade = PRESTIGE_UPGRADES[upgradeId];
         if (!upgrade) return false;
         const level = state.prestige.upgradeLevels[upgradeId] || 0;
@@ -458,6 +487,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setState(prev => ({
             ...prev,
             prestige: { ...prev.prestige, shards: prev.prestige.shards - cost, upgradeLevels: { ...prev.prestige.upgradeLevels, [upgradeId]: level + 1 } },
+            tutorialStep: prev.tutorialStep === 11 ? 12 : prev.tutorialStep // 11(Buy) -> 12(Close Prestige)
         }));
         return true;
     }, [state.prestige]);
@@ -526,11 +556,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }));
     }, []);
 
-    const spendSeeds = useCallback((amount: number): boolean => {
-        if (state.seeds < amount) return false;
-        setState(prev => ({ ...prev, seeds: prev.seeds - amount }));
+    const spendGems = useCallback((amount: number): boolean => {
+        if (state.gems < amount) return false;
+        setState(prev => ({ ...prev, gems: prev.gems - amount }));
         return true;
-    }, [state.seeds]);
+    }, [state.gems]);
 
     // Tree Lab: Create Custom Tree
     const createCustomTree = useCallback((params: Omit<TreeSpecies, 'id' | 'unlockCost'>, cost: number) => {
@@ -554,7 +584,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 description: `Level ${treeName} to 5`,
                 icon: treeName.includes('Money') ? '💰' : '🧬',
                 objective: { type: 'specific_tree_level', target: 5, treeId: newId },
-                rewards: { coins: 100 * (finalTree.branchCount || 2), seeds: 10 },
+                rewards: { coins: 100 * (finalTree.branchCount || 2), gems: 3 },
             });
 
             // Level 10 Quest
@@ -564,7 +594,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 description: `Level ${treeName} to 10`,
                 icon: '⭐',
                 objective: { type: 'specific_tree_level', target: 10, treeId: newId },
-                rewards: { coins: 300 * (finalTree.branchCount || 2), seeds: 30 },
+                rewards: { coins: 300 * (finalTree.branchCount || 2), gems: 10 },
                 prerequisite: `${newId}_level_5`,
             });
 
@@ -578,12 +608,16 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             return {
                 ...prev,
-                seeds: prev.seeds - cost,
+                gems: prev.gems - cost,
                 customTrees: { ...prev.customTrees, [newId]: finalTree },
                 unlockedTrees: [...prev.unlockedTrees, newId],
                 currentTreeId: newId,
                 treeStats: { ...prev.treeStats, [newId]: { level: 1, xp: 0, totalEnergy: 0, height: 50 } },
-                totalLabTreesCreated: (prev.totalLabTreesCreated || 0) + 1
+                totalLabTreesCreated: (prev.totalLabTreesCreated || 0) + 1,
+                labTreesByRarity: {
+                    ...prev.labTreesByRarity,
+                    [params.rarity]: (prev.labTreesByRarity[params.rarity] || 0) + 1
+                }
             };
         });
     }, []);
@@ -598,8 +632,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             if (prizeType === 'coins') {
                 newState.coins += prizeValue;
-            } else if (prizeType === 'seeds') {
-                newState.seeds += prizeValue;
+            } else if (prizeType === 'gems') {
+                newState.gems += prizeValue;
             } else if (prizeType === 'grow') {
                 newState.grow += prizeValue;
             }
@@ -610,16 +644,50 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
     }, [saveGame]);
 
+    const advanceTutorial = useCallback((toStep?: number) => {
+        setState(prev => {
+            const nextStep = toStep !== undefined ? toStep : prev.tutorialStep + 1;
+            if (prev.tutorialStep >= 13) return prev;
+
+            let updates: Partial<GameState> = { tutorialStep: nextStep };
+
+            // Step 8 -> 9: Give enough energy for 5 Shards (When Entering Prestige Menu Step 9)
+            // Wait, flow is: 7(Close Quests) -> 8(Open Prestige).
+            // Opening Prestige (Step 8) triggers transition to 9? No.
+            // Flow:
+            // 7: Close Quest -> 8 (Open Prestige)
+            // 8: Open Prestige -> 9 (Click Reset)
+            // So when we enter Step 9, we need resources.
+            if (nextStep === 9 && prev.tutorialStep !== 9) {
+                const targetShards = 5;
+                const requiredEnergy = 500 * Math.pow(targetShards, 1 / 0.6);
+                const safeEnergy = Math.ceil(requiredEnergy * 1.1);
+
+                updates = {
+                    ...updates,
+                    energy: Math.max(prev.energy, safeEnergy),
+                    totalEnergyEarned: Math.max(prev.totalEnergyEarned, safeEnergy)
+                };
+            }
+
+            return {
+                ...prev,
+                ...updates
+            };
+        });
+    }, []);
+
     const value: GameContextType = {
         state, currentSpecies, allSpecies, tap, switchTree, unlockTree, buyUpgrade, claimQuestReward,
         performPrestige, buyPrestigeUpgrade,
-        spendSeeds, awardRoulettePrize, createCustomTree,
+        spendGems, awardRoulettePrize, createCustomTree,
         getPrestigeShardPreview, canPerformPrestige,
         getEffectiveTapPower, getEffectiveGrowthSpeed, getAutoEnergyRate, getAutoGrowthRate, getCoinMultiplier, getMaxTreeDepth,
         getAvailableQuestsList, getClaimableQuestsCount,
         getPrestigeTapBonus, getPrestigeCoinBonus, getPrestigeEnergyBonus, getPrestigeGrowthBonus, hasCosmetic,
         currentTreeHeight: currentStats.height,
         saveGame, loadGame, resetGame, addResources,
+        tutorialStep: state.tutorialStep, advanceTutorial
     };
 
     return <GameContext.Provider value={value}>{children}</GameContext.Provider>;

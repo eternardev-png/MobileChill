@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { useGame } from '../gameState';
 import { getAllUpgrades, calculateUpgradeCost, calculateUpgradeEffect, Upgrade } from '../data/upgrades';
-import { CoinIcon, EnergyIcon, SeedIcon, TapIcon, AutoIcon, GrowthRateIcon } from './Icons';
+import { CoinIcon, EnergyIcon, TapIcon, AutoIcon, GrowthRateIcon } from './Icons';
 
 interface UpgradeShopProps {
     onClose: () => void;
@@ -45,9 +45,11 @@ export const UpgradeShop: React.FC<UpgradeShopProps> = ({ onClose }) => {
             <View style={styles.modal}>
                 <View style={styles.header}>
                     <Text style={styles.title}>🛒 Upgrade Shop</Text>
-                    <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-                        <Text style={styles.closeBtnText}>✕</Text>
-                    </TouchableOpacity>
+                    {state.tutorialStep !== 3 && (
+                        <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+                            <Text style={styles.closeBtnText}>✕</Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
 
                 {/* Coins display */}
@@ -58,24 +60,34 @@ export const UpgradeShop: React.FC<UpgradeShopProps> = ({ onClose }) => {
 
                 {/* Tabs */}
                 <View style={styles.tabsContainer}>
-                    <TouchableOpacity
-                        style={[styles.tabButton, activeTab === 'active' && styles.tabButtonActive]}
-                        onPress={() => setActiveTab('active')}
-                    >
-                        <Text style={[styles.tabText, activeTab === 'active' && styles.tabTextActive]}>Active</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[styles.tabButton, activeTab === 'idle' && styles.tabButtonActive]}
-                        onPress={() => setActiveTab('idle')}
-                    >
-                        <Text style={[styles.tabText, activeTab === 'idle' && styles.tabTextActive]}>Idle</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[styles.tabButton, activeTab === 'bonus' && styles.tabButtonActive]}
-                        onPress={() => setActiveTab('bonus')}
-                    >
-                        <Text style={[styles.tabText, activeTab === 'bonus' && styles.tabTextActive]}>Bonus</Text>
-                    </TouchableOpacity>
+                    {(() => {
+                        const isTabLocked = [3, 4].includes(state.tutorialStep);
+                        return (
+                            <>
+                                <TouchableOpacity
+                                    style={[styles.tabButton, activeTab === 'active' && styles.tabButtonActive, isTabLocked && { opacity: 0.5 }]}
+                                    onPress={() => !isTabLocked && setActiveTab('active')}
+                                    disabled={isTabLocked}
+                                >
+                                    <Text style={[styles.tabText, activeTab === 'active' && styles.tabTextActive]}>Active</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.tabButton, activeTab === 'idle' && styles.tabButtonActive, isTabLocked && { opacity: 0.5 }]}
+                                    onPress={() => !isTabLocked && setActiveTab('idle')}
+                                    disabled={isTabLocked}
+                                >
+                                    <Text style={[styles.tabText, activeTab === 'idle' && styles.tabTextActive]}>Idle</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.tabButton, activeTab === 'bonus' && styles.tabButtonActive, isTabLocked && { opacity: 0.5 }]}
+                                    onPress={() => !isTabLocked && setActiveTab('bonus')}
+                                    disabled={isTabLocked}
+                                >
+                                    <Text style={[styles.tabText, activeTab === 'bonus' && styles.tabTextActive]}>Bonus</Text>
+                                </TouchableOpacity>
+                            </>
+                        );
+                    })()}
                 </View>
 
                 <ScrollView style={styles.list}>
@@ -87,8 +99,13 @@ export const UpgradeShop: React.FC<UpgradeShopProps> = ({ onClose }) => {
                         const currentEffect = calculateUpgradeEffect(upgrade, currentLevel);
                         const nextEffect = calculateUpgradeEffect(upgrade, currentLevel + 1);
 
+                        const isLockedStep = [3, 4].includes(state.tutorialStep);
+                        const isTapPower = upgrade.id === 'tapPower';
+                        const isDisabledByTutorial = isLockedStep && !isTapPower;
+                        const isFullyLockedByStep4 = state.tutorialStep === 4;
+
                         return (
-                            <View key={upgrade.id} style={styles.upgradeCard}>
+                            <View key={upgrade.id} style={[styles.upgradeCard, isDisabledByTutorial && { opacity: 0.5 }]}>
                                 <View style={styles.upgradeHeader}>
                                     {getUpgradeIcon(upgrade.icon)}
                                     <View style={styles.upgradeInfo}>
@@ -114,11 +131,12 @@ export const UpgradeShop: React.FC<UpgradeShopProps> = ({ onClose }) => {
                                 <TouchableOpacity
                                     style={[
                                         styles.buyButton,
-                                        !canAfford && styles.buyButtonDisabled,
+                                        (!canAfford || isDisabledByTutorial || isFullyLockedByStep4) && styles.buyButtonDisabled,
                                         isMaxed && styles.buyButtonMaxed,
+                                        (isDisabledByTutorial || isFullyLockedByStep4) && { opacity: 0.5 }
                                     ]}
                                     onPress={() => handleBuy(upgrade.id)}
-                                    disabled={!canAfford || isMaxed}
+                                    disabled={!canAfford || isMaxed || isDisabledByTutorial || isFullyLockedByStep4}
                                 >
                                     <View style={styles.buyButtonInner}>
                                         {!isMaxed && <CoinIcon size={16} />}

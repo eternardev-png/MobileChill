@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity, ScrollView } from 'react-nati
 import { useGame } from '../gameState';
 import { QUESTS, Quest, getAllQuests } from '../data/quests';
 import { getTreeSpecies } from '../data/treeSpecies';
+import { CoinIcon, EnergyIcon, GemIcon } from './Icons';
 
 interface QuestPanelProps {
     onClose: () => void;
@@ -44,7 +45,11 @@ export const QuestPanel: React.FC<QuestPanelProps> = ({ onClose }) => {
                 current = state.totalUpgradesPurchased || 0;
                 break;
             case 'lab_trees_created':
-                current = state.totalLabTreesCreated || 0;
+                if (quest.objective.rarity) {
+                    current = state.labTreesByRarity?.[quest.objective.rarity] || 0;
+                } else {
+                    current = state.totalLabTreesCreated || 0;
+                }
                 break;
         }
 
@@ -82,16 +87,18 @@ export const QuestPanel: React.FC<QuestPanelProps> = ({ onClose }) => {
             <View style={styles.modal}>
                 <View style={styles.header}>
                     <Text style={styles.title}>📜 Quests</Text>
-                    <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-                        <Text style={styles.closeBtnText}>✕</Text>
-                    </TouchableOpacity>
+                    {state.tutorialStep !== 6 && (
+                        <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+                            <Text style={styles.closeBtnText}>✕</Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
 
                 <Text style={styles.subtitle}>
                     Completed: {state.completedQuests.length}/{Object.keys(QUESTS).length}
                 </Text>
 
-                <ScrollView style={styles.list}>
+                <ScrollView style={styles.list} scrollEnabled={![6, 7].includes(state.tutorialStep)}>
                     {sortedQuests.length === 0 ? (
                         <View style={styles.emptyState}>
                             <Text style={styles.emptyEmoji}>🎉</Text>
@@ -108,7 +115,9 @@ export const QuestPanel: React.FC<QuestPanelProps> = ({ onClose }) => {
                                     key={quest.id}
                                     style={[
                                         styles.questCard,
-                                        completed && styles.questCardClaimable
+                                        completed && styles.questCardClaimable,
+                                        (state.tutorialStep === 6 && quest.id !== 'tutorial_upgrade') && { opacity: 0.4 },
+                                        (state.tutorialStep === 7) && { opacity: 0.4 }
                                     ]}
                                 >
                                     <View style={styles.questHeader}>
@@ -144,26 +153,54 @@ export const QuestPanel: React.FC<QuestPanelProps> = ({ onClose }) => {
                                     <View style={styles.rewardsRow}>
                                         <Text style={styles.rewardsLabel}>Rewards:</Text>
                                         {quest.rewards.coins && (
-                                            <Text style={styles.rewardItem}>🪙 {quest.rewards.coins}</Text>
+                                            <View style={styles.rewardItemContainer}>
+                                                <CoinIcon size={14} />
+                                                <Text style={styles.rewardItem}>{quest.rewards.coins}</Text>
+                                            </View>
                                         )}
-                                        {quest.rewards.seeds && (
-                                            <Text style={styles.rewardItem}>🌱 {quest.rewards.seeds}</Text>
+                                        {quest.rewards.energy && (
+                                            <View style={styles.rewardItemContainer}>
+                                                <EnergyIcon size={14} />
+                                                <Text style={styles.rewardItem}>{quest.rewards.energy}</Text>
+                                            </View>
+                                        )}
+                                        {quest.rewards.gems && (
+                                            <View style={styles.rewardItemContainer}>
+                                                <GemIcon size={14} />
+                                                <Text style={styles.rewardItem}>{quest.rewards.gems}</Text>
+                                            </View>
                                         )}
                                     </View>
 
                                     {/* Claim button */}
-                                    <TouchableOpacity
-                                        style={[
-                                            styles.claimButton,
-                                            !completed && styles.claimButtonDisabled,
-                                        ]}
-                                        onPress={() => handleClaim(quest.id)}
-                                        disabled={!completed}
-                                    >
-                                        <Text style={styles.claimButtonText}>
-                                            {completed ? '✓ Claim Reward' : 'In Progress'}
-                                        </Text>
-                                    </TouchableOpacity>
+                                    {(() => {
+                                        const isTutorialStep6 = state.tutorialStep === 6;
+                                        const isTutorialStep7 = state.tutorialStep === 7;
+                                        const isTutorialQuest = quest.id === 'tutorial_upgrade';
+
+                                        // During step 6: only tutorial quest can be claimed
+                                        // During step 7: everything is locked (waiting for close)
+                                        const isDisabled = !completed ||
+                                            (isTutorialStep6 && !isTutorialQuest) ||
+                                            isTutorialStep7;
+
+                                        return (
+                                            <TouchableOpacity
+                                                style={[
+                                                    styles.claimButton,
+                                                    isDisabled && styles.claimButtonDisabled,
+                                                    (isTutorialStep6 && !isTutorialQuest) && { opacity: 0.5 },
+                                                    isTutorialStep7 && { opacity: 0.5 }
+                                                ]}
+                                                onPress={() => handleClaim(quest.id)}
+                                                disabled={isDisabled}
+                                            >
+                                                <Text style={styles.claimButtonText}>
+                                                    {completed ? '✓ Claim Reward' : 'In Progress'}
+                                                </Text>
+                                            </TouchableOpacity>
+                                        );
+                                    })()}
                                 </View>
                             );
                         })
@@ -308,10 +345,16 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         gap: 10,
         marginBottom: 12,
+        alignItems: 'center',
     },
     rewardsLabel: {
         color: '#888',
         fontSize: 12,
+    },
+    rewardItemContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
     },
     rewardItem: {
         color: '#fbbf24',

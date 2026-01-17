@@ -69,7 +69,8 @@ export const PrestigeShop: React.FC<PrestigeShopProps> = ({ onClose }) => {
         performPrestige,
         buyPrestigeUpgrade,
         getPrestigeShardPreview,
-        canPerformPrestige
+        canPerformPrestige,
+        advanceTutorial
     } = useGame();
 
     const [showConfirm, setShowConfirm] = useState(false);
@@ -78,7 +79,10 @@ export const PrestigeShop: React.FC<PrestigeShopProps> = ({ onClose }) => {
     const canPrestigeNow = canPerformPrestige();
 
     const handlePrestige = () => {
-        if (canPrestigeNow) setShowConfirm(true);
+        if (canPrestigeNow) {
+            setShowConfirm(true);
+            if (state.tutorialStep === 9) advanceTutorial(10); // Step 9 (Reset) -> 10 (Confirm)
+        }
     };
 
     const confirmPrestige = () => {
@@ -94,9 +98,11 @@ export const PrestigeShop: React.FC<PrestigeShopProps> = ({ onClose }) => {
                         <PrestigeHeaderIcon size={26} />
                         <Text style={styles.title}>Prestige</Text>
                     </View>
-                    <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-                        <Text style={styles.closeBtnText}>✕</Text>
-                    </TouchableOpacity>
+                    {![8, 9, 10, 11].includes(state.tutorialStep) && (
+                        <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+                            <Text style={styles.closeBtnText}>✕</Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
 
                 {/* Shards display with gradient */}
@@ -159,7 +165,7 @@ export const PrestigeShop: React.FC<PrestigeShopProps> = ({ onClose }) => {
                     <ShopIconSVG size={18} />
                     <Text style={styles.sectionTitle}>Prestige Shop</Text>
                 </View>
-                <ScrollView style={styles.list}>
+                <ScrollView style={styles.list} scrollEnabled={![8, 9, 10, 11].includes(state.tutorialStep)}>
                     {upgrades.map(upgrade => {
                         const currentLevel = state.prestige.upgradeLevels[upgrade.id] || 0;
                         const isMaxed = currentLevel >= upgrade.maxLevel;

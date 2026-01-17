@@ -1,7 +1,7 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Animated, Dimensions, Easing } from 'react-native';
 import { useGame } from '../gameState';
-import { CoinIcon, EnergyIcon, SeedIcon, HeightIcon, TapIcon, AutoIcon } from './Icons';
+import { CoinIcon, EnergyIcon, GemIcon, HeightIcon, TapIcon, AutoIcon } from './Icons';
 
 const { height } = Dimensions.get('window');
 
@@ -26,8 +26,8 @@ export const TopBar: React.FC = () => {
                     <Text style={styles.resourceValue}>{Math.floor(state.coins)}</Text>
                 </View>
                 <View style={styles.resourceItem}>
-                    <SeedIcon size={20} />
-                    <Text style={styles.resourceValue}>{Math.floor(state.seeds)}</Text>
+                    <GemIcon size={20} />
+                    <Text style={styles.resourceValue}>{Math.floor(state.gems)}</Text>
                 </View>
             </View>
 
@@ -63,15 +63,27 @@ export const BottomControls: React.FC = () => {
     const autoGrowth = getAutoGrowthRate();
     const currentStats = state.treeStats[state.currentTreeId];
 
-    const handleTap = () => {
+    const handleTap = useCallback(() => {
         tap();
 
         // Scale animation
         Animated.sequence([
-            Animated.timing(scaleAnim, { toValue: 0.9, duration: 50, useNativeDriver: true }),
-            Animated.timing(scaleAnim, { toValue: 1, duration: 100, useNativeDriver: true })
+            Animated.timing(scaleAnim, { toValue: 0.98, duration: 80, useNativeDriver: true }),
+            Animated.timing(scaleAnim, { toValue: 1, duration: 150, useNativeDriver: true })
         ]).start();
-    };
+    }, [tap, scaleAnim]);
+
+    // Spacebar listener
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === ' ') {
+                handleTap();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [handleTap]);
 
     return (
         <View style={styles.bottomSection}>
@@ -104,11 +116,7 @@ export const BottomControls: React.FC = () => {
             <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
                 <TouchableOpacity style={styles.tapButton} onPress={handleTap} activeOpacity={0.8}>
                     <View style={styles.tapInner}>
-                        <Text style={styles.tapText}>TAP</Text>
-                        <View style={styles.tapPowerRow}>
-                            <EnergyIcon size={14} color="#fff" />
-                            <Text style={styles.tapPower}>+{getEffectiveTapPower().toFixed(1)}</Text>
-                        </View>
+                        {/* Content removed per user request */}
                     </View>
                 </TouchableOpacity>
             </Animated.View>
@@ -265,15 +273,15 @@ const styles = StyleSheet.create({
     },
     tapButton: {
         backgroundColor: '#22c55e',
-        width: 80,
-        height: 80,
-        borderRadius: 40,
+        width: Dimensions.get('window').width * 0.9,
+        height: 64,
+        borderRadius: 16,
         alignItems: 'center',
         justifyContent: 'center',
         shadowColor: '#22c55e',
         shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.5,
-        shadowRadius: 20,
+        shadowOpacity: 0.6,
+        shadowRadius: 15,
         elevation: 10,
     },
     tapInner: {
@@ -281,19 +289,30 @@ const styles = StyleSheet.create({
     },
     tapText: {
         color: '#fff',
-        fontSize: 18,
-        fontWeight: 'bold',
-        letterSpacing: 1,
+        fontSize: 22,
+        fontWeight: '900',
+        letterSpacing: 2,
+        textShadowColor: 'rgba(0,0,0,0.2)',
+        textShadowOffset: { width: 0, height: 2 },
+        textShadowRadius: 4,
     },
-    tapPowerRow: {
+    tapMainContent: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 3,
-        marginTop: 2,
+        gap: 15,
+    },
+    tapPowerBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 20,
+        gap: 5,
     },
     tapPower: {
-        color: 'rgba(255,255,255,0.9)',
-        fontSize: 11,
-        fontWeight: '600',
+        color: 'rgba(255,255,255,0.95)',
+        fontSize: 13,
+        fontWeight: 'bold',
     },
 });

@@ -7,24 +7,20 @@ interface IconProps {
     color?: string;
 }
 
-// Coin icon - Enhanced with 3D metallic effect
+// Coin icon - Minimalist flat design
 export const CoinIcon: React.FC<IconProps> = ({ size = 20, color = '#fbbf24' }) => (
     <Svg width={size} height={size} viewBox="0 0 20 20">
-        <defs>
-            <radialGradient id="coinGrad" cx="40%" cy="30%">
-                <stop offset="0%" stopColor="#fde68a" stopOpacity="1" />
-                <stop offset="50%" stopColor={color} stopOpacity="1" />
-                <stop offset="100%" stopColor="#d97706" stopOpacity="1" />
-            </radialGradient>
-        </defs>
-        {/* Outer ring */}
-        <Circle cx="10" cy="10" r="9" fill="url(#coinGrad)" stroke="#b45309" strokeWidth="0.8" />
-        {/* Inner details for 3D look */}
-        <Ellipse cx="10" cy="10" rx="6" ry="9" fill="none" stroke="#d97706" strokeWidth="1.2" />
-        <Ellipse cx="10" cy="10" rx="4" ry="7" fill="none" stroke="#f59e0b" strokeWidth="0.6" opacity={0.5} />
-        {/* Shine highlight */}
-        <Circle cx="8" cy="7" r="2.5" fill="#fff" opacity={0.4} />
-        <Circle cx="7" cy="6" r="1" fill="#fff" opacity={0.7} />
+        <Defs>
+            <LinearGradient id="coinFlatGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <Stop offset="0%" stopColor="#fde68a" />
+                <Stop offset="50%" stopColor={color} />
+                <Stop offset="100%" stopColor="#f59e0b" />
+            </LinearGradient>
+        </Defs>
+        {/* Main coin circle */}
+        <Circle cx="10" cy="10" r="8.5" fill="url(#coinFlatGrad)" stroke="#d97706" strokeWidth="1.5" />
+        {/* Inner circle for depth */}
+        <Circle cx="10" cy="10" r="6" fill="none" stroke="#f59e0b" strokeWidth="1" opacity={0.4} />
     </Svg>
 );
 
@@ -56,19 +52,38 @@ export const EnergyIcon: React.FC<IconProps> = ({ size = 20, color = '#facc15' }
     </Svg>
 );
 
-// Seed icon - Tilted Green Leaf (Natural Style)
-export const SeedIcon: React.FC<IconProps> = ({ size = 20, color = '#15803d' }) => (
+// Gem Icon - Green Diamond (Classic Gem Shape)
+export const GemIcon: React.FC<IconProps> = ({ size = 20, color = '#22c55e' }) => (
     <Svg width={size} height={size} viewBox="0 0 24 24">
-        {/* Tilted leaf shape */}
-        <G transform="rotate(45, 12, 12)">
-            <Path
-                d="M12 21 C12 21 5 15 5 9 C5 5 8 2 12 2 C16 2 19 5 19 9 C19 15 12 21 12 21 Z"
-                fill="#16a34a"
-            />
-            <Path d="M12 21 C12 21 12 13 16 6" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" opacity={0.6} fill="none" />
-        </G>
+        <Defs>
+            <LinearGradient id="gemGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <Stop offset="0%" stopColor="#4ade80" />
+                <Stop offset="50%" stopColor={color} />
+                <Stop offset="100%" stopColor="#15803d" />
+            </LinearGradient>
+            <LinearGradient id="gemShine" x1="0%" y1="0%" x2="0%" y2="100%">
+                <Stop offset="0%" stopColor="#fff" stopOpacity="0.8" />
+                <Stop offset="100%" stopColor="#fff" stopOpacity="0" />
+            </LinearGradient>
+        </Defs>
+        {/* Main Diamond Shape */}
+        <Polygon points="7,4 17,4 22,10 12,22 2,10" fill="url(#gemGrad)" stroke="#064e3b" strokeWidth="0.5" />
+        {/* Facets for "Brilliant" look */}
+        <Polygon points="7,4 17,4 12,10" fill="#fff" opacity={0.25} /> {/* Top center facet */}
+        <Polygon points="7,4 12,10 2,10" fill="#14532d" opacity={0.2} /> {/* Top left */}
+        <Polygon points="17,4 22,10 12,10" fill="#14532d" opacity={0.2} /> {/* Top right */}
+        <Polygon points="2,10 12,22 12,10" fill="#064e3b" opacity={0.3} /> {/* Bottom left */}
+        <Polygon points="22,10 12,22 12,10" fill="#14532d" opacity={0.4} /> {/* Bottom right */}
+
+        {/* Sparkle/Shine edges */}
+        <Line x1="7" y1="4" x2="17" y2="4" stroke="#fff" strokeWidth="0.5" opacity={0.5} />
+        <Line x1="2" y1="10" x2="22" y2="10" stroke="#fff" strokeWidth="0.3" opacity={0.3} />
+
+        {/* Top Shine Highlight */}
+        <Polygon points="9,5 15,5 12,8" fill="url(#gemShine)" opacity={0.3} />
     </Svg>
 );
+
 
 // Growth Rate Icon - Distinct from Seeds (Upward Chart/Arrow with Sprout)
 export const GrowthRateIcon: React.FC<IconProps> = ({ size = 20, color = '#4ade80' }) => (
@@ -362,5 +377,35 @@ export const PrestigeGlowIcon: React.FC<IconProps> = ({ size = 28, color = '#a85
         <Line x1="18" y1="12" x2="22" y2="12" stroke="#c084fc" strokeWidth="2" strokeLinecap="round" opacity={0.8} />
         {/* Center bright spot */}
         <Circle cx="12" cy="12" r="2" fill="#fff" opacity={0.9} />
+    </Svg>
+);
+
+// Casino/Roulette Icon
+export const CasinoIcon: React.FC<IconProps> = ({ size = 24, color = '#fbbf24' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        <Defs>
+            <RadialGradient id="rouletteGrad" cx="50%" cy="50%" r="50%">
+                <Stop offset="0%" stopColor="#fff" stopOpacity="0.2" />
+                <Stop offset="100%" stopColor="transparent" stopOpacity="0" />
+            </RadialGradient>
+        </Defs>
+        {/* Outer Wheel Rim */}
+        <Circle cx="12" cy="12" r="10" fill="#222" stroke="#333" strokeWidth="1" />
+        {/* Segments (Simulated) */}
+        <G transform="translate(12, 12)">
+            {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => (
+                <Path
+                    key={angle}
+                    d={`M0,0 L${8 * Math.cos(angle * Math.PI / 180)},${8 * Math.sin(angle * Math.PI / 180)} A8,8 0 0,1 ${8 * Math.cos((angle + 45) * Math.PI / 180)},${8 * Math.sin((angle + 45) * Math.PI / 180)} Z`}
+                    fill={i % 2 === 0 ? '#ef4444' : '#111'}
+                />
+            ))}
+        </G>
+        {/* Glow */}
+        <Circle cx="12" cy="12" r="8" fill="url(#rouletteGrad)" />
+        {/* Center Knob */}
+        <Circle cx="12" cy="12" r="3" fill={color} stroke="#b45309" strokeWidth="0.5" />
+        {/* Shine */}
+        <Circle cx="11" cy="11" r="1.2" fill="#fff" opacity={0.6} />
     </Svg>
 );

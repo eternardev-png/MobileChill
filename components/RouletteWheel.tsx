@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Animated, Easing, Dimensions } from 'react-native';
 import Svg, { Path, G, Text as SvgText, Circle, Polygon, LinearGradient, RadialGradient, Stop, Defs, ClipPath } from 'react-native-svg';
 import { useGame } from '../gameState';
-import { SeedIcon } from './Icons'; // Added import
+import { GemIcon, EnergyIcon, CoinIcon } from './Icons'; // Updated import
 
 const { width } = Dimensions.get('window');
 const WHEEL_SIZE = Math.min(width * 0.85, 300);
@@ -28,7 +28,7 @@ const PRIZES = [
 const SLICE_ANGLE = 360 / PRIZES.length;
 
 export const RouletteWheel: React.FC<RouletteWheelProps> = ({ onClose }) => {
-    const { state, spendSeeds, awardRoulettePrize } = useGame();
+    const { state, spendGems, awardRoulettePrize } = useGame();
     const spinAnim = useRef(new Animated.Value(0)).current;
     const finalAngleRef = useRef(0); // Track total rotation to prevent reset glitches
     const pulseAnim = useRef(new Animated.Value(0)).current;
@@ -54,7 +54,7 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({ onClose }) => {
         if (spinning) return;
 
         // Attempt to spend cost immediately
-        const success = spendSeeds(5);
+        const success = spendGems(5);
         if (!success) return; // Not enough currency
 
         setSpinning(true);
@@ -71,11 +71,16 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({ onClose }) => {
             }
         }
 
+        const wonPrize = PRIZES[selectedIndex];
+        // Determinate prize early
+        setPrize(wonPrize);
+
+        // Award prize immediately so closing the component doesn't cancel it
+        awardRoulettePrize(wonPrize.type, wonPrize.value);
+
         const segmentCenter = selectedIndex * SLICE_ANGLE + SLICE_ANGLE / 2;
 
         // CUMULATIVE ROTATION LOGIC to fix re-spin bug
-        // Calculate target angle in 0-360 space (counter-clockwise logic)
-        // Note: 270 (top) - center gives the target rotation.
         const baseTarget = 270 - segmentCenter;
 
         // Get current rotation modulo 360
@@ -101,9 +106,7 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({ onClose }) => {
             useNativeDriver: true,
         }).start(() => {
             setSpinning(false);
-            const wonPrize = PRIZES[selectedIndex];
-            setPrize(wonPrize);
-            awardRoulettePrize(wonPrize.type, wonPrize.value);
+            // Visual feedback already handled by determinePrize
         });
     };
 
@@ -337,14 +340,14 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({ onClose }) => {
                 )}
 
                 <TouchableOpacity
-                    style={[styles.spinButton, state.seeds < 5 && styles.spinButtonDisabled]}
+                    style={[styles.spinButton, state.gems < 5 && styles.spinButtonDisabled]}
                     onPress={handleSpin}
-                    disabled={spinning || state.seeds < 5}
+                    disabled={spinning || state.gems < 5}
                 >
                     <Text style={styles.spinButtonText}>SPIN</Text>
                     <View style={styles.costBadge}>
                         <Text style={styles.costText}>5</Text>
-                        <SeedIcon size={16} color="#fff" />
+                        <GemIcon size={16} color="#fff" />
                     </View>
                 </TouchableOpacity>
             </View>
