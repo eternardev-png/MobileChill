@@ -31,28 +31,28 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart }) => {
         <View style={styles.container}>
             <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
                 <View style={styles.iconContainer}>
-                    <TreeIcon size={80} color="#4ade80" />
+                    <Text style={styles.cherryBlossomIcon}>🌸</Text>
                 </View>
-                <Text style={styles.title}>MobileChill</Text>
-                <Text style={styles.subtitle}>Relax, Grow, and Collect.</Text>
+                <Text style={styles.title}>Eternal Tree</Text>
+                <Text style={styles.subtitle}>Grow, Cultivate, Ascend.</Text>
 
                 <View style={styles.features}>
                     <View style={styles.featureItem}>
-                        <Text style={styles.featureEmoji}>🌳</Text>
-                        <Text style={styles.featureText}>Grow unique trees</Text>
+                        <Text style={styles.featureEmoji}>🌸</Text>
+                        <Text style={styles.featureText}>Grow mystical trees</Text>
+                    </View>
+                    <View style={styles.featureItem}>
+                        <Text style={styles.featureEmoji}>⚡</Text>
+                        <Text style={styles.featureText}>Collect cosmic energy</Text>
                     </View>
                     <View style={styles.featureItem}>
                         <Text style={styles.featureEmoji}>✨</Text>
-                        <Text style={styles.featureText}>Collect rare species</Text>
-                    </View>
-                    <View style={styles.featureItem}>
-                        <Text style={styles.featureEmoji}>💤</Text>
-                        <Text style={styles.featureText}>Chill gameplay</Text>
+                        <Text style={styles.featureText}>Ascend through prestige</Text>
                     </View>
                 </View>
 
                 <TouchableOpacity style={styles.startButton} onPress={onStart}>
-                    <Text style={styles.startButtonText}>Start Journey</Text>
+                    <Text style={styles.startButtonText}>Start</Text>
                 </TouchableOpacity>
             </Animated.View>
         </View>
@@ -74,10 +74,16 @@ const styles = StyleSheet.create({
     },
     iconContainer: {
         marginBottom: 20,
-        shadowColor: '#4ade80',
+        shadowColor: '#ff69b4',
         shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.5,
-        shadowRadius: 20,
+        shadowOpacity: 0.8,
+        shadowRadius: 30,
+    },
+    cherryBlossomIcon: {
+        fontSize: 100,
+        textShadowColor: '#ff69b4',
+        textShadowOffset: { width: 0, height: 0 },
+        textShadowRadius: 30,
     },
     title: {
         fontSize: 42,
@@ -88,7 +94,7 @@ const styles = StyleSheet.create({
     },
     subtitle: {
         fontSize: 18,
-        color: '#888',
+        color: '#ffb3d9',
         marginBottom: 40,
         textAlign: 'center',
     },
@@ -104,19 +110,19 @@ const styles = StyleSheet.create({
     featureEmoji: { fontSize: 20 },
     featureText: { color: '#ccc', fontSize: 16 },
     startButton: {
-        backgroundColor: '#22c55e',
+        backgroundColor: '#ff69b4',
         paddingVertical: 16,
-        paddingHorizontal: 40,
+        paddingHorizontal: 60,
         borderRadius: 30,
         elevation: 5,
-        shadowColor: '#22c55e',
+        shadowColor: '#ff69b4',
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
+        shadowOpacity: 0.5,
+        shadowRadius: 12,
     },
     startButtonText: {
         color: '#fff',
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: 'bold',
     },
 });
