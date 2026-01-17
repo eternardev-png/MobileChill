@@ -93,153 +93,151 @@ const GameContent = () => {
                 </View>
             </SafeAreaView>
 
-            {/* Navigation Bar */}
-            {state.tutorialStep !== 0 && (
-                <View style={styles.navbar}>
-                    {/* Collection */}
-                    {(() => {
-                        const isUnlocked = state.tutorialStep >= 13;
-                        return (
-                            <TouchableOpacity
-                                style={[styles.navItem, activeTab === 'collection' && styles.navItemActive, !isUnlocked && { opacity: 0.3 }]}
-                                onPress={() => {
-                                    if (!isUnlocked) return;
-                                    telegram.haptic('light');
-                                    if (activeTab === 'collection') setActiveTab('tree');
-                                    else setActiveTab('collection');
-                                }}
-                                disabled={!isUnlocked}
-                            >
-                                <View style={styles.collectionIconWrapper}>
-                                    <View style={[styles.collectionIconRow, { marginBottom: 2 }]}>
-                                        <View style={[styles.collectionDot, { backgroundColor: isUnlocked ? '#22c55e' : '#444' }]} />
-                                        <View style={[styles.collectionDot, { backgroundColor: isUnlocked ? '#3b82f6' : '#444' }]} />
-                                    </View>
-                                    <View style={styles.collectionIconRow}>
-                                        <View style={[styles.collectionDot, { backgroundColor: isUnlocked ? '#a855f7' : '#444' }]} />
-                                        <View style={[styles.collectionDot, { backgroundColor: isUnlocked ? '#f59e0b' : '#444' }]} />
-                                    </View>
+            {/* Navigation Bar - Always visible */}
+            <View style={styles.navbar}>
+                {/* Collection */}
+                {(() => {
+                    const isUnlocked = state.tutorialStep >= 13;
+                    return (
+                        <TouchableOpacity
+                            style={[styles.navItem, activeTab === 'collection' && styles.navItemActive, !isUnlocked && { opacity: 0.3 }]}
+                            onPress={() => {
+                                if (!isUnlocked) return;
+                                telegram.haptic('light');
+                                if (activeTab === 'collection') setActiveTab('tree');
+                                else setActiveTab('collection');
+                            }}
+                            disabled={!isUnlocked}
+                        >
+                            <View style={styles.collectionIconWrapper}>
+                                <View style={[styles.collectionIconRow, { marginBottom: 2 }]}>
+                                    <View style={[styles.collectionDot, { backgroundColor: isUnlocked ? '#22c55e' : '#444' }]} />
+                                    <View style={[styles.collectionDot, { backgroundColor: isUnlocked ? '#3b82f6' : '#444' }]} />
                                 </View>
-                                <Text style={[styles.navText, activeTab === 'collection' && styles.navTextActive]}>Collection</Text>
-                            </TouchableOpacity>
-                        );
-                    })()}
-
-                    {/* Shop */}
-                    {(() => {
-                        const isUnlocked = (state.tutorialStep === 2 || state.tutorialStep === 3 || state.tutorialStep === 4 || state.tutorialStep >= 13);
-                        return (
-                            <TouchableOpacity
-                                style={[styles.navItem, activeTab === 'shop' && styles.navItemActive, !isUnlocked && { opacity: 0.3 }]}
-                                onPress={() => {
-                                    if (!isUnlocked) return;
-                                    telegram.haptic('light');
-                                    if (activeTab === 'shop') setActiveTab('tree');
-                                    else {
-                                        setActiveTab('shop');
-                                        if (state.tutorialStep === 2) advanceTutorial(3);
-                                    }
-                                }}
-                                disabled={!isUnlocked}
-                            >
-                                <ShopIcon size={24} color={!isUnlocked ? '#444' : (activeTab === 'shop' ? '#4ade80' : '#888')} />
-                                <Text style={[styles.navText, activeTab === 'shop' && styles.navTextActive]}>Shop</Text>
-                            </TouchableOpacity>
-                        );
-                    })()}
-
-                    {/* Quests */}
-                    {(() => {
-                        const isUnlocked = (state.tutorialStep === 5 || state.tutorialStep === 6 || state.tutorialStep === 7 || state.tutorialStep >= 13);
-                        return (
-                            <TouchableOpacity
-                                style={[styles.navItem, activeTab === 'quests' && styles.navItemActive, !isUnlocked && { opacity: 0.3 }]}
-                                onPress={() => {
-                                    if (!isUnlocked) return;
-                                    telegram.haptic('light');
-                                    if (activeTab === 'quests') setActiveTab('tree');
-                                    else {
-                                        setActiveTab('quests');
-                                        if (state.tutorialStep === 5) advanceTutorial(6);
-                                    }
-                                }}
-                                disabled={!isUnlocked}
-                            >
-                                <View style={styles.questIconWrapper}>
-                                    <QuestIcon size={24} color={!isUnlocked ? '#444' : (activeTab === 'quests' ? '#4ade80' : '#888')} />
-                                    {isUnlocked && getClaimableQuestsCount() > 0 && (
-                                        <View style={styles.navQuestBadge} />
-                                    )}
+                                <View style={styles.collectionIconRow}>
+                                    <View style={[styles.collectionDot, { backgroundColor: isUnlocked ? '#a855f7' : '#444' }]} />
+                                    <View style={[styles.collectionDot, { backgroundColor: isUnlocked ? '#f59e0b' : '#444' }]} />
                                 </View>
-                                <Text style={[styles.navText, activeTab === 'quests' && styles.navTextActive]}>Quests</Text>
-                            </TouchableOpacity>
-                        );
-                    })()}
+                            </View>
+                            <Text style={[styles.navText, activeTab === 'collection' && styles.navTextActive]}>Collection</Text>
+                        </TouchableOpacity>
+                    );
+                })()}
 
-                    {/* Prestige */}
-                    {(() => {
-                        const isUnlocked = (state.tutorialStep >= 8);
-                        return (
-                            <TouchableOpacity
-                                style={[styles.navItem, activeTab === 'prestige' && styles.navItemActive, !isUnlocked && { opacity: 0.3 }]}
-                                onPress={() => {
-                                    if (!isUnlocked) return;
-                                    telegram.haptic('light');
-                                    if (activeTab === 'prestige') setActiveTab('tree');
-                                    else {
-                                        setActiveTab('prestige');
-                                        if (state.tutorialStep === 8) advanceTutorial(9);
-                                    }
-                                }}
-                                disabled={!isUnlocked}
-                            >
-                                <PrestigeIcon size={24} color={!isUnlocked ? '#444' : (activeTab === 'prestige' ? '#4ade80' : '#888')} />
-                                <Text style={[styles.navText, activeTab === 'prestige' && styles.navTextActive]}>Prestige</Text>
-                            </TouchableOpacity>
-                        );
-                    })()}
+                {/* Shop */}
+                {(() => {
+                    const isUnlocked = (state.tutorialStep === 2 || state.tutorialStep === 3 || state.tutorialStep === 4 || state.tutorialStep >= 13);
+                    return (
+                        <TouchableOpacity
+                            style={[styles.navItem, activeTab === 'shop' && styles.navItemActive, !isUnlocked && { opacity: 0.3 }]}
+                            onPress={() => {
+                                if (!isUnlocked) return;
+                                telegram.haptic('light');
+                                if (activeTab === 'shop') setActiveTab('tree');
+                                else {
+                                    setActiveTab('shop');
+                                    if (state.tutorialStep === 2) advanceTutorial(3);
+                                }
+                            }}
+                            disabled={!isUnlocked}
+                        >
+                            <ShopIcon size={24} color={!isUnlocked ? '#444' : (activeTab === 'shop' ? '#4ade80' : '#888')} />
+                            <Text style={[styles.navText, activeTab === 'shop' && styles.navTextActive]}>Shop</Text>
+                        </TouchableOpacity>
+                    );
+                })()}
 
-                    {/* Lab */}
-                    {(() => {
-                        const isUnlocked = state.tutorialStep >= 13;
-                        return (
-                            <TouchableOpacity
-                                style={[styles.navItem, activeTab === 'lab' && styles.navItemActive, !isUnlocked && { opacity: 0.3 }]}
-                                onPress={() => {
-                                    if (!isUnlocked) return;
-                                    telegram.haptic('light');
-                                    if (activeTab === 'lab') setActiveTab('tree');
-                                    else setActiveTab('lab');
-                                }}
-                                disabled={!isUnlocked}
-                            >
-                                <LabIcon size={24} color={!isUnlocked ? '#444' : (activeTab === 'lab' ? '#a855f7' : '#888')} />
-                                <Text style={[styles.navText, activeTab === 'lab' && styles.navTextColored]}>Lab</Text>
-                            </TouchableOpacity>
-                        );
-                    })()}
+                {/* Quests */}
+                {(() => {
+                    const isUnlocked = (state.tutorialStep === 5 || state.tutorialStep === 6 || state.tutorialStep === 7 || state.tutorialStep >= 13);
+                    return (
+                        <TouchableOpacity
+                            style={[styles.navItem, activeTab === 'quests' && styles.navItemActive, !isUnlocked && { opacity: 0.3 }]}
+                            onPress={() => {
+                                if (!isUnlocked) return;
+                                telegram.haptic('light');
+                                if (activeTab === 'quests') setActiveTab('tree');
+                                else {
+                                    setActiveTab('quests');
+                                    if (state.tutorialStep === 5) advanceTutorial(6);
+                                }
+                            }}
+                            disabled={!isUnlocked}
+                        >
+                            <View style={styles.questIconWrapper}>
+                                <QuestIcon size={24} color={!isUnlocked ? '#444' : (activeTab === 'quests' ? '#4ade80' : '#888')} />
+                                {isUnlocked && getClaimableQuestsCount() > 0 && (
+                                    <View style={styles.navQuestBadge} />
+                                )}
+                            </View>
+                            <Text style={[styles.navText, activeTab === 'quests' && styles.navTextActive]}>Quests</Text>
+                        </TouchableOpacity>
+                    );
+                })()}
 
-                    {/* Casino */}
-                    {(() => {
-                        const isUnlocked = state.tutorialStep >= 13;
-                        return (
-                            <TouchableOpacity
-                                style={[styles.navItem, activeTab === 'casino' && styles.navItemActive, !isUnlocked && { opacity: 0.3 }]}
-                                onPress={() => {
-                                    if (!isUnlocked) return;
-                                    telegram.haptic('light');
-                                    if (activeTab === 'casino') setActiveTab('tree');
-                                    else setActiveTab('casino');
-                                }}
-                                disabled={!isUnlocked}
-                            >
-                                <CasinoIcon size={24} color={!isUnlocked ? '#444' : (activeTab === 'casino' ? '#fbbf24' : '#888')} />
-                                <Text style={[styles.navText, activeTab === 'casino' && { color: '#fbbf24' }]}>Casino</Text>
-                            </TouchableOpacity>
-                        );
-                    })()}
-                </View>
-            )}
+                {/* Prestige */}
+                {(() => {
+                    const isUnlocked = (state.tutorialStep >= 8);
+                    return (
+                        <TouchableOpacity
+                            style={[styles.navItem, activeTab === 'prestige' && styles.navItemActive, !isUnlocked && { opacity: 0.3 }]}
+                            onPress={() => {
+                                if (!isUnlocked) return;
+                                telegram.haptic('light');
+                                if (activeTab === 'prestige') setActiveTab('tree');
+                                else {
+                                    setActiveTab('prestige');
+                                    if (state.tutorialStep === 8) advanceTutorial(9);
+                                }
+                            }}
+                            disabled={!isUnlocked}
+                        >
+                            <PrestigeIcon size={24} color={!isUnlocked ? '#444' : (activeTab === 'prestige' ? '#4ade80' : '#888')} />
+                            <Text style={[styles.navText, activeTab === 'prestige' && styles.navTextActive]}>Prestige</Text>
+                        </TouchableOpacity>
+                    );
+                })()}
+
+                {/* Lab */}
+                {(() => {
+                    const isUnlocked = state.tutorialStep >= 13;
+                    return (
+                        <TouchableOpacity
+                            style={[styles.navItem, activeTab === 'lab' && styles.navItemActive, !isUnlocked && { opacity: 0.3 }]}
+                            onPress={() => {
+                                if (!isUnlocked) return;
+                                telegram.haptic('light');
+                                if (activeTab === 'lab') setActiveTab('tree');
+                                else setActiveTab('lab');
+                            }}
+                            disabled={!isUnlocked}
+                        >
+                            <LabIcon size={24} color={!isUnlocked ? '#444' : (activeTab === 'lab' ? '#a855f7' : '#888')} />
+                            <Text style={[styles.navText, activeTab === 'lab' && styles.navTextColored]}>Lab</Text>
+                        </TouchableOpacity>
+                    );
+                })()}
+
+                {/* Casino */}
+                {(() => {
+                    const isUnlocked = state.tutorialStep >= 13;
+                    return (
+                        <TouchableOpacity
+                            style={[styles.navItem, activeTab === 'casino' && styles.navItemActive, !isUnlocked && { opacity: 0.3 }]}
+                            onPress={() => {
+                                if (!isUnlocked) return;
+                                telegram.haptic('light');
+                                if (activeTab === 'casino') setActiveTab('tree');
+                                else setActiveTab('casino');
+                            }}
+                            disabled={!isUnlocked}
+                        >
+                            <CasinoIcon size={24} color={!isUnlocked ? '#444' : (activeTab === 'casino' ? '#fbbf24' : '#888')} />
+                            <Text style={[styles.navText, activeTab === 'casino' && { color: '#fbbf24' }]}>Casino</Text>
+                        </TouchableOpacity>
+                    );
+                })()}
+            </View>
 
             {/* Overlays */}
             {activeTab === 'shop' && (
