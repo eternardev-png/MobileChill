@@ -30,10 +30,12 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart }) => {
     return (
         <View style={styles.container}>
             <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-                <View style={styles.treeContainer}>
+                {/* Tree grows upward */}
+                <View style={styles.treeWrapper}>
                     <CherryBlossomTree />
                 </View>
 
+                {/* TitleBox positioned right below tree base */}
                 <View style={styles.titleBox}>
                     <Text style={styles.title}>Eternal Tree</Text>
                 </View>
@@ -58,14 +60,13 @@ const styles = StyleSheet.create({
         zIndex: 1000,
     },
     content: {
+        flex: 1,
         alignItems: 'center',
-        width: '100%',
-        marginTop: -80, // Shift everything up
+        justifyContent: 'center',
     },
-    treeContainer: {
-        position: 'relative',
-        marginBottom: -5,
-        zIndex: 1, // Below other elements
+    treeWrapper: {
+        marginBottom: -2, // Pull titleBox up more to align with tree base
+        zIndex: 0, // Behind UI elements
     },
     titleBox: {
         backgroundColor: 'rgba(255, 255, 255, 0.05)',
@@ -78,7 +79,8 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 0 },
         shadowOpacity: 0.6,
         shadowRadius: 20,
-        zIndex: 2, // Above tree
+        marginBottom: 10,
+        zIndex: 1, // Above tree
     },
     title: {
         fontSize: 48,
@@ -92,7 +94,6 @@ const styles = StyleSheet.create({
         marginTop: 20,
         marginBottom: 40,
         textAlign: 'center',
-        zIndex: 2,
     },
     startButton: {
         backgroundColor: '#ff69b4',
@@ -104,7 +105,6 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.6,
         shadowRadius: 15,
-        zIndex: 3, // Above everything
     },
     startButtonText: {
         color: '#fff',

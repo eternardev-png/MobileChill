@@ -26,8 +26,8 @@ const generateBranches = (
     const t = Math.min(1, depth / (maxDepth || 10));
 
     const currentHue = start.hue + (end.hue - start.hue) * t;
-    const currentSaturation = start.saturation + (end.saturation - start.saturation) * t;
-    const currentLightness = start.lightness + (end.lightness - start.lightness) * t;
+    const currentSaturation = (start.saturation + (end.saturation - start.saturation) * t) * 0.7; // Reduced by 30%
+    const currentLightness = start.lightness + (end.lightness - start.lightness) * t + 10; // Lighter
 
     const strokeColor = `hsl(${currentHue}, ${currentSaturation}%, ${currentLightness}%)`;
 
@@ -87,15 +87,15 @@ export const CherryBlossomTree = () => {
         <View style={styles.container}>
             <Svg width="400" height="400" viewBox="0 0 400 400">
                 <Defs>
-                    <RadialGradient id="pinkGlow" cx="50%" cy="98%">
-                        <Stop offset="0%" stopColor={glowColor} stopOpacity="0.8" />
-                        <Stop offset="50%" stopColor="#ff69b4" stopOpacity="0.4" />
+                    <RadialGradient id="pinkGlow" cx="50%" cy="60%">
+                        <Stop offset="0%" stopColor="#ff69b4" stopOpacity="0.25" />
+                        <Stop offset="50%" stopColor="#ff69b4" stopOpacity="0.1" />
                         <Stop offset="100%" stopColor="transparent" stopOpacity="0" />
                     </RadialGradient>
                 </Defs>
 
-                {/* Pink glow at base */}
-                <Circle cx={centerX} cy={startY} r={baseLength * 4} fill="url(#pinkGlow)" />
+                {/* Pink glow from tree center */}
+                <Circle cx={centerX} cy={200} r={200} fill="url(#pinkGlow)" />
 
                 {/* Tree branches */}
                 <G>
