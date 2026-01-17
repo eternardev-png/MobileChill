@@ -18,7 +18,14 @@
     "android": {
       "package": "com.mobilechill.app"
     },
-    "web": {},
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "name": "MobileChill",
+      "shortName": "MobileChill",
+      "description": "Grow your virtual tree in Telegram!",
+      "themeColor": "#111111",
+      "backgroundColor": "#111111"
+    },
     "extra": {
       "eas": {
         "projectId": "4d7b5885-0842-4c6a-b6e7-429504876450"
@@ -27,6 +34,7 @@
     "plugins": [
       "expo-asset",
       "expo-font"
-    ]
+    ],
+    "scheme": "mobilechill"
   }
 }

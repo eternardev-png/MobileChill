@@ -6,12 +6,13 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "build:web": "expo export:web"
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",
     "@react-native-community/slider": "^4.5.3",
-    "@shopify/react-native-skia": "^1.5.4",
+    "@twa-dev/sdk": "^7.10.1",
     "expo": "~52.0.0",
     "expo-asset": "~11.0.5",
     "expo-constants": "~17.0.8",

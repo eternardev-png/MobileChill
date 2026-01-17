@@ -3,6 +3,7 @@ import { TREE_SPECIES, getTreeSpecies, getAllSpecies, TreeSpecies } from './data
 import { UPGRADES, calculateUpgradeCost, calculateUpgradeEffect } from './data/upgrades';
 import { QUESTS, getAvailableQuests, Quest } from './data/quests';
 import { PRESTIGE_UPGRADES, calculatePrestigeShards, canPrestige, calculatePrestigeBonus, PRESTIGE_MIN_ENERGY, calculatePrestigeCost } from './data/prestige';
+import { telegram } from './telegram';
 
 // Types
 export interface TreeStats {
@@ -112,65 +113,67 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const currentStats = state.treeStats[state.currentTreeId] || defaultTreeStats;
     const xpForLevel = (level: number) => Math.floor(50 * Math.pow(1.5, level - 1));
 
-    // Load
+    // Load (async from Telegram Cloud Storage)
     useEffect(() => {
-        try {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                if (!parsed.prestige) parsed.prestige = { ...defaultPrestige };
-                if (parsed.grow === undefined) parsed.grow = 0;
+        const loadGameData = async () => {
+            try {
+                const saved = await telegram.cloudLoad(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (!parsed.prestige) parsed.prestige = { ...defaultPrestige };
+                    if (parsed.grow === undefined) parsed.grow = 0;
 
-                // MIGRATION / SYNC: Always recalculate derived stats to ensure accuracy
-                if (parsed.customTrees) {
-                    const realLabCount = Object.keys(parsed.customTrees).length;
-                    // Keep the larger value just in case (e.g. if we add deletion later), but for now sync to reality
-                    parsed.totalLabTreesCreated = Math.max(parsed.totalLabTreesCreated || 0, realLabCount);
+                    // MIGRATION / SYNC: Always recalculate derived stats to ensure accuracy
+                    if (parsed.customTrees) {
+                        const realLabCount = Object.keys(parsed.customTrees).length;
+                        parsed.totalLabTreesCreated = Math.max(parsed.totalLabTreesCreated || 0, realLabCount);
+                    }
+
+                    if (parsed.upgradeLevels) {
+                        const realUpgradeCount = Object.values(parsed.upgradeLevels).reduce((a: any, b: any) => a + b, 0);
+                        parsed.totalUpgradesPurchased = Math.max(parsed.totalUpgradesPurchased || 0, realUpgradeCount);
+                    }
+
+                    // FIX: Register Dynamic Quests for Retroactive/Loaded Trees
+                    if (parsed.customTrees) {
+                        Object.values(parsed.customTrees as Record<string, TreeSpecies>).forEach(tree => {
+                            const q5 = {
+                                id: `${tree.id}_level_5`,
+                                name: `${tree.name} Rookie`,
+                                description: `Level ${tree.name} to 5`,
+                                icon: tree.name.includes('Money') ? '💰' : '🧬',
+                                objective: { type: 'specific_tree_level', target: 5, treeId: tree.id },
+                                rewards: { coins: 100 * (tree.branchCount || 2), seeds: 10 },
+                            };
+                            const q10 = {
+                                id: `${tree.id}_level_10`,
+                                name: `${tree.name} Expert`,
+                                description: `Level ${tree.name} to 10`,
+                                icon: '⭐',
+                                objective: { type: 'specific_tree_level', target: 10, treeId: tree.id },
+                                rewards: { coins: 300 * (tree.branchCount || 2), seeds: 30 },
+                                prerequisite: `${tree.id}_level_5`,
+                            };
+                            // @ts-ignore
+                            QUESTS[q5.id] = q5;
+                            // @ts-ignore
+                            QUESTS[q10.id] = q10;
+                        });
+                    }
+
+                    setState({ ...initialState, ...parsed });
                 }
-
-                if (parsed.upgradeLevels) {
-                    const realUpgradeCount = Object.values(parsed.upgradeLevels).reduce((a: any, b: any) => a + b, 0);
-                    parsed.totalUpgradesPurchased = Math.max(parsed.totalUpgradesPurchased || 0, realUpgradeCount);
-                }
-
-                // FIX: Register Dynamic Quests for Retroactive/Loaded Trees
-                if (parsed.customTrees) {
-                    Object.values(parsed.customTrees as Record<string, TreeSpecies>).forEach(tree => {
-                        const q5 = {
-                            id: `${tree.id}_level_5`,
-                            name: `${tree.name} Rookie`,
-                            description: `Level ${tree.name} to 5`,
-                            icon: tree.name.includes('Money') ? '💰' : '🧬',
-                            objective: { type: 'specific_tree_level', target: 5, treeId: tree.id },
-                            rewards: { coins: 100 * (tree.branchCount || 2), seeds: 10 },
-                        };
-                        const q10 = {
-                            id: `${tree.id}_level_10`,
-                            name: `${tree.name} Expert`,
-                            description: `Level ${tree.name} to 10`,
-                            icon: '⭐',
-                            objective: { type: 'specific_tree_level', target: 10, treeId: tree.id },
-                            rewards: { coins: 300 * (tree.branchCount || 2), seeds: 30 },
-                            prerequisite: `${tree.id}_level_5`,
-                        };
-                        // @ts-ignore
-                        QUESTS[q5.id] = q5;
-                        // @ts-ignore
-                        QUESTS[q10.id] = q10;
-                    });
-                }
-
-                setState({ ...initialState, ...parsed });
-            }
-        } catch (e) { console.log('No save'); }
+            } catch (e) { console.log('No save'); }
+        };
+        loadGameData();
     }, []);
 
-    // Auto-save
+    // Auto-save (async to Telegram Cloud Storage)
     useEffect(() => {
-        const interval = setInterval(() => {
+        const interval = setInterval(async () => {
             setState(prev => {
                 const toSave = { ...prev, lastSaveTime: Date.now() };
-                try { localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave)); } catch (e) { }
+                telegram.cloudSave(STORAGE_KEY, JSON.stringify(toSave)).catch(e => console.error('Auto-save failed', e));
                 return toSave;
             });
         }, 10000);
@@ -446,18 +449,18 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, [state]);
 
     // Save/Load/Reset functions
-    const saveGame = useCallback(() => {
+    const saveGame = useCallback(async () => {
         try {
             const toSave = { ...state, lastSaveTime: Date.now() };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+            await telegram.cloudSave(STORAGE_KEY, JSON.stringify(toSave));
         } catch (e) {
             console.error('Failed to save game', e);
         }
     }, [state]);
 
-    const loadGame = useCallback(() => {
+    const loadGame = useCallback(async () => {
         try {
-            const saved = localStorage.getItem(STORAGE_KEY);
+            const saved = await telegram.cloudLoad(STORAGE_KEY);
             if (saved) {
                 const parsed = JSON.parse(saved);
                 if (!parsed.prestige) parsed.prestige = { ...defaultPrestige };
@@ -469,10 +472,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     }, []);
 
-    const resetGame = useCallback(() => {
+    const resetGame = useCallback(async () => {
         setState(initialState);
         try {
-            localStorage.removeItem(STORAGE_KEY);
+            await telegram.cloudRemove(STORAGE_KEY);
         } catch (e) {
             console.error('Failed to reset game', e);
         }

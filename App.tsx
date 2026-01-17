@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, View, SafeAreaView, TouchableOpacity, Text, Dimensions, ImageBackground } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
 import { useGame, GameProvider } from './gameState';
 import { GameHUD } from './components/GameHUD';
 import { Tree } from './components/Tree';
@@ -22,6 +21,7 @@ import {
 } from './components/Icons';
 import Svg, { Defs, RadialGradient, Stop, Circle } from 'react-native-svg';
 import { GlobalStyles } from './components/GlobalStyles';
+import { telegram } from './telegram';
 
 const { width, height } = Dimensions.get('window');
 
@@ -48,22 +48,24 @@ const GameContent = () => {
 
     // Loading and initialization logic...
     useEffect(() => {
-        // Check for existing save on mount
-        const saved = localStorage.getItem('mobilechill_save');
-        if (!saved) {
-            setShowWelcome(true);
-        } else {
-            try {
-                const parsed = JSON.parse(saved);
-                const now = Date.now();
-                const timeDiff = (now - (parsed.lastSaveTime || now)) / 1000;
-                if (timeDiff > 60) {
-                    // Calculate offline earnings (simplified for brevity)
-                }
-            } catch (e) {
+        const checkSave = async () => {
+            const saved = await telegram.cloudLoad('mobilechill_save');
+            if (!saved) {
                 setShowWelcome(true);
+            } else {
+                try {
+                    const parsed = JSON.parse(saved);
+                    const now = Date.now();
+                    const timeDiff = (now - (parsed.lastSaveTime || now)) / 1000;
+                    if (timeDiff > 60) {
+                        // Calculate offline earnings (simplified for brevity)
+                    }
+                } catch (e) {
+                    setShowWelcome(true);
+                }
             }
-        }
+        };
+        checkSave();
     }, []);
 
 
@@ -85,7 +87,7 @@ const GameContent = () => {
 
     return (
         <View style={styles.container}>
-            <StatusBar style="light" />
+            {/* StatusBar removed for Telegram */}
 
             {/* Main Game Area */}
             <SafeAreaView style={styles.gameArea}>
@@ -96,7 +98,13 @@ const GameContent = () => {
                 </View>
 
                 {/* Roulette button - floating in top right corner, JUST THE ICON with glow */}
-                <TouchableOpacity style={styles.rouletteButton} onPress={() => setShowRoulette(true)}>
+                <TouchableOpacity
+                    style={styles.rouletteButton}
+                    onPress={() => {
+                        telegram.haptic('light');
+                        setShowRoulette(true);
+                    }}
+                >
                     <View style={styles.rouletteButtonContent}>
                         <RouletteGlow />
                         <Text style={styles.rouletteEmoji}>🎰</Text>
@@ -110,7 +118,10 @@ const GameContent = () => {
             <View style={styles.navbar}>
                 <TouchableOpacity
                     style={[styles.navItem, activeTab === 'collection' && styles.navItemActive]}
-                    onPress={() => setActiveTab('collection')}
+                    onPress={() => {
+                        telegram.haptic('light');
+                        setActiveTab('collection');
+                    }}
                 >
                     <View style={styles.collectionIconWrapper}>
                         <View style={[styles.collectionIconRow, { marginBottom: 2 }]}>
@@ -127,7 +138,10 @@ const GameContent = () => {
 
                 <TouchableOpacity
                     style={[styles.navItem, activeTab === 'shop' && styles.navItemActive]}
-                    onPress={() => setActiveTab('shop')}
+                    onPress={() => {
+                        telegram.haptic('light');
+                        setActiveTab('shop');
+                    }}
                 >
                     <ShopIcon size={24} color={activeTab === 'shop' ? '#4ade80' : '#888'} />
                     <Text style={[styles.navText, activeTab === 'shop' && styles.navTextActive]}>Shop</Text>
@@ -135,7 +149,10 @@ const GameContent = () => {
 
                 <TouchableOpacity
                     style={[styles.navItem, activeTab === 'quests' && styles.navItemActive]}
-                    onPress={() => setActiveTab('quests')}
+                    onPress={() => {
+                        telegram.haptic('light');
+                        setActiveTab('quests');
+                    }}
                 >
                     <View style={styles.questIconWrapper}>
                         <QuestIcon size={24} color={activeTab === 'quests' ? '#4ade80' : '#888'} />
@@ -148,7 +165,10 @@ const GameContent = () => {
 
                 <TouchableOpacity
                     style={[styles.navItem, activeTab === 'prestige' && styles.navItemActive]}
-                    onPress={() => setActiveTab('prestige')}
+                    onPress={() => {
+                        telegram.haptic('light');
+                        setActiveTab('prestige');
+                    }}
                 >
                     <PrestigeIcon size={24} color={activeTab === 'prestige' ? '#4ade80' : '#888'} />
                     <Text style={[styles.navText, activeTab === 'prestige' && styles.navTextActive]}>Prestige</Text>
@@ -156,7 +176,10 @@ const GameContent = () => {
 
                 <TouchableOpacity
                     style={[styles.navItem, activeTab === 'lab' && styles.navItemActive]}
-                    onPress={() => setActiveTab('lab')}
+                    onPress={() => {
+                        telegram.haptic('light');
+                        setActiveTab('lab');
+                    }}
                 >
                     <LabIcon size={24} color={activeTab === 'lab' ? '#a855f7' : '#888'} />
                     <Text style={[styles.navText, activeTab === 'lab' && styles.navTextColored]}>Lab</Text>
@@ -198,7 +221,6 @@ export default function App() {
     return (
         <GameProvider>
             <GlobalStyles />
-            <StatusBar style="light" />
             <GameContent />
         </GameProvider>
     );
