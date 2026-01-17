@@ -558,7 +558,22 @@ export const CasinoIcon: React.FC<IconProps> = ({ size = 24, color = '#fbbf24' }
     </Svg>
 );
 
-// ============ SHOP COMPOSITE ICONS ============
+// Slot Machine Icon (777)
+export const SlotIcon: React.FC<IconProps> = ({ size = 24, color = '#ef4444' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        <Rect x="2" y="4" width="20" height="16" rx="2" fill="none" stroke={color} strokeWidth="1.5" />
+        <Line x1="2" y1="9" x2="22" y2="9" stroke={color} strokeWidth="1" opacity={0.5} />
+        <Line x1="2" y1="15" x2="22" y2="15" stroke={color} strokeWidth="1" opacity={0.5} />
+        <Line x1="8" y1="4" x2="8" y2="20" stroke={color} strokeWidth="1" opacity={0.5} />
+        <Line x1="16" y1="4" x2="16" y2="20" stroke={color} strokeWidth="1" opacity={0.5} />
+        {/* Sevens */}
+        <Path d="M4 11 L7 11 L5 14" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+        <Path d="M10.5 11 L13.5 11 L11.5 14" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+        <Path d="M17 11 L20 11 L18 14" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    </Svg>
+);
+
+// Shop Composite Icons
 
 export const ShopFasterGrowthIcon: React.FC<IconProps> = ({ size = 28 }) => (
     <Svg width={size} height={size} viewBox="0 0 24 24">

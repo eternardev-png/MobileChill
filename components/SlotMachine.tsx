@@ -1,8 +1,8 @@
-import React, { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Animated, Easing, Dimensions } from 'react-native';
-import Svg, { Rect, G, Text as SvgText, Defs, LinearGradient, Stop, ClipPath } from 'react-native-svg';
+import Svg, { Rect, G, Text as SvgText, Defs, LinearGradient, Stop, ClipPath, Circle, RadialGradient } from 'react-native-svg';
 import { useGame } from '../gameState';
-import { GemIcon, CoinIcon, EnergyIcon, DiamondIcon } from './Icons';
+import { GemIcon, CoinIcon, EnergyIcon, DiamondIcon, CasinoIcon } from './Icons';
 
 const { width } = Dimensions.get('window');
 const SLOT_WIDTH = Math.min(width * 0.25, 80);
@@ -43,7 +43,7 @@ const getRandomSymbol = () => {
 };
 
 // Generate reel with extra symbols for smooth scrolling
-const generateReel = (length: number = 20) => {
+const generateReel = (length: number = 50) => {
     return Array.from({ length }, () => getRandomSymbol());
 };
 
@@ -55,9 +55,26 @@ export const SlotMachine: React.FC<SlotMachineProps> = ({ onClose }) => {
     const reel2Anim = useRef(new Animated.Value(0)).current;
     const reel3Anim = useRef(new Animated.Value(0)).current;
 
+    // Animation for red lights
+    const lightsAnim = useRef(new Animated.Value(0)).current;
+
     const [spinning, setSpinning] = useState(false);
     const [reels, setReels] = useState([generateReel(), generateReel(), generateReel()]);
-    const [result, setResult] = useState<{ symbols: typeof SYMBOLS[0][], win: number } | null>(null);
+    const [result, setResult] = useState<{ symbols: typeof SYMBOLS[0][], win: number, winType: 'coins' | 'energy' | 'gems' | 'shard' } | null>(null);
+
+    // Pulse lights when spinning
+    useEffect(() => {
+        if (spinning) {
+            Animated.loop(
+                Animated.sequence([
+                    Animated.timing(lightsAnim, { toValue: 1, duration: 300, useNativeDriver: true }),
+                    Animated.timing(lightsAnim, { toValue: 0, duration: 300, useNativeDriver: true })
+                ])
+            ).start();
+        } else {
+            lightsAnim.setValue(0);
+        }
+    }, [spinning]);
 
     const SPIN_COST = 3; // Gems cost per spin
 
@@ -74,11 +91,11 @@ export const SlotMachine: React.FC<SlotMachineProps> = ({ onClose }) => {
         const newReels = [generateReel(), generateReel(), generateReel()];
         setReels(newReels);
 
-        // Final symbols (middle row of each reel)
+        // Final symbols (middle row of each reel) - TARGET INDEX 30
         const finalSymbols = [
-            newReels[0][10],
-            newReels[1][10],
-            newReels[2][10],
+            newReels[0][30],
+            newReels[1][30],
+            newReels[2][30],
         ];
 
         // Reset animations
@@ -86,8 +103,8 @@ export const SlotMachine: React.FC<SlotMachineProps> = ({ onClose }) => {
         reel2Anim.setValue(0);
         reel3Anim.setValue(0);
 
-        // Staggered spin animations
-        const spinDuration = 2000;
+        // Staggered spin animations - LONGER & STRONGER
+        const spinDuration = 3500; // Increased duration
         const stagger = 300;
 
         Animated.sequence([
@@ -95,19 +112,19 @@ export const SlotMachine: React.FC<SlotMachineProps> = ({ onClose }) => {
                 Animated.timing(reel1Anim, {
                     toValue: 1,
                     duration: spinDuration,
-                    easing: Easing.out(Easing.cubic),
+                    easing: Easing.bezier(0.25, 0.1, 0.25, 1), // Strong ease-out
                     useNativeDriver: true,
                 }),
                 Animated.timing(reel2Anim, {
                     toValue: 1,
                     duration: spinDuration + stagger,
-                    easing: Easing.out(Easing.cubic),
+                    easing: Easing.bezier(0.25, 0.1, 0.25, 1),
                     useNativeDriver: true,
                 }),
                 Animated.timing(reel3Anim, {
                     toValue: 1,
                     duration: spinDuration + stagger * 2,
-                    easing: Easing.out(Easing.cubic),
+                    easing: Easing.bezier(0.25, 0.1, 0.25, 1),
                     useNativeDriver: true,
                 }),
             ]),
@@ -119,20 +136,39 @@ export const SlotMachine: React.FC<SlotMachineProps> = ({ onClose }) => {
                 finalSymbols[0].id === finalSymbols[2].id;
 
             let winAmount = 0;
-            if (allSame) {
-                winAmount = finalSymbols[0].multiplier * 100;
-            } else if (twoSame) {
-                // Find matching pair
-                const matchSymbol = finalSymbols[0].id === finalSymbols[1].id ? finalSymbols[0] :
+            let winType: 'coins' | 'energy' | 'gems' | 'shard' = 'coins';
+
+            // Determine winning symbol for type
+            let matchSymbol = finalSymbols[0];
+            if (twoSame && !allSame) {
+                matchSymbol = finalSymbols[0].id === finalSymbols[1].id ? finalSymbols[0] :
                     finalSymbols[1].id === finalSymbols[2].id ? finalSymbols[1] : finalSymbols[0];
-                winAmount = matchSymbol.multiplier * 20;
+            }
+
+            // Map symbol to reward type
+            if (matchSymbol.id === 'coin') winType = 'coins';
+            else if (matchSymbol.id === 'energy') winType = 'energy';
+            else if (matchSymbol.id === 'gem') winType = 'gems';
+            else if (matchSymbol.id === 'diamond') winType = 'shard';
+            else if (matchSymbol.id === 'seven') winType = 'coins'; // Jackpot is coins for now
+
+            if (allSame) {
+                if (matchSymbol.id === 'diamond') winAmount = 3; // 3 Shards
+                else if (matchSymbol.id === 'gem') winAmount = matchSymbol.multiplier * 5; // Gems
+                else winAmount = matchSymbol.multiplier * 100; // Coins/Energy
+            } else if (twoSame) {
+                if (matchSymbol.id === 'diamond') winAmount = 1; // 1 Shard
+                else if (matchSymbol.id === 'gem') winAmount = matchSymbol.multiplier * 2; // Gems
+                else winAmount = matchSymbol.multiplier * 20; // Coins/Energy
             }
 
             if (winAmount > 0) {
-                awardRoulettePrize('coins', winAmount);
+                // Map to awardRoulettePrize types: 'coins' | 'energy' | 'grow_mult' (gems) | 'shard'
+                let awardType = winType === 'gems' ? 'grow_mult' : winType;
+                awardRoulettePrize(awardType, winAmount);
             }
 
-            setResult({ symbols: finalSymbols, win: winAmount });
+            setResult({ symbols: finalSymbols, win: winAmount, winType });
             setSpinning(false);
         });
     };
@@ -159,14 +195,14 @@ export const SlotMachine: React.FC<SlotMachineProps> = ({ onClose }) => {
     const renderReel = (reelData: typeof SYMBOLS[0][], animValue: Animated.Value, index: number) => {
         const translateY = animValue.interpolate({
             inputRange: [0, 1],
-            outputRange: [0, -SYMBOL_SIZE * 9], // Scroll distance
+            outputRange: [0, -SYMBOL_SIZE * 29], // Scroll distance (Target index 29/30)
         });
 
         return (
             <View key={index} style={styles.reelContainer}>
                 <View style={styles.reelMask}>
                     <Animated.View style={[styles.reelStrip, { transform: [{ translateY }] }]}>
-                        {reelData.slice(0, 15).map((symbol, i) => (
+                        {reelData.slice(0, 40).map((symbol, i) => (
                             <View key={i} style={styles.symbolWrapper}>
                                 {renderSymbol(symbol)}
                             </View>
@@ -185,11 +221,40 @@ export const SlotMachine: React.FC<SlotMachineProps> = ({ onClose }) => {
                 </TouchableOpacity>
 
                 <View style={styles.header}>
+                    {/* Top-left Icon as requested */}
+                    <View style={styles.headerIconContainer}>
+                        <CasinoIcon size={24} color="#ef4444" />
+                    </View>
                     <Text style={styles.title}>SLOTS</Text>
                 </View>
 
                 {/* Slot Machine Frame */}
                 <View style={styles.machineFrame}>
+                    {/* Perimeter Lights */}
+                    <View style={styles.lightsTop}>
+                        {[...Array(6)].map((_, i) => (
+                            <Animated.View key={`t${i}`} style={[styles.lightSmall, { opacity: lightsAnim }]} />
+                        ))}
+                    </View>
+
+                    <View style={styles.lightsBottom}>
+                        {[...Array(6)].map((_, i) => (
+                            <Animated.View key={`b${i}`} style={[styles.lightSmall, { opacity: lightsAnim }]} />
+                        ))}
+                    </View>
+
+                    <View style={styles.lightsLeft}>
+                        {[...Array(4)].map((_, i) => (
+                            <Animated.View key={`l${i}`} style={[styles.lightSide, { opacity: lightsAnim }]} />
+                        ))}
+                    </View>
+                    <View style={styles.lightsRight}>
+                        {[...Array(4)].map((_, i) => (
+                            <Animated.View key={`r${i}`} style={[styles.lightSide, { opacity: lightsAnim }]} />
+                        ))}
+                    </View>
+
+
                     {/* Win Line Indicator */}
                     <View style={styles.winLine} />
 
@@ -208,7 +273,10 @@ export const SlotMachine: React.FC<SlotMachineProps> = ({ onClose }) => {
                             <>
                                 <Text style={styles.winText}>YOU WON!</Text>
                                 <View style={styles.winAmount}>
-                                    <CoinIcon size={28} />
+                                    {result.winType === 'coins' && <CoinIcon size={28} />}
+                                    {result.winType === 'energy' && <EnergyIcon size={28} />}
+                                    {result.winType === 'gems' && <GemIcon size={28} />}
+                                    {result.winType === 'shard' && <DiamondIcon size={28} />}
                                     <Text style={styles.winValue}>{result.win}</Text>
                                 </View>
                             </>
@@ -285,6 +353,15 @@ const styles = StyleSheet.create({
     header: {
         marginBottom: 20,
         alignItems: 'center',
+        flexDirection: 'row', // Align icon and title
+        justifyContent: 'center',
+        width: '100%',
+        position: 'relative', // For absolute positioning of icon if needed, or flex layout
+    },
+    headerIconContainer: {
+        position: 'absolute',
+        left: 0,
+        top: 4,
     },
     title: {
         fontSize: 28,
@@ -298,10 +375,62 @@ const styles = StyleSheet.create({
     machineFrame: {
         backgroundColor: '#2a2a2a',
         borderRadius: 16,
-        padding: 16,
+        padding: 24, // Increased padding for lights inside
         borderWidth: 4,
         borderColor: '#444',
         position: 'relative',
+        alignItems: 'center',
+    },
+    // Light Strips
+    lightsTop: {
+        position: 'absolute',
+        top: 6,
+        flexDirection: 'row',
+        gap: 15,
+        zIndex: 5,
+    },
+    lightsBottom: {
+        position: 'absolute',
+        bottom: 6,
+        flexDirection: 'row',
+        gap: 15,
+        zIndex: 5,
+    },
+    lightsLeft: {
+        position: 'absolute',
+        left: 6,
+        top: 20,
+        bottom: 20,
+        justifyContent: 'space-between',
+        zIndex: 5,
+    },
+    lightsRight: {
+        position: 'absolute',
+        right: 6,
+        top: 20,
+        bottom: 20,
+        justifyContent: 'space-between',
+        zIndex: 5,
+    },
+    lightSmall: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: '#ef4444',
+        shadowColor: '#ef4444',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 1,
+        shadowRadius: 6,
+    },
+    lightSide: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: '#ef4444',
+        shadowColor: '#ef4444',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 1,
+        shadowRadius: 6,
     },
     winLine: {
         position: 'absolute',

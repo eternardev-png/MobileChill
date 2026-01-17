@@ -5,7 +5,7 @@ import { GameHUD } from './components/GameHUD';
 import { Tree } from './components/Tree';
 import { UpgradeShop } from './components/UpgradeShop';
 import { CollectionScreen } from './components/CollectionScreen';
-import { RouletteWheel } from './components/RouletteWheel';
+import { CasinoMenu } from './components/CasinoMenu';
 import { PrestigeShop } from './components/PrestigeShop';
 import { QuestPanel } from './components/QuestPanel';
 import { WelcomeScreen } from './components/WelcomeScreen';
@@ -274,7 +274,7 @@ const GameContent = () => {
             )}
 
             {activeTab === 'casino' && (
-                <RouletteWheel onClose={() => setActiveTab('tree')} />
+                <CasinoMenu onClose={() => setActiveTab('tree')} />
             )}
 
             {showWelcome && <WelcomeScreen onStart={handleCloseWelcome} />}
