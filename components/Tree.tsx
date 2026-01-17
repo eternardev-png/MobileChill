@@ -21,9 +21,8 @@ const generateBranches = (
   zoom: number,
   branchPath: string = "root" // Topological path for stable RNG and keys
 ): JSX.Element[] => {
-  // Recursion Stop Condition
-  // User requested 1.5px minimum to keep tree detailed
-  if (depth > maxDepth || length < 1.5) return [];
+  // Recursion Stop Condition - FPS FIX: Minimum length 2px
+  if (depth > maxDepth || length < 2) return [];
 
   // Calculate end point
   const x2 = x1 + length * Math.sin((angle * Math.PI) / 180);
@@ -135,11 +134,11 @@ export const Tree: React.FC = () => {
   const level = state.treeStats[currentSpecies.id]?.level || 1;
   const currentHeight = state.treeStats[currentSpecies.id]?.height || 50;
 
-  // Complexity: Dynamic depth limit to prevent freezing/lag on trees with many branches
+  // Complexity: Dynamic depth limit for performance (reduced for mobile FPS)
   const branchCount = currentSpecies.branchCount || 2;
-  // Reduce limit for 3-branch trees (3^8 is too heavy, 3^7 is safe)
-  const depthLimit = branchCount >= 4 ? 6 : (branchCount === 3 ? 7 : 11);
-  const maxDepth = Math.min(7 + Math.floor(level * 0.8) + currentSpecies.maxDepthBonus, depthLimit);
+  // FPS FIX: Reduced depth limits - binary:9, ternary:6, quaternary:5
+  const depthLimit = branchCount >= 4 ? 5 : (branchCount === 3 ? 6 : 9);
+  const maxDepth = Math.min(6 + Math.floor(level * 0.5) + currentSpecies.maxDepthBonus, depthLimit);
 
   // Size: More noticeable growth, scaled by Zoom
   // Adjusted baseline from 60 to 45 to prevent Level 8 trees from being "Giant" immediately

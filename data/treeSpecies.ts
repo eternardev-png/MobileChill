@@ -32,7 +32,7 @@ export interface TreeSpecies {
 
   // Unlock requirements
   unlockCost: number;
-  unlockQuest?: string;
+  unlockRequiresPreviousTree?: { treeId: string; minLevel: number };
 }
 
 export const TREE_SPECIES: Record<string, TreeSpecies> = {
@@ -76,7 +76,7 @@ export const TREE_SPECIES: Record<string, TreeSpecies> = {
     energyPerTap: 0.8,
     coinMultiplier: 1.0,
     unlockCost: 35,
-    unlockQuest: 'oak_level_5',
+    unlockRequiresPreviousTree: { treeId: 'oak', minLevel: 5 },
   },
 
   // 3. Maple (moved up)
@@ -98,7 +98,7 @@ export const TREE_SPECIES: Record<string, TreeSpecies> = {
     energyPerTap: 1.8,
     coinMultiplier: 1.0,
     unlockCost: 85,
-    unlockQuest: 'pine_level_5',
+    unlockRequiresPreviousTree: { treeId: 'pine', minLevel: 5 },
   },
 
   // 4. Baobab
@@ -120,7 +120,7 @@ export const TREE_SPECIES: Record<string, TreeSpecies> = {
     energyPerTap: 2.5,
     coinMultiplier: 1.0,
     unlockCost: 115,
-    unlockQuest: 'maple_level_5',
+    unlockRequiresPreviousTree: { treeId: 'maple', minLevel: 5 },
   },
 
   // 5. Money Tree
@@ -142,7 +142,7 @@ export const TREE_SPECIES: Record<string, TreeSpecies> = {
     energyPerTap: 0.5,
     coinMultiplier: 1.5,
     unlockCost: 115,
-    unlockQuest: 'baobab_level_5',
+    unlockRequiresPreviousTree: { treeId: 'baobab', minLevel: 5 },
   },
 
   // 6. Cherry Blossom
@@ -164,7 +164,7 @@ export const TREE_SPECIES: Record<string, TreeSpecies> = {
     energyPerTap: 4.0,
     coinMultiplier: 1.0,
     unlockCost: 165,
-    unlockQuest: 'money_level_5',
+    unlockRequiresPreviousTree: { treeId: 'money', minLevel: 5 },
   },
 };
 

@@ -397,8 +397,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const species = TREE_SPECIES[treeId];
         if (!species || state.unlockedTrees.includes(treeId) || state.gems < species.unlockCost) return false;
 
-        // Ensure quest is completed if required
-        if (species.unlockQuest && !state.completedQuests.includes(species.unlockQuest)) return false;
+        // Check if previous tree level requirement is met
+        if (species.unlockRequiresPreviousTree) {
+            const { treeId: prevTreeId, minLevel } = species.unlockRequiresPreviousTree;
+            const prevTreeStats = state.treeStats[prevTreeId];
+            if (!prevTreeStats || prevTreeStats.level < minLevel) return false;
+        }
 
         setState(prev => ({
             ...prev,
@@ -407,7 +411,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             treeStats: { ...prev.treeStats, [treeId]: { ...defaultTreeStats } },
         }));
         return true;
-    }, [state.gems, state.unlockedTrees, state.completedQuests]);
+    }, [state.gems, state.unlockedTrees, state.treeStats]);
 
     const buyUpgrade = useCallback((upgradeId: string): boolean => {
         const upgrade = UPGRADES[upgradeId];
