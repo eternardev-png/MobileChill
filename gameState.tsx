@@ -148,6 +148,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         parsed.totalUpgradesPurchased = Math.max(Number(parsed.totalUpgradesPurchased) || 0, realUpgradeCount);
                     }
 
+                    // MIGRATION: Fix missing Tutorial Step for existing players
+                    // If player has taps/progress but tutorialStep is 0/undefined, set to 13 (Done)
+                    if ((!parsed.tutorialStep || parsed.tutorialStep === 0) && (parsed.totalTaps > 10 || parsed.coins > 100)) {
+                        parsed.tutorialStep = 13;
+                    }
+
                     // FIX: Register Dynamic Quests for Retroactive/Loaded Trees
                     if (parsed.customTrees) {
                         Object.values(parsed.customTrees as Record<string, TreeSpecies>).forEach(tree => {
