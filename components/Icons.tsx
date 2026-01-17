@@ -516,6 +516,103 @@ export const CasinoIcon: React.FC<IconProps> = ({ size = 24, color = '#fbbf24' }
     </Svg>
 );
 
+// ============ SHOP COMPOSITE ICONS ============
+
+export const ShopFasterGrowthIcon: React.FC<IconProps> = ({ size = 28 }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        {/* Tree Part */}
+        <G transform="translate(-2, 2) scale(0.85)">
+            <Path d="M10 22 L10 14" stroke="#854d0e" strokeWidth="3" strokeLinecap="round" />
+            <Circle cx="10" cy="8" r="7" fill="#22c55e" stroke="#166534" strokeWidth="1" />
+        </G>
+        {/* Smaller Arrow Up Part - closer to tree */}
+        <G transform="translate(16, 6) scale(0.7)">
+            <Path d="M0 6 L4 0 L8 6 M4 0 L4 16" fill="none" stroke="#4ade80" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+        </G>
+    </Svg>
+);
+
+export const ShopAutoEnergyIcon: React.FC<IconProps> = ({ size = 28 }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        {/* Energy Part */}
+        <G transform="translate(-1, 0) scale(1.0)">
+            <Path d="M13 3 L8 13 L11 13 L9 21 L16 11 L13 11 L13 3" fill="#facc15" stroke="#eab308" strokeWidth="1" />
+        </G>
+        {/* Mini Time Part - closer */}
+        <G transform="translate(11, 11) scale(0.55)">
+            <Circle cx="12" cy="12" r="9" fill="#1a1a1a" stroke="#fff" strokeWidth="2.5" />
+            <Path d="M12 7 V12 L15 15" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" />
+        </G>
+    </Svg>
+);
+
+export const ShopAutoGrowthIcon: React.FC<IconProps> = ({ size = 28 }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        {/* Tree Part */}
+        <G transform="translate(-2, 2) scale(0.8)">
+            <Path d="M12 22 L12 12" stroke="#854d0e" strokeWidth="3" strokeLinecap="round" />
+            <Circle cx="12" cy="6" r="5" fill="#22c55e" />
+            <Circle cx="6" cy="9" r="3" fill="#22c55e" />
+            <Circle cx="14" cy="9" r="3" fill="#22c55e" />
+        </G>
+        {/* Mini Time Part - closer */}
+        <G transform="translate(11, 11) scale(0.55)">
+            <Circle cx="12" cy="12" r="9" fill="#1a1a1a" stroke="#fff" strokeWidth="2.5" />
+            <Path d="M12 7 V12 L15 15" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" />
+        </G>
+    </Svg>
+);
+
+export const ShopGoldMineIcon: React.FC<IconProps> = ({ size = 28 }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        {/* Gold Part */}
+        <G transform="translate(-1, 2) scale(1.0)">
+            <Circle cx="10" cy="10" r="8.5" fill="#fbbf24" stroke="#d97706" strokeWidth="1.5" />
+            <Circle cx="10" cy="10" r="6" fill="none" stroke="#f59e0b" strokeWidth="1" opacity={0.4} />
+        </G>
+        {/* Mini Time Part - closer */}
+        <G transform="translate(11, 11) scale(0.55)">
+            <Circle cx="12" cy="12" r="9" fill="#1a1a1a" stroke="#fff" strokeWidth="2.5" />
+            <Path d="M12 7 V12 L15 15" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" />
+        </G>
+    </Svg>
+);
+
+export const ShopTapIcon: React.FC<IconProps> = ({ size = 28 }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        {/* The Energy Bolt (on the left) */}
+        <G transform="translate(2, 4) scale(0.8)">
+            <Path d="M11 2 L6 11 L9 11 L7 18 L14 9 L11 9 L11 2" fill="#facc15" stroke="#eab308" strokeWidth="1" />
+        </G>
+
+        {/* White Mouse Arrow Cursor (to the right of the bolt) */}
+        <G transform="translate(10, 6) rotate(-10)">
+            {/* Black Outline */}
+            <Path
+                d="M0,0 v13 l3,-3 l2,5 h2 l-2,-5 h5 Z"
+                fill="#000"
+            />
+            {/* White Fill */}
+            <Path
+                d="M1,2 v9 l2,-2 l2,5 h1 l-2,-5 h4 Z"
+                fill="#fff"
+            />
+        </G>
+    </Svg>
+);
+
+export const ShopCoinMultiplierIcon: React.FC<IconProps> = ({ size = 28 }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        {/* Arrow Up Part */}
+        <Path d="M6 14 L10 10 M10 10 L14 14 M10 10 L10 20" fill="none" stroke="#fbbf24" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+        {/* Coin Part */}
+        <G transform="translate(12, 4) scale(0.5)">
+            <Circle cx="10" cy="10" r="8.5" fill="#fbbf24" stroke="#d97706" strokeWidth="2" />
+            <Path d="M10 6 V14 M8 8 H12" stroke="#d97706" strokeWidth="2" strokeLinecap="round" />
+        </G>
+    </Svg>
+);
+
 // Map string identifiers to Components
 export const getIconByName = (name: string, size = 20, color?: string) => {
     const props = { size, color };
@@ -525,6 +622,14 @@ export const getIconByName = (name: string, size = 20, color?: string) => {
         case 'icon_energy': return <EnergyIcon {...props} />;
         case 'icon_gem': return <GemIcon {...props} />;
         case 'icon_prestige': return <PrestigeIcon {...props} />;
+
+        // Shop Specific
+        case 'shop_tap': return <ShopTapIcon {...props} />;
+        case 'shop_faster_growth': return <ShopFasterGrowthIcon {...props} />;
+        case 'shop_auto_energy': return <ShopAutoEnergyIcon {...props} />;
+        case 'shop_auto_growth': return <ShopAutoGrowthIcon {...props} />;
+        case 'shop_gold_mine': return <ShopGoldMineIcon {...props} />;
+        case 'shop_coin_multiplier': return <ShopCoinMultiplierIcon {...props} />;
 
         // Trees
         case 'tree_oak': return <TreeOakIcon {...props} />;

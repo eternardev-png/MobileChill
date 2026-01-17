@@ -16,9 +16,9 @@ export interface Upgrade {
 export const UPGRADES: Record<string, Upgrade> = {
   tapPower: {
     id: 'tapPower',
-    name: 'Stronger Taps',
+    name: 'Energy per Tap',
     description: 'Increase energy gained per tap',
-    icon: 'quest_tap',
+    icon: 'shop_tap',
     maxLevel: 20,
     baseCost: 10,
     costMultiplier: 1.5,
@@ -27,9 +27,9 @@ export const UPGRADES: Record<string, Upgrade> = {
 
   growthSpeed: {
     id: 'growthSpeed',
-    name: 'Rapid Growth',
+    name: 'Faster Growth',
     description: 'Trees grow faster in height',
-    icon: 'quest_height',
+    icon: 'shop_faster_growth',
     maxLevel: 15,
     baseCost: 25,
     costMultiplier: 1.6,
@@ -39,8 +39,8 @@ export const UPGRADES: Record<string, Upgrade> = {
   autoEnergy: {
     id: 'autoEnergy',
     name: 'Auto Energy',
-    description: 'Generate energy passively (+0.1/s)',
-    icon: 'quest_energy',
+    description: 'Generate energy passively',
+    icon: 'shop_auto_energy',
     maxLevel: 20,
     baseCost: 40,
     costMultiplier: 1.6,
@@ -50,8 +50,8 @@ export const UPGRADES: Record<string, Upgrade> = {
   autoGrowth: {
     id: 'autoGrowth',
     name: 'Auto Growth',
-    description: 'Tree grows automatically (+0.05 height/s)',
-    icon: 'quest_height',
+    description: 'Tree grows automatically',
+    icon: 'shop_auto_growth',
     maxLevel: 15,
     baseCost: 60,
     costMultiplier: 1.7,
@@ -62,7 +62,7 @@ export const UPGRADES: Record<string, Upgrade> = {
     id: 'coinBonus',
     name: 'Coin Multiplier',
     description: 'Earn more coins from all sources',
-    icon: 'icon_coin',
+    icon: 'shop_coin_multiplier',
     maxLevel: 10,
     baseCost: 30,
     costMultiplier: 1.7,
@@ -72,8 +72,8 @@ export const UPGRADES: Record<string, Upgrade> = {
   autoCoin: {
     id: 'autoCoin',
     name: 'Gold Mine',
-    description: 'Generate coins passively (+0.1/s)',
-    icon: 'icon_coin',
+    description: 'Generate coins passively',
+    icon: 'shop_gold_mine',
     maxLevel: 20,
     baseCost: 100,
     costMultiplier: 1.5,
