@@ -60,7 +60,7 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({ onClose }) => {
                 pendingPrizeRef.current = null;
             }
         };
-    }, []);
+    }, [awardRoulettePrize]);
 
     const handleSpin = () => {
         if (spinning) return;

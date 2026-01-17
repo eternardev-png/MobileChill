@@ -235,7 +235,11 @@ export const PrestigeShop: React.FC<PrestigeShopProps> = ({ onClose }) => {
                                 <Text style={styles.shardHighlight}> Purple Shards</Text>
                             </View>
                             <View style={styles.confirmButtons}>
-                                <TouchableOpacity style={styles.cancelButton} onPress={() => setShowConfirm(false)}>
+                                <TouchableOpacity
+                                    style={[styles.cancelButton, state.tutorialStep === 10 && { opacity: 0.3 }]}
+                                    onPress={() => setShowConfirm(false)}
+                                    disabled={state.tutorialStep === 10}
+                                >
                                     <Text style={styles.cancelButtonText}>Cancel</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity style={styles.confirmButton} onPress={confirmPrestige}>

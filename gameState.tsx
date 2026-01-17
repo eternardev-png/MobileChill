@@ -636,19 +636,33 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setState(prev => {
             let newState = { ...prev, totalSpins: (prev.totalSpins || 0) + 1 };
 
-            if (prizeType === 'coins') {
-                newState.coins += prizeValue;
-            } else if (prizeType === 'gems') {
-                newState.gems += prizeValue;
-            } else if (prizeType === 'grow') {
-                newState.grow += prizeValue;
+            switch (prizeType) {
+                case 'coins':
+                    newState.coins += prizeValue;
+                    break;
+                case 'energy':
+                    newState.energy += prizeValue;
+                    newState.totalEnergyEarned += prizeValue;
+                    break;
+                case 'shard':
+                    newState.prestige = {
+                        ...newState.prestige,
+                        shards: newState.prestige.shards + prizeValue,
+                        totalShards: newState.prestige.totalShards + prizeValue
+                    };
+                    break;
+                case 'grow_mult':
+                case 'grow':
+                    newState.grow += prizeValue;
+                    break;
+                case 'gems':
+                    newState.gems += prizeValue;
+                    break;
             }
 
-            // Auto-save on significant events
-            saveGame();
             return newState;
         });
-    }, [saveGame]);
+    }, []);
 
     const advanceTutorial = useCallback((toStep?: number) => {
         setState(prev => {

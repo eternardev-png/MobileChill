@@ -148,6 +148,40 @@ export const ShopIcon: React.FC<IconProps> = ({ size = 20, color = '#fff' }) => 
     </Svg>
 );
 
+// Quest Upgrade Icon - Simple Gear + Arrow Up
+export const QuestUpgradeIcon: React.FC<IconProps> = ({ size = 20, color = '#60a5fa' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        {/* Gear */}
+        <G transform="translate(2, 8)">
+            <Circle cx="7" cy="7" r="5" fill="none" stroke={color} strokeWidth="2" />
+            <Circle cx="7" cy="7" r="2" fill={color} />
+            {/* Gear teeth */}
+            <Path d="M7,1 L7,0 M7,13 L7,14 M1,7 L0,7 M13,7 L14,7 M2.5,2.5 L1.5,1.5 M11.5,11.5 L12.5,12.5 M2.5,11.5 L1.5,12.5 M11.5,2.5 L12.5,1.5"
+                stroke={color} strokeWidth="2" strokeLinecap="round" />
+        </G>
+        {/* Arrow Up */}
+        <G transform="translate(14, 2)">
+            <Path d="M4,16 L4,4 M0,8 L4,4 L8,8" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        </G>
+    </Svg>
+);
+
+// Prestige Cosmetic Icon - Paintbrush with sparkles
+export const PrestigeCosmeticIcon: React.FC<IconProps> = ({ size = 28, color = '#e879f9' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        {/* Paintbrush Handle */}
+        <Path d="M4,20 L10,14" stroke="#7e22ce" strokeWidth="3" strokeLinecap="round" />
+        {/* Brush Ferrule */}
+        <Rect x="9" y="11" width="4" height="5" rx="1" fill="#9ca3af" transform="rotate(-45, 11, 13.5)" />
+        {/* Brush Bristles */}
+        <Path d="M12,12 L18,6 Q20,4 18,6 L14,10" fill={color} stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        {/* Sparkles */}
+        <Path d="M18,3 L19,5 L21,4 L19,5 L20,7 L19,5 L17,6 L19,5 L18,3" fill="#fff" stroke="#fff" strokeWidth="0.5" />
+        <Circle cx="6" cy="8" r="1" fill="#e879f9" />
+        <Circle cx="16" cy="10" r="0.8" fill="#fff" opacity={0.7} />
+    </Svg>
+);
+
 // Scroll/Quest icon
 export const QuestIcon: React.FC<IconProps> = ({ size = 20, color = '#fbbf24' }) => (
     <Svg width={size} height={size} viewBox="0 0 20 20">
@@ -468,29 +502,6 @@ export const TreeCherryIcon: React.FC<IconProps> = ({ size = 24 }) => (
 
 // ============ QUEST ICONS ============
 
-export const QuestUpgradeIcon: React.FC<IconProps> = ({ size = 20, color = '#60a5fa' }) => (
-    <Svg width={size} height={size} viewBox="0 0 24 24">
-        {/* Wrench - Diagonal based on reference silhouette */}
-        <G transform="rotate(-45, 12, 12)">
-            {/* Wrench Body/Handle */}
-            <Rect x="10" y="8" width="4" height="14" rx="2" fill={color} />
-            {/* Wrench Head */}
-            <Path
-                d="M12,2 C8.68,2 6,4.68 6,8 C6,9.25 6.39,10.41 7.05,11.36 L16.95,11.36 C17.61,10.41 18,9.25 18,8 C18,4.68 15.32,2 12,2 Z"
-                fill={color}
-            />
-            {/* The Cutout in the head */}
-            <Path
-                d="M12,2 L12,7 L8.5,10.5 L12,14 L12,14 L15.5,10.5 L12,7 Z"
-                fill="#1a1a1a"
-                transform="translate(0, -1)"
-            />
-            {/* Small hole at the bottom of handle */}
-            <Circle cx="12" cy="19.5" r="1" fill="#1a1a1a" />
-        </G>
-    </Svg>
-);
-
 export const QuestTapIcon: React.FC<IconProps> = ({ size = 20, color = '#f472b6' }) => (
     <Svg width={size} height={size} viewBox="0 0 24 24">
         <Path d="M12 2 L12 6" stroke={color} strokeWidth="2" strokeLinecap="round" />
@@ -761,6 +772,7 @@ export const getIconByName = (name: string, size = 20, color?: string) => {
         case 'prestige_rapid': return <PrestigeRapidGrowthIcon {...props} />;
         case 'prestige_auto_energy': return <PrestigeEternalEnergyIcon {...props} />;
         case 'prestige_auto_wealth': return <PrestigeEternalWealthIcon {...props} />;
+        case 'prestige_cosmetic': return <PrestigeCosmeticIcon {...props} />;
 
         // Shop Specific
         case 'shop_tap': return <ShopTapIcon {...props} />;

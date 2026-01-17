@@ -463,7 +463,7 @@ export const QUESTS: Record<string, Quest> = {
     id: 'tap_legend',
     name: 'Tap Legend',
     description: 'Tap 2000 times',
-    icon: 'quest_tap',
+    icon: 'quest_cursor',
     objective: { type: 'tap_count', target: 2000 },
     rewards: { coins: 400, gems: 15 },
     prerequisite: 'tap_master',
