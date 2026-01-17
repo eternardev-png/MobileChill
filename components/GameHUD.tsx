@@ -41,8 +41,7 @@ export const TopBar: React.FC = () => {
                         <Text style={styles.resourceValue}>{Math.floor(state.energy)}</Text>
                     </View>
                     <View style={styles.ratesRow}>
-                        <Text style={styles.rateText}>+{Math.floor(perClick)}/tap</Text>
-                        {autoEnergy > 0 && <Text style={styles.rateText}> • +{autoEnergy.toFixed(1)}/s</Text>}
+                        {autoEnergy > 0 && <Text style={styles.rateText}>+{autoEnergy.toFixed(1)}/s</Text>}
                     </View>
                 </View>
 
@@ -229,6 +228,11 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 5,
+    },
+    resourceValue: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
     ratesRow: {
         flexDirection: 'row',
