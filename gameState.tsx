@@ -92,6 +92,7 @@ interface GameContextType {
     getEffectiveGrowthSpeed: () => number;
     getAutoEnergyRate: () => number;
     getAutoGrowthRate: () => number;
+    getAutoCoinRate: () => number;
     getCoinMultiplier: () => number;
     getMaxTreeDepth: () => number;
     getAvailableQuestsList: () => Quest[];
@@ -706,7 +707,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         performPrestige, buyPrestigeUpgrade,
         spendGems, awardRoulettePrize, createCustomTree,
         getPrestigeShardPreview, canPerformPrestige,
-        getEffectiveTapPower, getEffectiveGrowthSpeed, getAutoEnergyRate, getAutoGrowthRate, getCoinMultiplier, getMaxTreeDepth,
+        getEffectiveTapPower, getEffectiveGrowthSpeed, getAutoEnergyRate, getAutoGrowthRate, getAutoCoinRate, getCoinMultiplier, getMaxTreeDepth,
         getAvailableQuestsList, getClaimableQuestsCount,
         getPrestigeTapBonus, getPrestigeCoinBonus, getPrestigeEnergyBonus, getPrestigeGrowthBonus, hasCosmetic,
         currentTreeHeight: currentStats.height,

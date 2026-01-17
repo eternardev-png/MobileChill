@@ -10,24 +10,61 @@ export const BOTTOM_CONTROLS_HEIGHT = 160; // Height of stats + tap button area
 export const TREE_GROUND_POSITION = height - BOTTOM_CONTROLS_HEIGHT; // Tree base position
 
 // Top bar with resources
+// Top Bar with resources
 export const TopBar: React.FC = () => {
-    const { state, currentSpecies } = useGame();
+    const {
+        state,
+        currentSpecies,
+        getAutoEnergyRate,
+        getAutoCoinRate,
+        getEffectiveTapPower,
+        getPrestigeEnergyBonus
+    } = useGame();
+
     const currentStats = state.treeStats[state.currentTreeId];
+
+    // Calculate rates
+    const autoEnergy = getAutoEnergyRate();
+    const autoCoin = getAutoCoinRate();
+
+    // Calculate per-click energy
+    const energyBonus = 1 + getPrestigeEnergyBonus();
+    const perClick = getEffectiveTapPower() * currentSpecies.energyPerTap * energyBonus;
 
     return (
         <View style={styles.topSection}>
             <View style={styles.resourceBar}>
-                <View style={styles.resourceItem}>
-                    <EnergyIcon size={20} />
-                    <Text style={styles.resourceValue}>{Math.floor(state.energy)}</Text>
+                {/* Energy */}
+                <View style={styles.resourceItemColumn}>
+                    <View style={styles.resourceRowMain}>
+                        <EnergyIcon size={20} />
+                        <Text style={styles.resourceValue}>{Math.floor(state.energy)}</Text>
+                    </View>
+                    <View style={styles.ratesRow}>
+                        <Text style={styles.rateText}>+{Math.floor(perClick)}/tap</Text>
+                        {autoEnergy > 0 && <Text style={styles.rateText}> • +{autoEnergy.toFixed(1)}/s</Text>}
+                    </View>
                 </View>
-                <View style={styles.resourceItem}>
-                    <CoinIcon size={20} />
-                    <Text style={styles.resourceValue}>{Math.floor(state.coins)}</Text>
+
+                {/* Coins */}
+                <View style={styles.resourceItemColumn}>
+                    <View style={styles.resourceRowMain}>
+                        <CoinIcon size={20} />
+                        <Text style={styles.resourceValue}>{Math.floor(state.coins)}</Text>
+                    </View>
+                    {autoCoin > 0 && (
+                        <View style={styles.ratesRow}>
+                            <Text style={styles.rateText}>+{autoCoin.toFixed(1)}/s</Text>
+                        </View>
+                    )}
                 </View>
-                <View style={styles.resourceItem}>
-                    <GemIcon size={20} />
-                    <Text style={styles.resourceValue}>{Math.floor(state.gems)}</Text>
+
+                {/* Gems */}
+                <View style={styles.resourceItemColumn}>
+                    <View style={styles.resourceRowMain}>
+                        <GemIcon size={20} />
+                        <Text style={styles.resourceValue}>{Math.floor(state.gems)}</Text>
+                    </View>
                 </View>
             </View>
 
@@ -57,10 +94,9 @@ export const TopBar: React.FC = () => {
 
 // Bottom controls with tap button
 export const BottomControls: React.FC = () => {
-    const { state, tap, currentSpecies, getEffectiveTapPower, getAutoEnergyRate, getAutoGrowthRate } = useGame();
+    const { state, tap, getEffectiveTapPower, getAutoGrowthRate } = useGame();
     const scaleAnim = useRef(new Animated.Value(1)).current;
 
-    const autoEnergy = getAutoEnergyRate();
     const autoGrowth = getAutoGrowthRate();
     const currentStats = state.treeStats[state.currentTreeId];
 
@@ -101,16 +137,16 @@ export const BottomControls: React.FC = () => {
                     <Text style={[styles.statValue, { color: '#22c55e' }]}>TAP: {getEffectiveTapPower().toFixed(1)}</Text>
                 </View>
 
-                <>
-                    <View style={styles.statDivider} />
-                    <View style={styles.statItem}>
-                        <Text style={styles.autoValue}>
-                            {autoEnergy > 0 && `+${autoEnergy.toFixed(1)}⚡`}
-                            {autoEnergy > 0 && autoGrowth > 0 && ' '}
-                            {autoGrowth > 0 && `+${autoGrowth.toFixed(2)}↑`}
-                        </Text>
-                    </View>
-                </>
+                {autoGrowth > 0 && (
+                    <>
+                        <View style={styles.statDivider} />
+                        <View style={styles.statItem}>
+                            <Text style={styles.autoValue}>
+                                +{autoGrowth.toFixed(2)}↑/s
+                            </Text>
+                        </View>
+                    </>
+                )}
             </View>
 
             {/* Redesigned Tap Button */}
@@ -183,22 +219,31 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around',
         paddingVertical: 8,
     },
-    resourceItem: {
+    resourceItemColumn: {
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minWidth: 70,
+    },
+    resourceRowMain: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 5,
     },
-    resourceValue: {
-        color: '#fff',
-        fontSize: 15,
-        fontWeight: 'bold',
+    ratesRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 2,
     },
-    growValue: {
-        color: '#4ade80',
+    rateText: {
+        color: '#888',
+        fontSize: 10,
+        fontWeight: '600',
     },
     treeInfoRow: {
         alignItems: 'center',
         gap: 8,
+        marginTop: 10,
     },
     treeInfo: {
         flexDirection: 'row',

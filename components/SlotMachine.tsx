@@ -284,8 +284,8 @@ export const SlotMachine: React.FC<SlotMachineProps> = ({ onClose }) => {
                     </View>
                 </View>
 
-                {/* Result Display */}
-                {result && (
+                {/* Result or Paytable Display - Swapped to maintain layout stability */}
+                {result ? (
                     <View style={styles.resultContainer}>
                         {result.win > 0 ? (
                             <>
@@ -302,18 +302,17 @@ export const SlotMachine: React.FC<SlotMachineProps> = ({ onClose }) => {
                             <Text style={styles.loseText}>Try Again!</Text>
                         )}
                     </View>
+                ) : (
+                    <View style={styles.paytable}>
+                        <Text style={styles.paytableTitle}>PAYOUTS</Text>
+                        <View style={styles.paytableRow}>
+                            <Text style={styles.paytableText}>Match 3 for Big Prizes!</Text>
+                        </View>
+                        <View style={styles.paytableRow}>
+                            <Text style={styles.paytableText}>777 = 100 Gems Jackpot</Text>
+                        </View>
+                    </View>
                 )}
-
-                {/* Paytable */}
-                <View style={styles.paytable}>
-                    <Text style={styles.paytableTitle}>PAYOUTS</Text>
-                    <View style={styles.paytableRow}>
-                        <Text style={styles.paytableText}>Match 3 for Big Prizes!</Text>
-                    </View>
-                    <View style={styles.paytableRow}>
-                        <Text style={styles.paytableText}>777 = 100 Gems Jackpot</Text>
-                    </View>
-                </View>
 
                 {/* Spin Button */}
                 <TouchableOpacity
