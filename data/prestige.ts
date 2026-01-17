@@ -1,0 +1,181 @@
+// Prestige System Data
+
+export interface PrestigeUpgrade {
+    id: string;
+    name: string;
+    description: string;
+    icon: string;
+    baseCost: number;
+    costIncrease: number;
+    maxLevel: number;
+    effect: {
+        type: 'tap_bonus' | 'coin_bonus' | 'energy_bonus' | 'growth_bonus' | 'auto_energy_bonus' | 'auto_growth_bonus' | 'max_tree_size' | 'auto_coin_bonus' | 'cosmetic';
+        valuePerLevel: number;
+    };
+    cosmetic?: {
+        type: 'rgb_taps' | 'rgb_tree' | 'glow_intensity' | 'particle_effect';
+    };
+}
+
+export const PRESTIGE_UPGRADES: Record<string, PrestigeUpgrade> = {
+    // Core bonuses
+    eternal_power: {
+        id: 'eternal_power',
+        name: 'Eternal Power',
+        description: '+10% tap power per level',
+        icon: 'tap',
+        baseCost: 5,
+        costIncrease: 2,
+        maxLevel: 10,
+        effect: { type: 'tap_bonus', valuePerLevel: 0.1 },
+    },
+
+    golden_touch: {
+        id: 'golden_touch',
+        name: 'Golden Touch',
+        description: '+15% coin gain per level',
+        icon: 'coin',
+        baseCost: 8,
+        costIncrease: 3,
+        maxLevel: 10,
+        effect: { type: 'coin_bonus', valuePerLevel: 0.15 },
+    },
+
+    nature_blessing: {
+        id: 'nature_blessing',
+        name: "Nature's Blessing",
+        description: '+10% energy gain per level',
+        icon: 'energy',
+        baseCost: 6,
+        costIncrease: 2,
+        maxLevel: 10,
+        effect: { type: 'energy_bonus', valuePerLevel: 0.1 },
+    },
+
+    rapid_growth: {
+        id: 'rapid_growth',
+        name: 'Rapid Growth',
+        description: '+8% growth speed per level',
+        icon: 'grow',
+        baseCost: 7,
+        costIncrease: 2,
+        maxLevel: 10,
+        effect: { type: 'growth_bonus', valuePerLevel: 0.08 },
+    },
+
+    // Auto bonuses
+    eternal_energy: {
+        id: 'eternal_energy',
+        name: 'Eternal Energy',
+        description: '+0.15/s permanent auto energy',
+        icon: 'energy',
+        baseCost: 10,
+        costIncrease: 4,
+        maxLevel: 15,
+        effect: { type: 'auto_energy_bonus', valuePerLevel: 0.15 },
+    },
+
+    eternal_growth: {
+        id: 'eternal_growth',
+        name: 'Eternal Growth',
+        description: '+0.1/s permanent auto height',
+        icon: 'grow',
+        baseCost: 12,
+        costIncrease: 5,
+        maxLevel: 15,
+        effect: { type: 'auto_growth_bonus', valuePerLevel: 0.1 },
+    },
+
+    eternal_wealth: {
+        id: 'eternal_wealth',
+        name: 'Eternal Wealth',
+        description: '+0.25/s permanent auto coins',
+        icon: 'coin',
+        baseCost: 15,
+        costIncrease: 5,
+        maxLevel: 10,
+        effect: { type: 'auto_coin_bonus', valuePerLevel: 0.25 },
+    },
+
+    // Max tree size upgrade
+    giant_roots: {
+        id: 'giant_roots',
+        name: 'Giant Roots',
+        description: '+1 max tree depth (more branches)',
+        icon: 'tree',
+        baseCost: 20,
+        costIncrease: 10,
+        maxLevel: 5,
+        effect: { type: 'max_tree_size', valuePerLevel: 1 },
+    },
+
+    // Cosmetics
+    rgb_taps: {
+        id: 'rgb_taps',
+        name: 'Rainbow Taps',
+        description: 'RGB tap effects +5% tap bonus',
+        icon: 'rainbow',
+        baseCost: 15,
+        costIncrease: 0,
+        maxLevel: 1,
+        effect: { type: 'tap_bonus', valuePerLevel: 0.05 },
+        cosmetic: { type: 'rgb_taps' },
+    },
+
+    rgb_tree: {
+        id: 'rgb_tree',
+        name: 'Prismatic Tree',
+        description: 'RGB tree texture +10% all',
+        icon: 'sparkle',
+        baseCost: 30,
+        costIncrease: 0,
+        maxLevel: 1,
+        effect: { type: 'coin_bonus', valuePerLevel: 0.1 },
+        cosmetic: { type: 'rgb_tree' },
+    },
+
+    mega_glow: {
+        id: 'mega_glow',
+        name: 'Mega Glow',
+        description: 'Intense glow +5% energy',
+        icon: 'glow',
+        baseCost: 12,
+        costIncrease: 5,
+        maxLevel: 3,
+        effect: { type: 'energy_bonus', valuePerLevel: 0.05 },
+        cosmetic: { type: 'glow_intensity' },
+    },
+};
+
+export const calculatePrestigeCost = (upgrade: PrestigeUpgrade, currentLevel: number): number => {
+    return upgrade.baseCost + (upgrade.costIncrease * currentLevel);
+};
+
+export const PRESTIGE_MIN_ENERGY = 5000;
+
+export const calculatePrestigeShards = (totalEnergyEarned: number): number => {
+    if (totalEnergyEarned < PRESTIGE_MIN_ENERGY) return 0;
+    // New Formula: (Energy / 500) ^ 0.6
+    // More generous than sqrt (0.5) and lower divisor (500 vs 1000)
+    return Math.floor(Math.pow(totalEnergyEarned / 500, 0.6));
+};
+
+export const canPrestige = (totalEnergyEarned: number): boolean => {
+    return totalEnergyEarned >= PRESTIGE_MIN_ENERGY;
+};
+
+export const getAllPrestigeUpgrades = (): PrestigeUpgrade[] => Object.values(PRESTIGE_UPGRADES);
+
+export const calculatePrestigeBonus = (
+    prestigeLevels: Record<string, number>,
+    bonusType: 'tap_bonus' | 'coin_bonus' | 'energy_bonus' | 'growth_bonus' | 'auto_energy_bonus' | 'auto_growth_bonus' | 'max_tree_size' | 'auto_coin_bonus'
+): number => {
+    let totalBonus = 0;
+    for (const [id, level] of Object.entries(prestigeLevels)) {
+        const upgrade = PRESTIGE_UPGRADES[id];
+        if (upgrade && upgrade.effect.type === bonusType) {
+            totalBonus += upgrade.effect.valuePerLevel * level;
+        }
+    }
+    return totalBonus;
+};

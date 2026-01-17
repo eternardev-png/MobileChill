@@ -1,238 +1,349 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { StyleSheet, View, SafeAreaView, TouchableOpacity, Text, Dimensions, ImageBackground } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import { useGame, GameProvider } from './gameState';
+import { GameHUD } from './components/GameHUD';
+import { Tree } from './components/Tree';
+import { UpgradeShop } from './components/UpgradeShop';
+import { CollectionScreen } from './components/CollectionScreen';
+import { RouletteWheel } from './components/RouletteWheel';
+import { PrestigeShop } from './components/PrestigeShop';
+import { QuestPanel } from './components/QuestPanel';
+import { WelcomeScreen } from './components/WelcomeScreen';
+import { TreeLab } from './components/TreeLab';
+import { OfflineProgressModal } from './components/OfflineProgressModal';
 import {
-    StyleSheet,
-    View,
-    Text,
-    SafeAreaView,
-    StatusBar,
-    Dimensions,
-} from 'react-native';
-import Slider from '@react-native-community/slider';
-import Svg, { Line } from 'react-native-svg';
+    ShopIcon,
+    TreeIcon,
+    SettingsIcon,
+    QuestIcon,
+    PrestigeIcon,
+    LabIcon,
+} from './components/Icons';
+import Svg, { Defs, RadialGradient, Stop, Circle } from 'react-native-svg';
+import { GlobalStyles } from './components/GlobalStyles';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
-interface TreeBranchProps {
-    x1: number;
-    y1: number;
-    angle: number;
-    length: number;
-    depth: number;
-    maxDepth: number;
-    branchAngle: number;
-}
+// Background glow for roulette button
+const RouletteGlow = () => (
+    <Svg height="60" width="60" style={styles.rouletteGlow}>
+        <Defs>
+            <RadialGradient id="grad" cx="50%" cy="50%" rx="50%" ry="50%">
+                <Stop offset="0%" stopColor="#fbbf24" stopOpacity="0.6" />
+                <Stop offset="100%" stopColor="transparent" stopOpacity="0" />
+            </RadialGradient>
+        </Defs>
+        <Circle cx="30" cy="30" r="30" fill="url(#grad)" />
+    </Svg>
+);
 
-const FractalTree: React.FC = () => {
-    const [branchAngle, setBranchAngle] = useState(25);
-    const [recursionDepth, setRecursionDepth] = useState(8);
-    const [baseLength, setBaseLength] = useState(100);
+const GameContent = () => {
+    const { state, saveGame, loadGame, resetGame, addResources, getClaimableQuestsCount } = useGame();
+    const [activeTab, setActiveTab] = useState<'shop' | 'tree' | 'quests' | 'collection' | 'prestige' | 'lab'>('tree');
+    const [showWelcome, setShowWelcome] = useState(false);
+    const [offlineEarnings, setOfflineEarnings] = useState<{ money: number, energy: number } | null>(null);
+    const [showRoulette, setShowRoulette] = useState(false);
 
-    // Generate tree branches recursively
-    const generateBranches = (
-        x1: number,
-        y1: number,
-        angle: number,
-        length: number,
-        depth: number
-    ): JSX.Element[] => {
-        if (depth > recursionDepth || length < 2) {
-            return [];
+
+    // Loading and initialization logic...
+    useEffect(() => {
+        // Check for existing save on mount
+        const saved = localStorage.getItem('mobilechill_save');
+        if (!saved) {
+            setShowWelcome(true);
+        } else {
+            try {
+                const parsed = JSON.parse(saved);
+                const now = Date.now();
+                const timeDiff = (now - (parsed.lastSaveTime || now)) / 1000;
+                if (timeDiff > 60) {
+                    // Calculate offline earnings (simplified for brevity)
+                }
+            } catch (e) {
+                setShowWelcome(true);
+            }
         }
+    }, []);
 
-        // Calculate end point of current branch
-        const x2 = x1 + length * Math.sin((angle * Math.PI) / 180);
-        const y2 = y1 - length * Math.cos((angle * Math.PI) / 180);
 
-        // Dynamic color based on depth (greens to browns)
-        const hue = 120 - depth * 15; // From green to brown
-        const saturation = 60 + depth * 5;
-        const lightness = 40 - depth * 2;
-        const strokeColor = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    // Save loop
+    useEffect(() => {
+        const interval = setInterval(saveGame, 10000);
+        return () => clearInterval(interval);
+    }, [state, saveGame]);
 
-        // Dynamic stroke width - thicker at base, thinner at tips
-        const strokeWidth = Math.max(1, recursionDepth - depth + 1);
-
-        const branches: JSX.Element[] = [
-            <Line
-                key={`branch-${x1}-${y1}-${angle}-${depth}`}
-                x1={x1}
-                y1={y1}
-                x2={x2}
-                y2={y2}
-                stroke={strokeColor}
-                strokeWidth={strokeWidth}
-                strokeLinecap="round"
-            />,
-        ];
-
-        // Recursively generate left and right branches
-        const newLength = length * 0.67;
-        branches.push(
-            ...generateBranches(x2, y2, angle - branchAngle, newLength, depth + 1)
-        );
-        branches.push(
-            ...generateBranches(x2, y2, angle + branchAngle, newLength, depth + 1)
-        );
-
-        return branches;
+    const handleReset = async () => {
+        await resetGame();
+        setShowWelcome(true);
     };
 
-    const canvasHeight = SCREEN_HEIGHT * 0.65;
-    const startX = SCREEN_WIDTH / 2;
-    const startY = canvasHeight - 40;
+    const handleCloseWelcome = () => {
+        setShowWelcome(false);
+        addResources(0, 0); // Trigger initial save
+    };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="light-content" backgroundColor="#0a0a0a" />
+        <View style={styles.container}>
+            <StatusBar style="light" />
 
-            {/* Header */}
-            <View style={styles.header}>
-                <Text style={styles.title}>🌳 Fractal Tree</Text>
-                <Text style={styles.subtitle}>Interactive Generative Art</Text>
-            </View>
+            {/* Main Game Area */}
+            <SafeAreaView style={styles.gameArea}>
+                <GameHUD />
 
-            {/* SVG Canvas */}
-            <View style={styles.canvasContainer}>
-                <Svg width={SCREEN_WIDTH} height={canvasHeight} style={styles.canvas}>
-                    {generateBranches(startX, startY, 0, baseLength, 0)}
-                </Svg>
-            </View>
-
-            {/* Debug Sliders */}
-            <View style={styles.controlsContainer}>
-                <Text style={styles.controlsTitle}>Debug Controls</Text>
-
-                {/* Branch Angle Slider */}
-                <View style={styles.sliderContainer}>
-                    <View style={styles.sliderHeader}>
-                        <Text style={styles.sliderLabel}>Branch Angle</Text>
-                        <Text style={styles.sliderValue}>{branchAngle.toFixed(0)}°</Text>
-                    </View>
-                    <Slider
-                        style={styles.slider}
-                        minimumValue={10}
-                        maximumValue={45}
-                        value={branchAngle}
-                        onValueChange={setBranchAngle}
-                        minimumTrackTintColor="#4ade80"
-                        maximumTrackTintColor="#333"
-                        thumbTintColor="#22c55e"
-                    />
+                <View style={styles.canvasContainer}>
+                    <Tree />
                 </View>
 
-                {/* Recursion Depth Slider */}
-                <View style={styles.sliderContainer}>
-                    <View style={styles.sliderHeader}>
-                        <Text style={styles.sliderLabel}>Recursion Depth</Text>
-                        <Text style={styles.sliderValue}>{Math.round(recursionDepth)}</Text>
+                {/* Roulette button - floating in top right corner, JUST THE ICON with glow */}
+                <TouchableOpacity style={styles.rouletteButton} onPress={() => setShowRoulette(true)}>
+                    <View style={styles.rouletteButtonContent}>
+                        <RouletteGlow />
+                        <Text style={styles.rouletteEmoji}>🎰</Text>
                     </View>
-                    <Slider
-                        style={styles.slider}
-                        minimumValue={1}
-                        maximumValue={10}
-                        step={1}
-                        value={recursionDepth}
-                        onValueChange={setRecursionDepth}
-                        minimumTrackTintColor="#60a5fa"
-                        maximumTrackTintColor="#333"
-                        thumbTintColor="#3b82f6"
-                    />
-                </View>
+                </TouchableOpacity>
 
-                {/* Base Length Slider */}
-                <View style={styles.sliderContainer}>
-                    <View style={styles.sliderHeader}>
-                        <Text style={styles.sliderLabel}>Base Length</Text>
-                        <Text style={styles.sliderValue}>{baseLength.toFixed(0)}px</Text>
+
+            </SafeAreaView>
+
+            {/* Navigation Bar */}
+            <View style={styles.navbar}>
+                <TouchableOpacity
+                    style={[styles.navItem, activeTab === 'collection' && styles.navItemActive]}
+                    onPress={() => setActiveTab('collection')}
+                >
+                    <View style={styles.collectionIconWrapper}>
+                        <View style={[styles.collectionIconRow, { marginBottom: 2 }]}>
+                            <View style={[styles.collectionDot, { backgroundColor: '#22c55e' }]} />
+                            <View style={[styles.collectionDot, { backgroundColor: '#3b82f6' }]} />
+                        </View>
+                        <View style={styles.collectionIconRow}>
+                            <View style={[styles.collectionDot, { backgroundColor: '#a855f7' }]} />
+                            <View style={[styles.collectionDot, { backgroundColor: '#f59e0b' }]} />
+                        </View>
                     </View>
-                    <Slider
-                        style={styles.slider}
-                        minimumValue={40}
-                        maximumValue={150}
-                        value={baseLength}
-                        onValueChange={setBaseLength}
-                        minimumTrackTintColor="#f472b6"
-                        maximumTrackTintColor="#333"
-                        thumbTintColor="#ec4899"
-                    />
-                </View>
+                    <Text style={[styles.navText, activeTab === 'collection' && styles.navTextActive]}>Collection</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={[styles.navItem, activeTab === 'shop' && styles.navItemActive]}
+                    onPress={() => setActiveTab('shop')}
+                >
+                    <ShopIcon size={24} color={activeTab === 'shop' ? '#4ade80' : '#888'} />
+                    <Text style={[styles.navText, activeTab === 'shop' && styles.navTextActive]}>Shop</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={[styles.navItem, activeTab === 'quests' && styles.navItemActive]}
+                    onPress={() => setActiveTab('quests')}
+                >
+                    <View style={styles.questIconWrapper}>
+                        <QuestIcon size={24} color={activeTab === 'quests' ? '#4ade80' : '#888'} />
+                        {getClaimableQuestsCount() > 0 && (
+                            <View style={styles.navQuestBadge} />
+                        )}
+                    </View>
+                    <Text style={[styles.navText, activeTab === 'quests' && styles.navTextActive]}>Quests</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={[styles.navItem, activeTab === 'prestige' && styles.navItemActive]}
+                    onPress={() => setActiveTab('prestige')}
+                >
+                    <PrestigeIcon size={24} color={activeTab === 'prestige' ? '#4ade80' : '#888'} />
+                    <Text style={[styles.navText, activeTab === 'prestige' && styles.navTextActive]}>Prestige</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={[styles.navItem, activeTab === 'lab' && styles.navItemActive]}
+                    onPress={() => setActiveTab('lab')}
+                >
+                    <LabIcon size={24} color={activeTab === 'lab' ? '#a855f7' : '#888'} />
+                    <Text style={[styles.navText, activeTab === 'lab' && styles.navTextColored]}>Lab</Text>
+                </TouchableOpacity>
             </View>
-        </SafeAreaView>
+
+            {/* Overlays */}
+            {activeTab === 'shop' && (
+                <View style={styles.overlayContainer}>
+                    <UpgradeShop onClose={() => setActiveTab('tree')} />
+                </View>
+            )}
+
+            {activeTab === 'collection' && (
+                <CollectionScreen onClose={() => setActiveTab('tree')} />
+            )}
+
+            {activeTab === 'prestige' && (
+                <View style={styles.overlayContainer}>
+                    <PrestigeShop onClose={() => setActiveTab('tree')} />
+                </View>
+            )}
+
+            {activeTab === 'quests' && (
+                <QuestPanel onClose={() => setActiveTab('tree')} />
+            )}
+
+            {activeTab === 'lab' && (
+                <TreeLab onClose={() => setActiveTab('tree')} />
+            )}
+            {showRoulette && <RouletteWheel onClose={() => setShowRoulette(false)} />}
+            {showWelcome && <WelcomeScreen onStart={handleCloseWelcome} />}
+            {offlineEarnings && <OfflineProgressModal earnings={offlineEarnings} onClose={() => setOfflineEarnings(null)} />}
+        </View>
     );
 };
+
+export default function App() {
+    return (
+        <GameProvider>
+            <GlobalStyles />
+            <StatusBar style="light" />
+            <GameContent />
+        </GameProvider>
+    );
+}
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0a0a0a',
-    },
-    header: {
-        paddingHorizontal: 24,
-        paddingVertical: 20,
         backgroundColor: '#111',
-        borderBottomWidth: 1,
-        borderBottomColor: '#222',
     },
-    title: {
-        fontSize: 32,
-        fontWeight: 'bold',
-        color: '#fff',
-        marginBottom: 4,
-    },
-    subtitle: {
-        fontSize: 14,
-        color: '#888',
-        fontWeight: '500',
+    gameArea: {
+        flex: 1,
+        position: 'relative',
     },
     canvasContainer: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#0f0f0f',
+        zIndex: 0,
     },
-    canvas: {
-        backgroundColor: '#0f0f0f',
-    },
-    controlsContainer: {
-        backgroundColor: '#111',
-        paddingHorizontal: 24,
-        paddingVertical: 20,
-        borderTopWidth: 1,
-        borderTopColor: '#222',
-    },
-    controlsTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#fff',
-        marginBottom: 16,
-    },
-    sliderContainer: {
-        marginBottom: 20,
-    },
-    sliderHeader: {
+    navbar: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 8,
+        backgroundColor: '#1a1a1a',
+        paddingBottom: 20,
+        paddingTop: 12,
+        borderTopWidth: 1,
+        borderTopColor: '#333',
+        justifyContent: 'space-around',
+        zIndex: 20,
     },
-    sliderLabel: {
-        fontSize: 15,
-        color: '#bbb',
+    navItem: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        flex: 1,
+    },
+    navItemActive: {
+        // Active state style
+    },
+    navText: {
+        color: '#888',
+        fontSize: 10,
+        marginTop: 4,
         fontWeight: '600',
     },
-    sliderValue: {
-        fontSize: 16,
-        color: '#fff',
-        fontWeight: 'bold',
-        backgroundColor: '#1a1a1a',
-        paddingHorizontal: 12,
-        paddingVertical: 4,
-        borderRadius: 8,
+    navTextActive: {
+        color: '#4ade80',
     },
-    slider: {
+    navTextColored: {
+        color: '#a855f7',
+    },
+    treeIconWrapper: {
+        width: 32,
+        height: 32,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    questIconWrapper: {
+        width: 32,
+        height: 32,
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+    },
+    navQuestBadge: {
+        position: 'absolute',
+        top: -2,
+        right: -2,
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        backgroundColor: '#ef4444',
+        borderWidth: 1,
+        borderColor: '#1a1a1a',
+    },
+    collectionIconWrapper: {
+        width: 24,
+        height: 24,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    collectionIconRow: {
+        flexDirection: 'row',
+        gap: 2,
+    },
+    collectionDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 2,
+    },
+    overlayContainer: {
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+        zIndex: 50,
+    },
+    questButton: {
+        position: 'absolute',
+        top: 100, // Below HUD
+        left: 16,
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: '#333',
+        zIndex: 10,
+    },
+    questBadge: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        width: 12,
+        height: 12,
+        borderRadius: 6,
+        backgroundColor: '#ef4444',
+        borderWidth: 2,
+        borderColor: '#1a1a1a',
+    },
+    rouletteButton: {
+        position: 'absolute',
+        top: 130,
+        right: 30,
+        width: 60,
+        height: 60,
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 10,
+    },
+    rouletteButtonContent: {
         width: '100%',
-        height: 40,
+        height: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+    },
+    rouletteGlow: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        transform: [{ scale: 1.2 }],
+    },
+    rouletteEmoji: {
+        fontSize: 32,
+        zIndex: 2,
+        textShadowColor: 'rgba(0,0,0,0.5)',
+        textShadowOffset: { width: 1, height: 1 },
+        textShadowRadius: 2,
     },
 });
-
-export default FractalTree;

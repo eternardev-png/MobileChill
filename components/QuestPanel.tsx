@@ -1,0 +1,335 @@
+import React from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { useGame } from '../gameState';
+import { QUESTS, Quest, getAllQuests } from '../data/quests';
+import { getTreeSpecies } from '../data/treeSpecies';
+
+interface QuestPanelProps {
+    onClose: () => void;
+}
+
+export const QuestPanel: React.FC<QuestPanelProps> = ({ onClose }) => {
+    const { state, claimQuestReward, getAvailableQuestsList } = useGame();
+    const availableQuests = getAvailableQuestsList();
+
+    const getProgress = (quest: Quest): { current: number; target: number; completed: boolean } => {
+        const target = quest.objective.target;
+        let current = 0;
+
+        switch (quest.objective.type) {
+            case 'tap_count':
+                current = state.totalTaps;
+                break;
+            case 'tree_height':
+                const hStats = state.treeStats[quest.objective.treeId || state.currentTreeId];
+                current = hStats?.height || 0;
+                break;
+            case 'total_energy':
+                current = state.totalEnergyEarned;
+                break;
+            case 'unlock_species':
+                current = state.unlockedTrees.length;
+                break;
+            case 'tree_level':
+                current = Math.max(...Object.values(state.treeStats).map(s => s.level), 0);
+                break;
+            case 'specific_tree_level':
+                const tStats = state.treeStats[quest.objective.treeId || 'oak'];
+                current = tStats?.level || 0;
+                break;
+            case 'roulette_spins':
+                current = state.totalSpins || 0;
+                break;
+            case 'upgrades_purchased':
+                current = state.totalUpgradesPurchased || 0;
+                break;
+            case 'lab_trees_created':
+                current = state.totalLabTreesCreated || 0;
+                break;
+        }
+
+        return {
+            current: Math.min(current, target),
+            target,
+            completed: current >= target
+        };
+    };
+
+    // Sort quests: claimable first, then in progress
+    const sortedQuests = [...availableQuests].sort((a, b) => {
+        const aProgress = getProgress(a);
+        const bProgress = getProgress(b);
+        if (aProgress.completed && !bProgress.completed) return -1;
+        if (!aProgress.completed && bProgress.completed) return 1;
+        return 0;
+    });
+
+    const handleClaim = (questId: string) => {
+        claimQuestReward(questId);
+    };
+
+    // Get tree-specific icon color
+    const getTreeColor = (quest: Quest): string => {
+        if (quest.objective.treeId) {
+            const species = getTreeSpecies(quest.objective.treeId);
+            return `hsl(${species.baseColor.hue}, ${species.baseColor.saturation}%, ${species.baseColor.lightness}%)`;
+        }
+        return '#888';
+    };
+
+    return (
+        <View style={styles.overlay}>
+            <View style={styles.modal}>
+                <View style={styles.header}>
+                    <Text style={styles.title}>📜 Quests</Text>
+                    <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+                        <Text style={styles.closeBtnText}>✕</Text>
+                    </TouchableOpacity>
+                </View>
+
+                <Text style={styles.subtitle}>
+                    Completed: {state.completedQuests.length}/{Object.keys(QUESTS).length}
+                </Text>
+
+                <ScrollView style={styles.list}>
+                    {sortedQuests.length === 0 ? (
+                        <View style={styles.emptyState}>
+                            <Text style={styles.emptyEmoji}>🎉</Text>
+                            <Text style={styles.emptyText}>All quests completed!</Text>
+                        </View>
+                    ) : (
+                        sortedQuests.map(quest => {
+                            const { current, target, completed } = getProgress(quest);
+                            const progressPercent = (current / target) * 100;
+                            const treeColor = getTreeColor(quest);
+
+                            return (
+                                <View
+                                    key={quest.id}
+                                    style={[
+                                        styles.questCard,
+                                        completed && styles.questCardClaimable
+                                    ]}
+                                >
+                                    <View style={styles.questHeader}>
+                                        <Text style={styles.questIcon}>{quest.icon}</Text>
+                                        <View style={styles.questInfo}>
+                                            <Text style={styles.questName}>{quest.name}</Text>
+                                            <Text style={styles.questDesc}>{quest.description}</Text>
+                                        </View>
+                                        {completed && (
+                                            <View style={styles.readyBadge}>
+                                                <Text style={styles.readyText}>READY!</Text>
+                                            </View>
+                                        )}
+                                    </View>
+
+                                    {/* Progress bar */}
+                                    <View style={styles.progressContainer}>
+                                        <View style={styles.progressBar}>
+                                            <View
+                                                style={[
+                                                    styles.progressFill,
+                                                    { width: `${progressPercent}%` },
+                                                    completed && styles.progressComplete
+                                                ]}
+                                            />
+                                        </View>
+                                        <Text style={styles.progressText}>
+                                            {Math.floor(current)}/{target}
+                                        </Text>
+                                    </View>
+
+                                    {/* Rewards */}
+                                    <View style={styles.rewardsRow}>
+                                        <Text style={styles.rewardsLabel}>Rewards:</Text>
+                                        {quest.rewards.coins && (
+                                            <Text style={styles.rewardItem}>🪙 {quest.rewards.coins}</Text>
+                                        )}
+                                        {quest.rewards.seeds && (
+                                            <Text style={styles.rewardItem}>🌱 {quest.rewards.seeds}</Text>
+                                        )}
+                                    </View>
+
+                                    {/* Claim button */}
+                                    <TouchableOpacity
+                                        style={[
+                                            styles.claimButton,
+                                            !completed && styles.claimButtonDisabled,
+                                        ]}
+                                        onPress={() => handleClaim(quest.id)}
+                                        disabled={!completed}
+                                    >
+                                        <Text style={styles.claimButtonText}>
+                                            {completed ? '✓ Claim Reward' : 'In Progress'}
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                            );
+                        })
+                    )}
+                </ScrollView>
+            </View>
+        </View>
+    );
+};
+
+const styles = StyleSheet.create({
+    overlay: {
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.9)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 100,
+    },
+    modal: {
+        width: '90%',
+        maxWidth: 450,
+        maxHeight: '85%',
+        backgroundColor: '#1a1a1a',
+        borderRadius: 20,
+        padding: 20,
+    },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#fff',
+    },
+    closeBtn: {
+        width: 36, height: 36,
+        borderRadius: 18,
+        backgroundColor: '#333',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    closeBtnText: {
+        color: '#fff',
+        fontSize: 18,
+    },
+    subtitle: {
+        color: '#888',
+        marginBottom: 15,
+    },
+    list: {
+        flex: 1,
+    },
+    emptyState: {
+        alignItems: 'center',
+        padding: 40,
+    },
+    emptyEmoji: {
+        fontSize: 48,
+    },
+    emptyText: {
+        color: '#888',
+        marginTop: 12,
+        fontSize: 16,
+    },
+    questCard: {
+        backgroundColor: '#252525',
+        borderRadius: 16,
+        padding: 16,
+        marginBottom: 12,
+        borderWidth: 2,
+        borderColor: 'transparent',
+    },
+    questCardClaimable: {
+        borderColor: '#22c55e',
+        backgroundColor: '#1a2f1a',
+    },
+    questHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        marginBottom: 12,
+    },
+    questIcon: {
+        fontSize: 32,
+    },
+    questInfo: {
+        flex: 1,
+    },
+    questName: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#fff',
+    },
+    questDesc: {
+        fontSize: 12,
+        color: '#888',
+        marginTop: 2,
+    },
+    readyBadge: {
+        backgroundColor: '#22c55e',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 8,
+    },
+    readyText: {
+        color: '#fff',
+        fontSize: 10,
+        fontWeight: 'bold',
+    },
+    progressContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+        marginBottom: 12,
+    },
+    progressBar: {
+        flex: 1,
+        height: 8,
+        backgroundColor: '#333',
+        borderRadius: 4,
+        overflow: 'hidden',
+    },
+    progressFill: {
+        height: '100%',
+        backgroundColor: '#3b82f6',
+        borderRadius: 4,
+    },
+    progressComplete: {
+        backgroundColor: '#22c55e',
+    },
+    progressText: {
+        color: '#aaa',
+        fontSize: 12,
+        minWidth: 60,
+        textAlign: 'right',
+    },
+    rewardsRow: {
+        flexDirection: 'row',
+        gap: 10,
+        marginBottom: 12,
+    },
+    rewardsLabel: {
+        color: '#888',
+        fontSize: 12,
+    },
+    rewardItem: {
+        color: '#fbbf24',
+        fontSize: 12,
+        fontWeight: 'bold',
+    },
+    claimButton: {
+        backgroundColor: '#22c55e',
+        paddingVertical: 12,
+        borderRadius: 12,
+        alignItems: 'center',
+    },
+    claimButtonDisabled: {
+        backgroundColor: '#4b5563',
+    },
+    claimButtonText: {
+        color: '#fff',
+        fontSize: 14,
+        fontWeight: 'bold',
+    },
+});

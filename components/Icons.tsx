@@ -1,0 +1,366 @@
+// SVG Icons for consistent game style
+import React from 'react';
+import Svg, { Circle, Ellipse, Line, Path, Polygon, Rect, G, Defs, LinearGradient, RadialGradient, Stop } from 'react-native-svg';
+
+interface IconProps {
+    size?: number;
+    color?: string;
+}
+
+// Coin icon - Enhanced with 3D metallic effect
+export const CoinIcon: React.FC<IconProps> = ({ size = 20, color = '#fbbf24' }) => (
+    <Svg width={size} height={size} viewBox="0 0 20 20">
+        <defs>
+            <radialGradient id="coinGrad" cx="40%" cy="30%">
+                <stop offset="0%" stopColor="#fde68a" stopOpacity="1" />
+                <stop offset="50%" stopColor={color} stopOpacity="1" />
+                <stop offset="100%" stopColor="#d97706" stopOpacity="1" />
+            </radialGradient>
+        </defs>
+        {/* Outer ring */}
+        <Circle cx="10" cy="10" r="9" fill="url(#coinGrad)" stroke="#b45309" strokeWidth="0.8" />
+        {/* Inner details for 3D look */}
+        <Ellipse cx="10" cy="10" rx="6" ry="9" fill="none" stroke="#d97706" strokeWidth="1.2" />
+        <Ellipse cx="10" cy="10" rx="4" ry="7" fill="none" stroke="#f59e0b" strokeWidth="0.6" opacity={0.5} />
+        {/* Shine highlight */}
+        <Circle cx="8" cy="7" r="2.5" fill="#fff" opacity={0.4} />
+        <Circle cx="7" cy="6" r="1" fill="#fff" opacity={0.7} />
+    </Svg>
+);
+
+// Energy/Lightning icon - Enhanced with glow
+export const EnergyIcon: React.FC<IconProps> = ({ size = 20, color = '#facc15' }) => (
+    <Svg width={size} height={size} viewBox="0 0 20 20">
+        <defs>
+            <radialGradient id="energyGlow" cx="50%" cy="50%">
+                <stop offset="0%" stopColor="#fef08a" stopOpacity="0.8" />
+                <stop offset="100%" stopColor={color} stopOpacity="0" />
+            </radialGradient>
+            <linearGradient id="lightningGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#fef08a" />
+                <stop offset="50%" stopColor={color} />
+                <stop offset="100%" stopColor="#eab308" />
+            </linearGradient>
+        </defs>
+        {/* Glow effect */}
+        <Circle cx="10" cy="10" r="9" fill="url(#energyGlow)" opacity={0.6} />
+        {/* Lightning bolt */}
+        <Path d="M11 2 L6 11 L9 11 L7 18 L14 9 L11 9 L11 2"
+            fill="url(#lightningGrad)"
+            stroke="#eab308"
+            strokeWidth="0.5" />
+        {/* Inner highlight */}
+        <Path d="M10.5 3 L7 10 L9 10 L8 15 L12 10 L10.5 10 L10.5 3"
+            fill="#fff"
+            opacity={0.3} />
+    </Svg>
+);
+
+// Seed icon - Tilted Green Leaf (Natural Style)
+export const SeedIcon: React.FC<IconProps> = ({ size = 20, color = '#15803d' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        {/* Tilted leaf shape */}
+        <G transform="rotate(45, 12, 12)">
+            <Path
+                d="M12 21 C12 21 5 15 5 9 C5 5 8 2 12 2 C16 2 19 5 19 9 C19 15 12 21 12 21 Z"
+                fill="#16a34a"
+            />
+            <Path d="M12 21 C12 21 12 13 16 6" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" opacity={0.6} fill="none" />
+        </G>
+    </Svg>
+);
+
+// Growth Rate Icon - Distinct from Seeds (Upward Chart/Arrow with Sprout)
+export const GrowthRateIcon: React.FC<IconProps> = ({ size = 20, color = '#4ade80' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        {/* Graph/Chart upward */}
+        <Path d="M3 20 L21 20" stroke={color} strokeWidth="2" strokeLinecap="round" />
+        <Path d="M5 16 L9 11 L13 14 L20 6" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+        {/* Arrow head */}
+        <Path d="M16 6 L20 6 L20 10" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+        {/* Nature element - Sprout leaves at top */}
+        <Path d="M20 6 L22 4" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+        <Circle cx="22" cy="4" r="1.5" fill={color} />
+    </Svg>
+);
+
+// Diamond/Shard icon for prestige - Enhanced with gradient
+export const DiamondIcon: React.FC<IconProps> = ({ size = 20, color = '#a855f7' }) => (
+    <Svg width={size} height={size} viewBox="0 0 20 20">
+        <Defs>
+            <LinearGradient id="diamondGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <Stop offset="0%" stopColor="#e879f9" stopOpacity="1" />
+                <Stop offset="50%" stopColor={color} stopOpacity="1" />
+                <Stop offset="100%" stopColor="#7e22ce" stopOpacity="1" />
+            </LinearGradient>
+            <LinearGradient id="diamondShine" x1="0%" y1="0%" x2="100%" y2="0%">
+                <Stop offset="0%" stopColor="#fff" stopOpacity="0" />
+                <Stop offset="50%" stopColor="#fff" stopOpacity="0.9" />
+                <Stop offset="100%" stopColor="#fff" stopOpacity="0" />
+            </LinearGradient>
+        </Defs>
+        <Polygon points="10,2 18,8 10,18 2,8" fill="url(#diamondGrad)" />
+        <Polygon points="10,2 14,8 10,12 6,8" fill="url(#diamondShine)" opacity={0.4} />
+        <Polygon points="10,2 6,8 2,8" fill="#9333ea" opacity={0.3} />
+        <Polygon points="10,2 14,8 18,8" fill="#c084fc" opacity={0.2} />
+        <Line x1="10" y1="2" x2="10" y2="18" stroke="#7e22ce" strokeWidth="0.8" opacity={0.6} />
+        <Polygon points="10,2 12,6 10,8 8,6" fill="#fff" opacity={0.6} />
+    </Svg>
+);
+
+// Prestige Icon (alias for Diamond or specific)
+export const PrestigeIcon = DiamondIcon;
+
+
+// Shop/Cart icon
+export const ShopIcon: React.FC<IconProps> = ({ size = 20, color = '#fff' }) => (
+    <Svg width={size} height={size} viewBox="0 0 20 20">
+        <Path d="M3 4 L5 4 L7 14 L16 14 L18 6 L6 6" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <Circle cx="8" cy="17" r="1.5" fill={color} />
+        <Circle cx="14" cy="17" r="1.5" fill={color} />
+    </Svg>
+);
+
+// Scroll/Quest icon
+export const QuestIcon: React.FC<IconProps> = ({ size = 20, color = '#fbbf24' }) => (
+    <Svg width={size} height={size} viewBox="0 0 20 20">
+        <Rect x="5" y="2" width="10" height="16" rx="2" fill="#292524" stroke={color} strokeWidth="1.5" />
+        <Line x1="7" y1="6" x2="13" y2="6" stroke={color} strokeWidth="1" />
+        <Line x1="7" y1="9" x2="13" y2="9" stroke={color} strokeWidth="1" />
+        <Line x1="7" y1="12" x2="11" y2="12" stroke={color} strokeWidth="1" />
+    </Svg>
+);
+
+// Roulette/Wheel icon
+export const RouletteIcon: React.FC<IconProps> = ({ size = 20, color = '#f472b6' }) => (
+    <Svg width={size} height={size} viewBox="0 0 20 20">
+        <Circle cx="10" cy="10" r="8" fill="none" stroke={color} strokeWidth="2" />
+        <Circle cx="10" cy="10" r="3" fill={color} />
+        <Line x1="10" y1="2" x2="10" y2="5" stroke={color} strokeWidth="1.5" />
+        <Line x1="10" y1="15" x2="10" y2="18" stroke={color} strokeWidth="1.5" />
+        <Line x1="2" y1="10" x2="5" y2="10" stroke={color} strokeWidth="1.5" />
+        <Line x1="15" y1="10" x2="18" y2="10" stroke={color} strokeWidth="1.5" />
+    </Svg>
+);
+
+// Lab/Flask Icon
+export const LabIcon: React.FC<IconProps> = ({ size = 20, color = '#a855f7' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        <Path d="M10 2 L14 2 L14 6 L10 6 Z" fill={color} opacity={0.5} />
+        <Path d="M9 14 L15 14" stroke="#fff" strokeWidth="1" opacity={0.5} />
+        <Path d="M7 16 C7 16 10 21 17 21 C17 21 21 16 18 10 L14 6 L10 6 L6 10 C6 10 2 15 7 16 Z"
+            fill={color} fillOpacity={0.2} stroke={color} strokeWidth="1.5" strokeLinejoin="round" />
+        <Circle cx="10" cy="18" r="1.5" fill="#fff" opacity={0.5} />
+        <Circle cx="15" cy="15" r="1" fill="#fff" opacity={0.4} />
+    </Svg>
+);
+
+// Tree icon (for collection)
+export const TreeNavIcon: React.FC<IconProps> = ({ size = 20, color = '#22c55e' }) => (
+    <Svg width={size} height={size} viewBox="0 0 20 20">
+        <Line x1="10" y1="18" x2="10" y2="7" stroke="#854d0e" strokeWidth="3" strokeLinecap="round" />
+        <Circle cx="10" cy="6" r="5" fill={color} />
+        <Circle cx="6" cy="9" r="3" fill={color} />
+        <Circle cx="14" cy="9" r="3" fill={color} />
+    </Svg>
+);
+
+// Alias TreeNavIcon as TreeIcon since App.tsx expects TreeIcon
+export const TreeIcon = TreeNavIcon;
+
+// Settings Icon
+export const SettingsIcon: React.FC<IconProps> = ({ size = 20, color = '#888' }) => (
+    <Svg width={size} height={size} viewBox="0 0 20 20">
+        <Circle cx="10" cy="10" r="5" fill="none" stroke={color} strokeWidth="2" />
+        <Line x1="10" y1="2" x2="10" y2="18" stroke={color} strokeWidth="2" strokeDasharray="2,4" />
+        <Line x1="2" y1="10" x2="18" y2="10" stroke={color} strokeWidth="2" strokeDasharray="2,4" />
+    </Svg>
+);
+
+// Height/Ruler icon
+export const HeightIcon: React.FC<IconProps> = ({ size = 16, color = '#888' }) => (
+    <Svg width={size} height={size} viewBox="0 0 16 16">
+        <Line x1="8" y1="2" x2="8" y2="14" stroke={color} strokeWidth="2" strokeLinecap="round" />
+        <Line x1="5" y1="2" x2="11" y2="2" stroke={color} strokeWidth="1.5" />
+        <Line x1="5" y1="14" x2="11" y2="14" stroke={color} strokeWidth="1.5" />
+    </Svg>
+);
+
+// Tap/Hand icon
+export const TapIcon: React.FC<IconProps> = ({ size = 16, color = '#888' }) => (
+    <Svg width={size} height={size} viewBox="0 0 16 16">
+        <Circle cx="8" cy="4" r="2.5" fill="none" stroke={color} strokeWidth="1.5" />
+        <Path d="M8 6.5 L8 14" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+        <Path d="M5 10 L8 13 L11 10" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    </Svg>
+);
+
+// Auto/Loop icon
+export const AutoIcon: React.FC<IconProps> = ({ size = 16, color = '#4ade80' }) => (
+    <Svg width={size} height={size} viewBox="0 0 16 16">
+        <Path d="M12 4 A5 5 0 1 1 8 3" fill="none" stroke={color} strokeWidth="1.5" />
+        <Polygon points="12,1 14,4 12,4" fill={color} />
+    </Svg>
+);
+
+// Star icon
+export const StarIcon: React.FC<IconProps> = ({ size = 16, color = '#fbbf24' }) => (
+    <Svg width={size} height={size} viewBox="0 0 16 16">
+        <Polygon points="8,1 10,6 15,6 11,9 13,15 8,11 3,15 5,9 1,6 6,6" fill={color} />
+    </Svg>
+);
+
+// ============ PRESTIGE UPGRADE ICONS (Purple Theme) ============
+
+// Prestige Tap Power Icon
+export const PrestigeTapIcon: React.FC<IconProps> = ({ size = 28, color = '#a855f7' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        <Defs>
+            <LinearGradient id="tapGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <Stop offset="0%" stopColor="#e879f9" />
+                <Stop offset="100%" stopColor={color} />
+            </LinearGradient>
+        </Defs>
+        {/* Hand/Finger pointing */}
+        <Circle cx="12" cy="8" r="4" fill="url(#tapGrad)" />
+        <Path d="M12 12 L12 20" stroke="url(#tapGrad)" strokeWidth="3" strokeLinecap="round" />
+        <Path d="M8 16 L12 20 L16 16" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        {/* Ripple effect */}
+        <Circle cx="12" cy="20" r="5" fill="none" stroke="#c084fc" strokeWidth="1" opacity={0.4} />
+    </Svg>
+);
+
+// Prestige Coin Icon
+export const PrestigeCoinIcon: React.FC<IconProps> = ({ size = 28, color = '#a855f7' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        <Defs>
+            <RadialGradient id="prestigeCoinGrad" cx="40%" cy="30%">
+                <Stop offset="0%" stopColor="#e879f9" />
+                <Stop offset="70%" stopColor={color} />
+                <Stop offset="100%" stopColor="#7e22ce" />
+            </RadialGradient>
+        </Defs>
+        <Circle cx="12" cy="12" r="10" fill="url(#prestigeCoinGrad)" stroke="#9333ea" strokeWidth="1" />
+        <Ellipse cx="12" cy="12" rx="7" ry="10" fill="none" stroke="#c084fc" strokeWidth="1.5" />
+        <Circle cx="10" cy="9" r="3" fill="#fff" opacity={0.3} />
+    </Svg>
+);
+
+// Prestige Energy Icon
+export const PrestigeEnergyIcon: React.FC<IconProps> = ({ size = 28, color = '#a855f7' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        <Defs>
+            <LinearGradient id="prestigeEnergyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <Stop offset="0%" stopColor="#e879f9" />
+                <Stop offset="100%" stopColor="#7e22ce" />
+            </LinearGradient>
+            <RadialGradient id="energyGlowPurple" cx="50%" cy="50%">
+                <Stop offset="0%" stopColor="#e879f9" stopOpacity="0.6" />
+                <Stop offset="100%" stopColor={color} stopOpacity="0" />
+            </RadialGradient>
+        </Defs>
+        <Circle cx="12" cy="12" r="11" fill="url(#energyGlowPurple)" />
+        <Path d="M13 3 L8 13 L11 13 L9 21 L16 11 L13 11 L13 3" fill="url(#prestigeEnergyGrad)" stroke="#9333ea" strokeWidth="0.5" />
+        <Path d="M12.5 5 L9 12 L11 12 L10 18 L14 12 L12.5 12 L12.5 5" fill="#fff" opacity={0.25} />
+    </Svg>
+);
+
+// Prestige Growth Icon
+export const PrestigeGrowthIcon: React.FC<IconProps> = ({ size = 28, color = '#a855f7' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        <Defs>
+            <LinearGradient id="growthGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <Stop offset="0%" stopColor="#e879f9" />
+                <Stop offset="100%" stopColor="#7e22ce" />
+            </LinearGradient>
+        </Defs>
+        {/* Stem */}
+        <Path d="M12 20 L12 10" stroke="url(#growthGrad)" strokeWidth="2.5" strokeLinecap="round" />
+        {/* Leaves */}
+        <Ellipse cx="9" cy="10" rx="4" ry="6" fill={color} transform="rotate(-25 9 10)" opacity={0.8} />
+        <Ellipse cx="15" cy="10" rx="4" ry="6" fill="#c084fc" transform="rotate(25 15 10)" opacity={0.8} />
+        {/* Sprout at top */}
+        <Circle cx="12" cy="8" r="3" fill="#e879f9" />
+        <Path d="M12 5 Q10 3 12 1" fill="none" stroke="#e879f9" strokeWidth="2" strokeLinecap="round" />
+    </Svg>
+);
+
+// Prestige Tree Icon
+export const PrestigeTreeIcon: React.FC<IconProps> = ({ size = 28, color = '#a855f7' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        <Defs>
+            <RadialGradient id="treeLeafGrad" cx="50%" cy="30%">
+                <Stop offset="0%" stopColor="#e879f9" />
+                <Stop offset="100%" stopColor={color} />
+            </RadialGradient>
+        </Defs>
+        {/* Trunk */}
+        <Path d="M12 22 L12 12" stroke="#7e22ce" strokeWidth="3" strokeLinecap="round" />
+        {/* Canopy */}
+        <Circle cx="12" cy="10" r="6" fill="url(#treeLeafGrad)" />
+        <Circle cx="8" cy="13" r="4" fill={color} opacity={0.8} />
+        <Circle cx="16" cy="13" r="4" fill="#c084fc" opacity={0.8} />
+        {/* Highlight */}
+        <Circle cx="11" cy="8" r="2" fill="#fff" opacity={0.4} />
+    </Svg>
+);
+
+// Prestige Rainbow/RGB Icon
+export const PrestigeRainbowIcon: React.FC<IconProps> = ({ size = 28 }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        <Defs>
+            <LinearGradient id="rainbowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <Stop offset="0%" stopColor="#e879f9" />
+                <Stop offset="33%" stopColor="#a855f7" />
+                <Stop offset="66%" stopColor="#7e22ce" />
+                <Stop offset="100%" stopColor="#c084fc" />
+            </LinearGradient>
+        </Defs>
+        {/* Rainbow arcs */}
+        <Path d="M4 18 Q12 4 20 18" fill="none" stroke="url(#rainbowGrad)" strokeWidth="3" strokeLinecap="round" />
+        <Path d="M6 18 Q12 8 18 18" fill="none" stroke="#c084fc" strokeWidth="2.5" strokeLinecap="round" opacity={0.7} />
+        <Path d="M8 18 Q12 12 16 18" fill="none" stroke="#e879f9" strokeWidth="2" strokeLinecap="round" opacity={0.5} />
+    </Svg>
+);
+
+// Prestige Sparkle Icon
+export const PrestigeSparkleIcon: React.FC<IconProps> = ({ size = 28, color = '#a855f7' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        <Defs>
+            <RadialGradient id="sparkleGrad" cx="50%" cy="50%">
+                <Stop offset="0%" stopColor="#fff" />
+                <Stop offset="50%" stopColor="#e879f9" />
+                <Stop offset="100%" stopColor={color} />
+            </RadialGradient>
+        </Defs>
+        {/* Main star */}
+        <Polygon points="12,2 14,10 22,12 14,14 12,22 10,14 2,12 10,10" fill="url(#sparkleGrad)" />
+        {/* Small sparkles */}
+        <Polygon points="6,6 7,8 9,9 7,10 6,12 5,10 3,9 5,8" fill="#e879f9" opacity={0.6} />
+        <Polygon points="18,6 19,8 21,9 19,10 18,12 17,10 15,9 17,8" fill="#c084fc" opacity={0.6} />
+    </Svg>
+);
+
+// Prestige Glow Icon
+export const PrestigeGlowIcon: React.FC<IconProps> = ({ size = 28, color = '#a855f7' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        <Defs>
+            <RadialGradient id="glowMainGrad" cx="50%" cy="50%">
+                <Stop offset="0%" stopColor="#e879f9" stopOpacity="1" />
+                <Stop offset="70%" stopColor={color} stopOpacity="0.6" />
+                <Stop offset="100%" stopColor={color} stopOpacity="0" />
+            </RadialGradient>
+        </Defs>
+        {/* Outer glow rings */}
+        <Circle cx="12" cy="12" r="11" fill="url(#glowMainGrad)" opacity={0.3} />
+        <Circle cx="12" cy="12" r="8" fill="url(#glowMainGrad)" opacity={0.5} />
+        <Circle cx="12" cy="12" r="5" fill={color} />
+        {/* Radial lines */}
+        <Line x1="12" y1="2" x2="12" y2="6" stroke="#e879f9" strokeWidth="2" strokeLinecap="round" opacity={0.8} />
+        <Line x1="12" y1="18" x2="12" y2="22" stroke="#e879f9" strokeWidth="2" strokeLinecap="round" opacity={0.8} />
+        <Line x1="2" y1="12" x2="6" y2="12" stroke="#c084fc" strokeWidth="2" strokeLinecap="round" opacity={0.8} />
+        <Line x1="18" y1="12" x2="22" y2="12" stroke="#c084fc" strokeWidth="2" strokeLinecap="round" opacity={0.8} />
+        {/* Center bright spot */}
+        <Circle cx="12" cy="12" r="2" fill="#fff" opacity={0.9} />
+    </Svg>
+);
