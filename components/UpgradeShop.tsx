@@ -2,23 +2,11 @@ import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { useGame } from '../gameState';
 import { getAllUpgrades, calculateUpgradeCost, calculateUpgradeEffect, Upgrade } from '../data/upgrades';
-import { CoinIcon, EnergyIcon, TapIcon, AutoIcon, GrowthRateIcon } from './Icons';
+import { CoinIcon, getIconByName } from './Icons';
 
 interface UpgradeShopProps {
     onClose: () => void;
 }
-
-// Get icon component for upgrade type
-const getUpgradeIcon = (iconType: string, size: number = 28): JSX.Element => {
-    switch (iconType) {
-        case 'tap': return <TapIcon size={size} color="#22c55e" />;
-        case 'growth': return <GrowthRateIcon size={size} color="#4ade80" />;
-        case 'energy': return <EnergyIcon size={size} color="#facc15" />;
-        case 'grow': return <GrowthRateIcon size={size} color="#4ade80" />;
-        case 'coin': return <CoinIcon size={size} color="#fbbf24" />;
-        default: return <AutoIcon size={size} color="#888" />;
-    }
-};
 
 export const UpgradeShop: React.FC<UpgradeShopProps> = ({ onClose }) => {
     const { state, buyUpgrade } = useGame();
@@ -107,7 +95,7 @@ export const UpgradeShop: React.FC<UpgradeShopProps> = ({ onClose }) => {
                         return (
                             <View key={upgrade.id} style={[styles.upgradeCard, isDisabledByTutorial && { opacity: 0.5 }]}>
                                 <View style={styles.upgradeHeader}>
-                                    {getUpgradeIcon(upgrade.icon)}
+                                    {getIconByName(upgrade.icon, 28, '#fbbf24')}
                                     <View style={styles.upgradeInfo}>
                                         <Text style={styles.upgradeName}>{upgrade.name}</Text>
                                         <Text style={styles.upgradeDesc}>{upgrade.description}</Text>
@@ -208,6 +196,25 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: 'bold',
         color: '#fbbf24',
+    },
+    upgradeItem: {
+        backgroundColor: '#1a1a1a',
+        padding: 12,
+        borderRadius: 12,
+        marginBottom: 8,
+        flexDirection: 'row',
+        alignItems: 'center', // Align icon vertically
+        borderWidth: 1,
+        borderColor: '#333',
+    },
+    iconContainer: {
+        width: 44,
+        height: 44,
+        borderRadius: 8,
+        backgroundColor: '#2a2a2a',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 12,
     },
     list: {
         flex: 1,

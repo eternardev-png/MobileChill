@@ -1,8 +1,8 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Animated, Easing, Dimensions } from 'react-native';
-import Svg, { Path, G, Text as SvgText, Circle, Polygon, LinearGradient, RadialGradient, Stop, Defs, ClipPath } from 'react-native-svg';
+import Svg, { Path, G, Text as SvgText, Circle, Polygon, LinearGradient, RadialGradient, Stop, Defs, ClipPath, Rect } from 'react-native-svg';
 import { useGame } from '../gameState';
-import { GemIcon, EnergyIcon, CoinIcon } from './Icons'; // Updated import
+import { GemIcon, EnergyIcon, CoinIcon, GrowthRateIcon, DiamondIcon } from './Icons'; // Updated import
 
 const { width } = Dimensions.get('window');
 const WHEEL_SIZE = Math.min(width * 0.85, 300);
@@ -14,18 +14,18 @@ interface RouletteWheelProps {
 }
 
 const PRIZES = [
-    { id: 'coins_100', label: '100', value: 100, type: 'coins', color: 'url(#grad_coins)', chance: 15 },
-    { id: 'energy_500', label: '500', value: 500, type: 'energy', color: 'url(#grad_energy)', chance: 15 },
-    { id: 'grow_15', label: '15', value: 15, type: 'grow_mult', color: 'url(#grad_green)', chance: 5 },
-    { id: 'coins_500', label: '500', value: 500, type: 'coins', color: 'url(#grad_coins_dark)', chance: 10 },
-    { id: 'energy_1000', label: '1K', value: 1000, type: 'energy', color: 'url(#grad_energy_dark)', chance: 10 },
-    { id: 'coins_1000', label: '1K', value: 1000, type: 'coins', color: 'url(#grad_coins)', chance: 8 },
-    { id: 'energy_2000', label: '2K', value: 2000, type: 'energy', color: 'url(#grad_energy)', chance: 8 },
-    { id: 'diamond', label: 'Shard', value: 1, type: 'shard', color: 'url(#grad_purple)', chance: 3 },
-    { id: 'coins_2000', label: '2K', value: 2000, type: 'coins', color: 'url(#grad_gold_premium)', chance: 5 },
+    { id: 'coins_100', label: '100', value: 100, type: 'coins', color: 'rgba(251, 191, 36, 0.85)', chance: 15 },      // Yellow bright
+    { id: 'energy_500', label: '500', value: 500, type: 'energy', color: 'rgba(59, 130, 246, 0.85)', chance: 15 },    // Blue bright
+    { id: 'grow_15', label: '15x', value: 15, type: 'grow_mult', color: 'rgba(74, 222, 128, 0.85)', chance: 5 },      // Green bright
+    { id: 'coins_500', label: '500', value: 500, type: 'coins', color: 'rgba(251, 191, 36, 0.85)', chance: 10 },      // Yellow bright
+    { id: 'energy_1000', label: '1K', value: 1000, type: 'energy', color: 'rgba(59, 130, 246, 0.85)', chance: 10 },   // Blue bright
+    { id: 'coins_1000', label: '1K', value: 1000, type: 'coins', color: 'rgba(251, 191, 36, 0.85)', chance: 8 },      // Yellow bright
+    { id: 'energy_2000', label: '2K', value: 2000, type: 'energy', color: 'rgba(59, 130, 246, 0.85)', chance: 8 },    // Blue bright
+    { id: 'shard', label: 'Shard', value: 1, type: 'shard', color: 'rgba(168, 85, 247, 0.85)', chance: 3 },           // Purple for shards
+    { id: 'coins_2000', label: '2K', value: 2000, type: 'coins', color: 'rgba(251, 191, 36, 0.85)', chance: 5 },      // Yellow bright
 ];
 
-const SLICE_ANGLE = 360 / PRIZES.length;
+const TOTAL_CHANCE = PRIZES.reduce((sum, p) => sum + p.chance, 0);
 
 export const RouletteWheel: React.FC<RouletteWheelProps> = ({ onClose }) => {
     const { state, spendGems, awardRoulettePrize } = useGame();
@@ -35,6 +35,8 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({ onClose }) => {
 
     const [spinning, setSpinning] = useState(false);
     const [prize, setPrize] = useState<any>(null);
+
+    const pendingPrizeRef = useRef<any>(null); // Track pending prize to award on finish/close
 
     // Start/Stop pulse animation based on spinning state
     useEffect(() => {
@@ -49,6 +51,16 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({ onClose }) => {
             pulseAnim.setValue(0);
         }
     }, [spinning]);
+
+    // Safety: Award prize if user closes modal while spinning
+    useEffect(() => {
+        return () => {
+            if (pendingPrizeRef.current) {
+                awardRoulettePrize(pendingPrizeRef.current.type, pendingPrizeRef.current.value);
+                pendingPrizeRef.current = null;
+            }
+        };
+    }, []);
 
     const handleSpin = () => {
         if (spinning) return;
@@ -72,13 +84,13 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({ onClose }) => {
         }
 
         const wonPrize = PRIZES[selectedIndex];
-        // Determinate prize early
-        setPrize(wonPrize);
+        // Store pending prize (Don't award yet, don't show UI yet)
+        pendingPrizeRef.current = wonPrize;
 
-        // Award prize immediately so closing the component doesn't cancel it
-        awardRoulettePrize(wonPrize.type, wonPrize.value);
-
-        const segmentCenter = selectedIndex * SLICE_ANGLE + SLICE_ANGLE / 2;
+        // Calculate segment center based on chance-proportional angles
+        const cumulativeBefore = PRIZES.slice(0, selectedIndex).reduce((sum, prize) => sum + prize.chance, 0);
+        const sliceAngle = (wonPrize.chance / TOTAL_CHANCE) * 360;
+        const segmentCenter = ((cumulativeBefore / TOTAL_CHANCE) * 360) + (sliceAngle / 2);
 
         // CUMULATIVE ROTATION LOGIC to fix re-spin bug
         const baseTarget = 270 - segmentCenter;
@@ -106,24 +118,30 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({ onClose }) => {
             useNativeDriver: true,
         }).start(() => {
             setSpinning(false);
-            // Visual feedback already handled by determinePrize
+            // Animation finished -> Award prize
+            if (pendingPrizeRef.current) {
+                awardRoulettePrize(pendingPrizeRef.current.type, pendingPrizeRef.current.value);
+                setPrize(pendingPrizeRef.current); // Show "YOU WON"
+                pendingPrizeRef.current = null; // Clear pending
+            }
         });
     };
 
-    const getIcon = (type: string) => {
-        switch (type) {
-            case 'coins': return '🪙';
-            case 'energy': return '⚡';
-            case 'grow_mult': return '🌿';
-            case 'shard': return '💎';
-            default: return '🎁';
+    // Handle close: Award pending prize if spinning, then close
+    const handleClose = () => {
+        if (pendingPrizeRef.current) {
+            awardRoulettePrize(pendingPrizeRef.current.type, pendingPrizeRef.current.value);
+            pendingPrizeRef.current = null;
         }
+        onClose();
     };
+
+    // getIcon removed as we now render standard components
 
     return (
         <View style={styles.overlay}>
             <View style={styles.container}>
-                <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+                <TouchableOpacity onPress={handleClose} style={styles.closeBtn}>
                     <Text style={styles.closeBtnText}>✕</Text>
                 </TouchableOpacity>
 
@@ -231,6 +249,12 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({ onClose }) => {
                                     <Stop offset="0%" stopColor="#fbbf24" stopOpacity="0.8" />
                                     <Stop offset="100%" stopColor="transparent" stopOpacity="0" />
                                 </RadialGradient>
+
+                                {/* ICON GLOW (Dark Shadow/Glow) */}
+                                <RadialGradient id="grad_icon_glow" cx="50%" cy="50%" r="50%">
+                                    <Stop offset="0%" stopColor="#000" stopOpacity="0.8" />
+                                    <Stop offset="100%" stopColor="#000" stopOpacity="0" />
+                                </RadialGradient>
                             </Defs>
 
                             {/* Background Circle (Dark fill behind segments) */}
@@ -239,16 +263,20 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({ onClose }) => {
                             {/* Segments Group with ClipPath for perfect circle */}
                             <G rotation={0} origin={`${CENTER}, ${CENTER} `} clipPath="url(#wheelClip)">
                                 {PRIZES.map((p, i) => {
-                                    const startAngle = i * SLICE_ANGLE;
-                                    const endAngle = (i + 1) * SLICE_ANGLE;
+                                    // Calculate cumulative angles based on chance
+                                    const cumulativeBefore = PRIZES.slice(0, i).reduce((sum, prize) => sum + prize.chance, 0);
+                                    const startAngle = (cumulativeBefore / TOTAL_CHANCE) * 360;
+                                    const sliceAngle = (p.chance / TOTAL_CHANCE) * 360;
+                                    const endAngle = startAngle + sliceAngle;
+
                                     // Oversize segments slightly to ensure no gaps, clipped by ClipPath
                                     const x1 = CENTER + (RADIUS + 2) * Math.cos(Math.PI * startAngle / 180);
                                     const y1 = CENTER + (RADIUS + 2) * Math.sin(Math.PI * startAngle / 180);
                                     const x2 = CENTER + (RADIUS + 2) * Math.cos(Math.PI * endAngle / 180);
                                     const y2 = CENTER + (RADIUS + 2) * Math.sin(Math.PI * endAngle / 180);
-                                    const largeArc = SLICE_ANGLE > 180 ? 1 : 0;
+                                    const largeArc = sliceAngle > 180 ? 1 : 0;
 
-                                    const midAngle = startAngle + SLICE_ANGLE / 2;
+                                    const midAngle = startAngle + sliceAngle / 2;
                                     // Adjusted distances - Moved EVEN FURTHER OUT
                                     const iconDist = RADIUS * 0.82;
                                     const textDist = RADIUS * 0.60;
@@ -260,46 +288,61 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({ onClose }) => {
                                     const textY = CENTER + textDist * Math.sin(Math.PI * midAngle / 180);
 
                                     // Fix rotation: Use midAngle for Radial alignment (reading outwards)
-                                    // p.s. midAngle + 90 was making it tangential/perpendicular
                                     const rotation = midAngle;
-                                    // For left side, maybe flip? Let's stick to consistent radiating out for now.
+
+                                    // Transform for Icon (Center at iconX, iconY)
+                                    const iconSize = 22;
+                                    const iconOffset = iconSize / 2;
+
+                                    // Determine icon color based on type - match GameHUD colors
+                                    let iconColor = '#fff';
+                                    if (p.type === 'coins') iconColor = '#fbbf24';      // Yellow/Gold for coins (same as GameHUD)
+                                    if (p.type === 'energy') iconColor = '#facc15';     // Yellow for energy (same as GameHUD)
+                                    if (p.type === 'grow_mult') iconColor = '#4ade80';  // Green for growth
+                                    if (p.type === 'shard') iconColor = '#a855f7';      // Purple for shards
 
                                     return (
                                         <G key={i}>
+
                                             <Path
                                                 d={`M${CENTER},${CENTER} L${x1},${y1} A${RADIUS + 2},${RADIUS + 2} 0 ${largeArc}, 1 ${x2},${y2} Z`}
                                                 fill={p.color}
-                                                stroke="rgba(0,0,0,0.1)"
-                                                strokeWidth="0.5"
+                                                stroke="rgba(0,0,0,0.3)"
+                                                strokeWidth="2"
                                             />
 
-                                            {/* Icon - Added Stroke for visibility (White Outline) */}
-                                            <SvgText
-                                                x={iconX}
-                                                y={iconY}
-                                                fontSize="22"
-                                                stroke="#fff"
-                                                strokeWidth="2"
-                                                fill="#fff"
-                                                textAnchor="middle"
-                                                alignmentBaseline="central"
-                                                transform={`rotate(${rotation}, ${iconX}, ${iconY})`}
-                                            >
-                                                {getIcon(p.type)}
-                                            </SvgText>
-                                            {/* Icon Content Layer (on top of stroke) */}
-                                            <SvgText
-                                                x={iconX}
-                                                y={iconY}
-                                                fontSize="22"
-                                                textAnchor="middle"
-                                                alignmentBaseline="central"
-                                                transform={`rotate(${rotation}, ${iconX}, ${iconY})`}
-                                            >
-                                                {getIcon(p.type)}
-                                            </SvgText>
+                                            {/* Render Icon Component inside G with Transform */}
+                                            {/* Note: In nested SVG, transform order matters. Translate to pos, then rotate. */}
+                                            <G transform={`translate(${iconX - iconOffset}, ${iconY - iconOffset}) rotate(${rotation}, ${iconOffset}, ${iconOffset})`}>
+                                                {/* Dark Glow behind icons */}
+                                                <Circle cx={iconOffset} cy={iconOffset} r={iconSize * 0.8} fill="url(#grad_icon_glow)" />
 
-                                            {/* Text - Radial Alignment */}
+                                                {p.type === 'coins' && <CoinIcon size={iconSize} />}
+                                                {p.type === 'energy' && <EnergyIcon size={iconSize} />}
+                                                {p.type === 'grow_mult' && <GemIcon size={iconSize} />}
+                                                {p.type === 'shard' && <DiamondIcon size={iconSize} />}
+                                            </G>
+
+                                            {/* Dark background for text - Glow/Shadow (Rectangular) */}
+                                            {(() => {
+                                                const isLong = p.label.length > 3;
+                                                const fSize = isLong ? 14 : 18;
+                                                const bgW = p.label.length * (fSize * 0.6) + 20;
+                                                const bgH = fSize + 12;
+                                                return (
+                                                    <Rect
+                                                        x={textX - bgW / 2}
+                                                        y={textY - bgH / 2}
+                                                        width={bgW}
+                                                        height={bgH}
+                                                        rx={bgH / 2}
+                                                        fill="url(#grad_icon_glow)"
+                                                        transform={`rotate(${rotation}, ${textX}, ${textY})`}
+                                                    />
+                                                );
+                                            })()}
+
+                                            {/* Text - Radial Alignment with heavy shadow/glow look */}
                                             <SvgText
                                                 x={textX}
                                                 y={textY}
@@ -310,8 +353,22 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({ onClose }) => {
                                                 alignmentBaseline="central"
                                                 transform={`rotate(${rotation}, ${textX}, ${textY})`}
                                                 letterSpacing="1"
-                                                stroke="rgba(0,0,0,0.3)"
-                                                strokeWidth="0.5" // Reduced stroke for cleaner look
+                                                stroke="rgba(0,0,0,0.8)"
+                                                strokeWidth="3" // Heavy stroke acting as glow/outline
+                                            >
+                                                {p.label}
+                                            </SvgText>
+                                            {/* Foreground text for sharpness */}
+                                            <SvgText
+                                                x={textX}
+                                                y={textY}
+                                                fill="#fff"
+                                                fontSize={p.label.length > 3 ? "14" : "18"}
+                                                fontWeight="900"
+                                                textAnchor="middle"
+                                                alignmentBaseline="central"
+                                                transform={`rotate(${rotation}, ${textX}, ${textY})`}
+                                                letterSpacing="1"
                                             >
                                                 {p.label}
                                             </SvgText>
@@ -333,9 +390,15 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({ onClose }) => {
                 {prize && (
                     <View style={styles.resultContainer}>
                         <Text style={styles.resultLabel}>YOU WON</Text>
-                        <Text style={[styles.prizeText]}>
-                            {getIcon(prize.type)} {prize.label}
-                        </Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                            {prize.type === 'coins' && <CoinIcon size={32} />}
+                            {prize.type === 'energy' && <EnergyIcon size={32} />}
+                            {prize.type === 'grow_mult' && <GemIcon size={32} />}
+                            {prize.type === 'shard' && <DiamondIcon size={32} />}
+                            <Text style={[styles.prizeText, { marginTop: 0 }]}>
+                                {prize.label}
+                            </Text>
+                        </View>
                     </View>
                 )}
 

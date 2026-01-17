@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Dimensions } from
 import Svg, { Line, Defs, RadialGradient, Stop, Circle, G, Path } from 'react-native-svg';
 import { useGame } from '../gameState';
 import { TreeSpecies } from '../data/treeSpecies';
-import { GemIcon, GrowthRateIcon, CoinIcon, EnergyIcon } from './Icons';
+import { GemIcon, GrowthRateIcon, CoinIcon, EnergyIcon, TimeIcon } from './Icons';
 import Slider from '@react-native-community/slider';
 
 const { width } = Dimensions.get('window');
@@ -231,7 +231,7 @@ export const TreeLab: React.FC<TreeLabProps> = ({ onClose }) => {
         const rarity = getRarity(cost);
 
         const description = `Genetically modified specimen.\nGrowth: ${growthMult}x | Coins: ${coinMult}x\nEnergy: ${energyMult}x | Time: ${timeMult}x`;
-        const emoji = '🧬';
+        const emoji = 'quest_lab';
 
         const newTree: Omit<TreeSpecies, 'id' | 'unlockCost'> = {
             name: `Specimen #${Math.floor(Math.random() * 9000) + 1000}`,
@@ -360,7 +360,7 @@ export const TreeLab: React.FC<TreeLabProps> = ({ onClose }) => {
                             <ParamSlider label="Growth" icon={<GrowthRateIcon size={14} color="#4ade80" />} value={growthMult} onChange={setGrowthMult} />
                             <ParamSlider label="Wealth" icon={<CoinIcon size={14} color="#fbbf24" />} value={coinMult} onChange={setCoinMult} />
                             <ParamSlider label="Energy" icon={<EnergyIcon size={14} color="#facc15" />} value={energyMult} onChange={setEnergyMult} />
-                            <ParamSlider label="Time" icon={<Text style={{ fontSize: 12 }}>⏳</Text>} value={timeMult} onChange={setTimeMult} />
+                            <ParamSlider label="Time" icon={<TimeIcon size={14} color="#fff" />} value={timeMult} onChange={setTimeMult} />
                         </AccordionSection>
 
                     </View>

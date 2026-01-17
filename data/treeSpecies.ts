@@ -40,7 +40,7 @@ export const TREE_SPECIES: Record<string, TreeSpecies> = {
   oak: {
     id: 'oak',
     name: 'Oak Tree',
-    emoji: '🌳',
+    emoji: 'tree_oak',
     description: 'A sturdy classic tree. Balanced in all stats.',
     rarity: 'common',
     baseColor: { hue: 120, saturation: 60, lightness: 35 },
@@ -61,7 +61,7 @@ export const TREE_SPECIES: Record<string, TreeSpecies> = {
   pine: {
     id: 'pine',
     name: 'Pine Tree',
-    emoji: '🌲',
+    emoji: 'tree_pine',
     description: 'Grows faster but produces less energy.',
     rarity: 'common',
     baseColor: { hue: 145, saturation: 55, lightness: 30 },
@@ -75,7 +75,7 @@ export const TREE_SPECIES: Record<string, TreeSpecies> = {
     growthRate: 1.3,
     energyPerTap: 0.8,
     coinMultiplier: 1.0,
-    unlockCost: 100,
+    unlockCost: 35,
     unlockQuest: 'oak_level_5',
   },
 
@@ -83,7 +83,7 @@ export const TREE_SPECIES: Record<string, TreeSpecies> = {
   maple: {
     id: 'maple',
     name: 'Maple Tree',
-    emoji: '🍁',
+    emoji: 'tree_maple',
     description: 'Fast growing with good energy balance.',
     rarity: 'rare',
     baseColor: { hue: 30, saturation: 90, lightness: 50 },
@@ -97,7 +97,7 @@ export const TREE_SPECIES: Record<string, TreeSpecies> = {
     growthRate: 1.5,
     energyPerTap: 1.8,
     coinMultiplier: 1.0,
-    unlockCost: 250,
+    unlockCost: 85,
     unlockQuest: 'pine_level_5',
   },
 
@@ -105,7 +105,7 @@ export const TREE_SPECIES: Record<string, TreeSpecies> = {
   baobab: {
     id: 'baobab',
     name: 'Baobab Tree',
-    emoji: '🌴',
+    emoji: 'tree_baobab',
     description: 'Ancient and powerful. Maximum energy per tap.',
     rarity: 'epic',
     baseColor: { hue: 35, saturation: 50, lightness: 45 },
@@ -119,7 +119,7 @@ export const TREE_SPECIES: Record<string, TreeSpecies> = {
     growthRate: 0.8,
     energyPerTap: 2.5,
     coinMultiplier: 1.0,
-    unlockCost: 350,
+    unlockCost: 115,
     unlockQuest: 'maple_level_5',
   },
 
@@ -127,7 +127,7 @@ export const TREE_SPECIES: Record<string, TreeSpecies> = {
   money: {
     id: 'money',
     name: 'Money Tree',
-    emoji: '💰',
+    emoji: 'tree_money',
     description: 'Generates 1.5x coins but grows slowly.',
     rarity: 'epic',
     baseColor: { hue: 50, saturation: 100, lightness: 50 },
@@ -141,7 +141,7 @@ export const TREE_SPECIES: Record<string, TreeSpecies> = {
     growthRate: 0.5,
     energyPerTap: 0.5,
     coinMultiplier: 1.5,
-    unlockCost: 350,
+    unlockCost: 115,
     unlockQuest: 'baobab_level_5',
   },
 
@@ -149,7 +149,7 @@ export const TREE_SPECIES: Record<string, TreeSpecies> = {
   cherry: {
     id: 'cherry',
     name: 'Cherry Blossom',
-    emoji: '🌸',
+    emoji: 'tree_cherry',
     description: 'Beautiful and energy-rich, but grows slowly.',
     rarity: 'legendary',
     baseColor: { hue: 330, saturation: 80, lightness: 60 },
@@ -163,7 +163,7 @@ export const TREE_SPECIES: Record<string, TreeSpecies> = {
     growthRate: 0.6,
     energyPerTap: 4.0,
     coinMultiplier: 1.0,
-    unlockCost: 500,
+    unlockCost: 165,
     unlockQuest: 'money_level_5',
   },
 };

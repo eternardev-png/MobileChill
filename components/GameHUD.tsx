@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useCallback } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Animated, Dimensions, Easing } from 'react-native';
 import { useGame } from '../gameState';
-import { CoinIcon, EnergyIcon, GemIcon, HeightIcon, TapIcon, AutoIcon } from './Icons';
+import { CoinIcon, EnergyIcon, GemIcon, HeightIcon, TapIcon, AutoIcon, getIconByName } from './Icons';
 
 const { height } = Dimensions.get('window');
 
@@ -33,7 +33,8 @@ export const TopBar: React.FC = () => {
 
             <View style={styles.treeInfoRow}>
                 <View style={styles.treeInfo}>
-                    <Text style={styles.treeName}>{currentSpecies.emoji} {currentSpecies.name}</Text>
+                    {getIconByName(currentSpecies.emoji, 24)}
+                    <Text style={styles.treeName}>{currentSpecies.name}</Text>
                     <View style={styles.levelBadge}>
                         <Text style={styles.levelText}>Lv.{currentStats?.level || 1}</Text>
                     </View>

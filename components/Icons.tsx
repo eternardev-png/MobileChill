@@ -2,9 +2,10 @@
 import React from 'react';
 import Svg, { Circle, Ellipse, Line, Path, Polygon, Rect, G, Defs, LinearGradient, RadialGradient, Stop } from 'react-native-svg';
 
-interface IconProps {
+export interface IconProps {
     size?: number;
     color?: string;
+    style?: any;
 }
 
 // Coin icon - Minimalist flat design
@@ -125,6 +126,15 @@ export const DiamondIcon: React.FC<IconProps> = ({ size = 20, color = '#a855f7' 
 
 // Prestige Icon (alias for Diamond or specific)
 export const PrestigeIcon = DiamondIcon;
+
+// Time icon
+export const TimeIcon = ({ size = 24, color = "#fff" }: IconProps) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        <Circle cx="12" cy="12" r="9" fill="none" stroke={color} strokeWidth="2" />
+        <Path d="M12 7 V12 L15 15" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" />
+    </Svg>
+);
+
 
 
 // Shop/Cart icon
@@ -380,6 +390,102 @@ export const PrestigeGlowIcon: React.FC<IconProps> = ({ size = 28, color = '#a85
     </Svg>
 );
 
+// ============ TREE ICONS (Replacing Emojis) ============
+
+export const TreeOakIcon: React.FC<IconProps> = ({ size = 24 }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        {/* Trunk */}
+        <Path d="M12 22 L12 12" stroke="#854d0e" strokeWidth="3" strokeLinecap="round" />
+        {/* Oak Canopy - Round and fluffy */}
+        <Circle cx="12" cy="10" r="7" fill="#4ade80" stroke="#166534" strokeWidth="1" />
+        <Circle cx="9" cy="8" r="4" fill="#86efac" opacity={0.5} />
+    </Svg>
+);
+
+export const TreePineIcon: React.FC<IconProps> = ({ size = 24 }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        <Path d="M12 22 L12 18" stroke="#854d0e" strokeWidth="3" strokeLinecap="round" />
+        {/* Pine shape - Triangles */}
+        <Path d="M12 2 L4 18 L20 18 Z" fill="#15803d" stroke="#052e16" strokeWidth="1" />
+        <Path d="M12 5 L6 14 L18 14 Z" fill="#166534" />
+        <Path d="M12 2 L9 8 L15 8 Z" fill="#22c55e" />
+    </Svg>
+);
+
+export const TreeMapleIcon: React.FC<IconProps> = ({ size = 24 }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        <Path d="M12 22 L12 14" stroke="#854d0e" strokeWidth="3" strokeLinecap="round" />
+        {/* Maple Leaf Shape (Stylized) */}
+        <Path d="M12 3 L15 8 L20 8 L16 12 L18 18 L12 15 L6 18 L8 12 L4 8 L9 8 Z" fill="#fb923c" stroke="#c2410c" strokeWidth="1" />
+        <Circle cx="12" cy="10" r="2" fill="#fed7aa" opacity={0.3} />
+    </Svg>
+);
+
+export const TreeBaobabIcon: React.FC<IconProps> = ({ size = 24 }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        {/* Thick Trunk */}
+        <Path d="M8 22 L8 12 Q8 6 12 12 Q16 6 16 12 L16 22" fill="#78350f" stroke="#451a03" strokeWidth="1" />
+        {/* Flat Top Canopy */}
+        <Path d="M6 10 Q12 0 18 10" fill="#a3e635" stroke="#3f6212" strokeWidth="1" />
+        <Path d="M7 8 Q12 1 17 8" fill="#d9f99d" opacity={0.4} />
+    </Svg>
+);
+
+export const TreeMoneyIcon: React.FC<IconProps> = ({ size = 24 }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        <Path d="M12 22 L12 12" stroke="#eab308" strokeWidth="3" strokeLinecap="round" />
+        {/* Golden Canopy */}
+        <Circle cx="12" cy="10" r="7" fill="#facc15" stroke="#a16207" strokeWidth="1" />
+        {/* Dollar Sign */}
+        <Path d="M12 7 L12 13 M10 8 C10 8 14 8 14 9 C14 10 10 10 10 11 C10 12 14 12 14 12" stroke="#854d0e" strokeWidth="2" strokeLinecap="round" fill="none" />
+    </Svg>
+);
+
+export const TreeCherryIcon: React.FC<IconProps> = ({ size = 24 }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        <Path d="M12 22 L12 12" stroke="#5f370e" strokeWidth="3" strokeLinecap="round" />
+        {/* Pink Cloud */}
+        <Path d="M12 4 Q18 4 19 9 Q20 15 12 15 Q4 15 5 9 Q6 4 12 4" fill="#f9a8d4" stroke="#db2777" strokeWidth="1" />
+        <Circle cx="10" cy="8" r="1.5" fill="#fbcfe8" />
+        <Circle cx="15" cy="10" r="1.5" fill="#fbcfe8" />
+    </Svg>
+);
+
+// ============ QUEST ICONS ============
+
+export const QuestUpgradeIcon: React.FC<IconProps> = ({ size = 20, color = '#60a5fa' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        {/* Wrench/Gear */}
+        <Path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.7-3.7a6 6 0 0 1-8.5 8.5l-2.8 2.8a1 1 0 0 1-1.4 0L7 15l-4 4 1.5 1.5 4-4 1.7-1.7a1 1 0 0 1 0-1.4l-2.8-2.8a6 6 0 0 1 8.5-8.5l-3.7 3.7a1 1 0 0 0 0 1.4z" fill={color} />
+    </Svg>
+);
+
+export const QuestTapIcon: React.FC<IconProps> = ({ size = 20, color = '#f472b6' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        <Path d="M12 2 L12 6" stroke={color} strokeWidth="2" strokeLinecap="round" />
+        <Circle cx="12" cy="14" r="6" fill="none" stroke={color} strokeWidth="2" />
+        <Circle cx="12" cy="14" r="3" fill={color} />
+    </Svg>
+);
+
+export const QuestHeightIcon: React.FC<IconProps> = ({ size = 20, color = '#22c55e' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        <Path d="M12 22 L12 2" stroke={color} strokeWidth="2" strokeLinecap="round" />
+        <Path d="M8 6 L12 2 L16 6" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+        <Line x1="8" y1="22" x2="16" y2="22" stroke={color} strokeWidth="2" />
+        <Line x1="9" y1="18" x2="15" y2="18" stroke={color} strokeWidth="1" opacity={0.5} />
+        <Line x1="9" y1="14" x2="15" y2="14" stroke={color} strokeWidth="1" opacity={0.5} />
+    </Svg>
+);
+
+export const QuestLabIcon: React.FC<IconProps> = ({ size = 20, color = '#a855f7' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        <Path d="M9 21h6v-1.5a2.5 2.5 0 0 0-1.5-2.3V11h2V9H8v2h2v6.2A2.5 2.5 0 0 0 8.5 19.5V21H9z" fill={color} stroke={color} strokeWidth="1" fillOpacity={0.3} />
+        <Circle cx="12" cy="15" r="1.5" fill={color} />
+        <Circle cx="11" cy="18" r="1" fill={color} />
+    </Svg>
+);
+
 // Casino/Roulette Icon
 export const CasinoIcon: React.FC<IconProps> = ({ size = 24, color = '#fbbf24' }) => (
     <Svg width={size} height={size} viewBox="0 0 24 24">
@@ -409,3 +515,42 @@ export const CasinoIcon: React.FC<IconProps> = ({ size = 24, color = '#fbbf24' }
         <Circle cx="11" cy="11" r="1.2" fill="#fff" opacity={0.6} />
     </Svg>
 );
+
+// Map string identifiers to Components
+export const getIconByName = (name: string, size = 20, color?: string) => {
+    const props = { size, color };
+    switch (name) {
+        // Resources
+        case 'icon_coin': return <CoinIcon {...props} />;
+        case 'icon_energy': return <EnergyIcon {...props} />;
+        case 'icon_gem': return <GemIcon {...props} />;
+        case 'icon_prestige': return <PrestigeIcon {...props} />;
+
+        // Trees
+        case 'tree_oak': return <TreeOakIcon {...props} />;
+        case 'tree_pine': return <TreePineIcon {...props} />;
+        case 'tree_maple': return <TreeMapleIcon {...props} />;
+        case 'tree_baobab': return <TreeBaobabIcon {...props} />;
+        case 'tree_money': return <TreeMoneyIcon {...props} />;
+        case 'tree_cherry': return <TreeCherryIcon {...props} />;
+
+        // Settings/UI
+        case 'icon_settings': return <SettingsIcon {...props} />;
+        case 'icon_shop': return <ShopIcon {...props} />;
+        case 'icon_quest': return <QuestIcon {...props} />;
+        case 'icon_lab': return <LabIcon {...props} />;
+        case 'icon_casino': return <CasinoIcon {...props} />;
+
+        // Quests
+        case 'quest_upgrade': return <QuestUpgradeIcon {...props} />;
+        case 'quest_tap': return <QuestTapIcon {...props} />;
+        case 'quest_height': return <QuestHeightIcon {...props} />;
+        case 'quest_energy': return <EnergyIcon {...props} />;
+        case 'quest_roulette': return <RouletteIcon {...props} />;
+        case 'quest_lab': return <QuestLabIcon {...props} />;
+        case 'quest_unlock': return <TreeIcon {...props} />; // Reuse genric tree
+
+        // Fallback
+        default: return <EnergyIcon {...props} />; // Default
+    }
+};

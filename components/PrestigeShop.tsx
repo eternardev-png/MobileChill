@@ -29,7 +29,7 @@ const getPrestigeIcon = (iconType: string, size: number = 28) => {
         case 'rainbow': return <PrestigeRainbowIcon size={size} />;
         case 'sparkle': return <PrestigeSparkleIcon size={size} />;
         case 'glow': return <PrestigeGlowIcon size={size} />;
-        default: return <Text style={{ fontSize: size }}>❓</Text>;
+        default: return <PrestigeSparkleIcon size={size} />;
     }
 };
 
@@ -135,7 +135,10 @@ export const PrestigeShop: React.FC<PrestigeShopProps> = ({ onClose }) => {
 
                 <View style={styles.prestigeInfo}>
                     <Text style={styles.prestigeCount}>Prestiges: {state.prestige.prestigeCount}</Text>
-                    <Text style={styles.prestigeTotal}>Total: {state.prestige.totalShards} 💎</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Text style={styles.prestigeTotal}>Total: {state.prestige.totalShards} </Text>
+                        <PrestigeSparkleIcon size={12} color="#888" />
+                    </View>
                 </View>
 
                 {/* Prestige button */}
@@ -145,18 +148,24 @@ export const PrestigeShop: React.FC<PrestigeShopProps> = ({ onClose }) => {
                         <Text style={styles.sectionTitle}>Reset for Shards</Text>
                     </View>
                     <Text style={styles.thresholdText}>Need {PRESTIGE_MIN_ENERGY.toLocaleString()}+ energy</Text>
-                    <Text style={styles.currentEnergy}>
-                        Current: {Math.floor(state.totalEnergyEarned).toLocaleString()} ⚡
-                    </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 6 }}>
+                        <Text style={[styles.currentEnergy, { marginVertical: 0 }]}>
+                            Current: {Math.floor(state.totalEnergyEarned).toLocaleString()}
+                        </Text>
+                        <PrestigeEnergyIcon size={14} color="#4ade80" />
+                    </View>
 
                     <TouchableOpacity
                         style={[styles.prestigeButton, !canPrestigeNow && styles.prestigeButtonDisabled]}
                         onPress={handlePrestige}
                         disabled={!canPrestigeNow}
                     >
-                        <Text style={styles.prestigeButtonText}>
-                            {canPrestigeNow ? `Prestige +${shardPreview} 💎` : 'Not enough energy'}
-                        </Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                            <Text style={styles.prestigeButtonText}>
+                                {canPrestigeNow ? `Prestige +${shardPreview}` : 'Not enough energy'}
+                            </Text>
+                            {canPrestigeNow && <PrestigeSparkleIcon size={16} color="#fff" />}
+                        </View>
                     </TouchableOpacity>
                 </View>
 
@@ -191,7 +200,7 @@ export const PrestigeShop: React.FC<PrestigeShopProps> = ({ onClose }) => {
 
                                 {upgrade.cosmetic && (
                                     <View style={styles.cosmeticBadge}>
-                                        <Text style={styles.cosmeticText}>✨ Cosmetic</Text>
+                                        <Text style={styles.cosmeticText}>COSMETIC</Text>
                                     </View>
                                 )}
 
@@ -204,9 +213,13 @@ export const PrestigeShop: React.FC<PrestigeShopProps> = ({ onClose }) => {
                                     onPress={() => buyPrestigeUpgrade(upgrade.id)}
                                     disabled={!canAfford || isMaxed}
                                 >
-                                    <Text style={styles.buyButtonText}>
-                                        {isMaxed ? (currentLevel > 0 ? '✓ Owned' : 'MAXED') : `💎 ${cost}`}
-                                    </Text>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                                        {(!isMaxed && canAfford && !upgrade.cosmetic) && <PrestigeSparkleIcon size={12} color="#fff" />}
+                                        <Text style={styles.buyButtonText}>
+                                            {isMaxed ? (currentLevel > 0 ? '✓ Owned' : 'MAXED') : `${cost}`}
+                                        </Text>
+                                        {!isMaxed && <PrestigeSparkleIcon size={12} color="#fff" />}
+                                    </View>
                                 </TouchableOpacity>
                             </View>
                         );
@@ -217,11 +230,15 @@ export const PrestigeShop: React.FC<PrestigeShopProps> = ({ onClose }) => {
                 {showConfirm && (
                     <View style={styles.confirmOverlay}>
                         <View style={styles.confirmModal}>
-                            <Text style={styles.confirmTitle}>⚠️ Confirm Prestige</Text>
+                            <Text style={styles.confirmTitle}>Confirm Prestige</Text>
                             <Text style={styles.confirmText}>
-                                Reset ALL progress for:{'\n'}
-                                <Text style={styles.shardHighlight}>{shardPreview} 💎 Shards</Text>
+                                Reset ALL progress for:
                             </Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 18 }}>
+                                <Text style={styles.shardHighlight}>{shardPreview} </Text>
+                                <PrestigeSparkleIcon size={20} color="#e879f9" />
+                                <Text style={styles.shardHighlight}> Shards</Text>
+                            </View>
                             <View style={styles.confirmButtons}>
                                 <TouchableOpacity style={styles.cancelButton} onPress={() => setShowConfirm(false)}>
                                     <Text style={styles.cancelButtonText}>Cancel</Text>

@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity, ScrollView } from 'react-nati
 import { useGame } from '../gameState';
 import { QUESTS, Quest, getAllQuests } from '../data/quests';
 import { getTreeSpecies } from '../data/treeSpecies';
-import { CoinIcon, EnergyIcon, GemIcon } from './Icons';
+import { CoinIcon, EnergyIcon, GemIcon, getIconByName } from './Icons';
 
 interface QuestPanelProps {
     onClose: () => void;
@@ -121,7 +121,7 @@ export const QuestPanel: React.FC<QuestPanelProps> = ({ onClose }) => {
                                     ]}
                                 >
                                     <View style={styles.questHeader}>
-                                        <Text style={styles.questIcon}>{quest.icon}</Text>
+                                        {getIconByName(quest.icon, 32)}
                                         <View style={styles.questInfo}>
                                             <Text style={styles.questName}>{quest.name}</Text>
                                             <Text style={styles.questDesc}>{quest.description}</Text>
@@ -291,6 +291,19 @@ const styles = StyleSheet.create({
         fontSize: 32,
     },
     questInfo: {
+        flexDirection: 'row',
+        marginBottom: 10,
+    },
+    iconContainer: {
+        width: 40,
+        height: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#333',
+        borderRadius: 8,
+        marginRight: 10,
+    },
+    textContainer: {
         flex: 1,
     },
     questName: {
