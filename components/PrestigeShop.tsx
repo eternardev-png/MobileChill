@@ -4,6 +4,8 @@ import Svg, { Circle, Path, Polygon, Defs, LinearGradient, Stop, RadialGradient 
 import { useGame } from '../gameState';
 import { PRESTIGE_UPGRADES, PRESTIGE_MIN_ENERGY, getAllPrestigeUpgrades, calculatePrestigeCost } from '../data/prestige';
 import {
+    getIconByName,
+    DiamondIcon,
     PrestigeTapIcon,
     PrestigeCoinIcon,
     PrestigeEnergyIcon,
@@ -20,17 +22,7 @@ interface PrestigeShopProps {
 
 // Icon mapping helper
 const getPrestigeIcon = (iconType: string, size: number = 28) => {
-    switch (iconType) {
-        case 'tap': return <PrestigeTapIcon size={size} />;
-        case 'coin': return <PrestigeCoinIcon size={size} />;
-        case 'energy': return <PrestigeEnergyIcon size={size} />;
-        case 'grow': return <PrestigeGrowthIcon size={size} />;
-        case 'tree': return <PrestigeTreeIcon size={size} />;
-        case 'rainbow': return <PrestigeRainbowIcon size={size} />;
-        case 'sparkle': return <PrestigeSparkleIcon size={size} />;
-        case 'glow': return <PrestigeGlowIcon size={size} />;
-        default: return <PrestigeSparkleIcon size={size} />;
-    }
+    return getIconByName(iconType, size);
 };
 
 // Custom SVG Icons for Prestige UI
@@ -74,7 +66,9 @@ export const PrestigeShop: React.FC<PrestigeShopProps> = ({ onClose }) => {
     } = useGame();
 
     const [showConfirm, setShowConfirm] = useState(false);
-    const upgrades = getAllPrestigeUpgrades();
+    const [activeTab, setActiveTab] = useState<'core' | 'auto' | 'special'>('core');
+    const allUpgrades = getAllPrestigeUpgrades();
+    const upgrades = allUpgrades.filter(u => u.category === activeTab);
     const shardPreview = getPrestigeShardPreview();
     const canPrestigeNow = canPerformPrestige();
 
@@ -117,17 +111,7 @@ export const PrestigeShop: React.FC<PrestigeShopProps> = ({ onClose }) => {
                         <Circle cx="50" cy="50" r="50" fill="url(#shardBg)" />
                     </Svg>
                     <View style={styles.shardsContent}>
-                        <Svg width="36" height="36" viewBox="0 0 20 20">
-                            <Defs>
-                                <LinearGradient id="shardDisplayGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <Stop offset="0%" stopColor="#e879f9" />
-                                    <Stop offset="50%" stopColor="#a855f7" />
-                                    <Stop offset="100%" stopColor="#7e22ce" />
-                                </LinearGradient>
-                            </Defs>
-                            <Polygon points="10,2 18,8 10,18 2,8" fill="url(#shardDisplayGrad)" />
-                            <Polygon points="10,2 12,6 10,8 8,6" fill="#fff" opacity={0.6} />
-                        </Svg>
+                        <DiamondIcon size={36} />
                         <Text style={styles.shardsValue}>{state.prestige.shards}</Text>
                         <Text style={styles.shardsLabel}>Purple Shards</Text>
                     </View>
@@ -164,16 +148,27 @@ export const PrestigeShop: React.FC<PrestigeShopProps> = ({ onClose }) => {
                             <Text style={styles.prestigeButtonText}>
                                 {canPrestigeNow ? `Prestige +${shardPreview}` : 'Not enough energy'}
                             </Text>
-                            {canPrestigeNow && <PrestigeSparkleIcon size={16} color="#fff" />}
+                            {canPrestigeNow && <DiamondIcon size={16} />}
                         </View>
                     </TouchableOpacity>
                 </View>
 
-                {/* Upgrades shop */}
-                <View style={styles.sectionHeader}>
-                    <ShopIconSVG size={18} />
-                    <Text style={styles.sectionTitle}>Prestige Shop</Text>
+                {/* Prestige Shop Tabs */}
+                <View style={styles.tabsContainer}>
+                    {(['core', 'auto', 'special'] as const).map(tab => (
+                        <TouchableOpacity
+                            key={tab}
+                            style={[styles.tabButton, activeTab === tab && styles.tabButtonActive]}
+                            onPress={() => setActiveTab(tab)}
+                        >
+                            <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>
+                                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
                 </View>
+
+                {/* Upgrades shop */}
                 <ScrollView style={styles.list} scrollEnabled={![8, 9, 10, 11].includes(state.tutorialStep)}>
                     {upgrades.map(upgrade => {
                         const currentLevel = state.prestige.upgradeLevels[upgrade.id] || 0;
@@ -214,11 +209,11 @@ export const PrestigeShop: React.FC<PrestigeShopProps> = ({ onClose }) => {
                                     disabled={!canAfford || isMaxed}
                                 >
                                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                                        {(!isMaxed && canAfford && !upgrade.cosmetic) && <PrestigeSparkleIcon size={12} color="#fff" />}
+                                        {(!isMaxed && canAfford && !upgrade.cosmetic) && <DiamondIcon size={12} />}
                                         <Text style={styles.buyButtonText}>
                                             {isMaxed ? (currentLevel > 0 ? '✓ Owned' : 'MAXED') : `${cost}`}
                                         </Text>
-                                        {!isMaxed && <PrestigeSparkleIcon size={12} color="#fff" />}
+                                        {!isMaxed && <DiamondIcon size={12} />}
                                     </View>
                                 </TouchableOpacity>
                             </View>
@@ -236,8 +231,8 @@ export const PrestigeShop: React.FC<PrestigeShopProps> = ({ onClose }) => {
                             </Text>
                             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 18 }}>
                                 <Text style={styles.shardHighlight}>{shardPreview} </Text>
-                                <PrestigeSparkleIcon size={20} color="#e879f9" />
-                                <Text style={styles.shardHighlight}> Shards</Text>
+                                <DiamondIcon size={20} />
+                                <Text style={styles.shardHighlight}> Purple Shards</Text>
                             </View>
                             <View style={styles.confirmButtons}>
                                 <TouchableOpacity style={styles.cancelButton} onPress={() => setShowConfirm(false)}>
@@ -387,6 +382,33 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     list: { flex: 1 },
+    tabsContainer: {
+        flexDirection: 'row',
+        gap: 8,
+        marginBottom: 12,
+        paddingHorizontal: 4,
+    },
+    tabButton: {
+        flex: 1,
+        backgroundColor: '#252525',
+        paddingVertical: 10,
+        borderRadius: 10,
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#333',
+    },
+    tabButtonActive: {
+        backgroundColor: '#a855f7',
+        borderColor: '#e879f9',
+    },
+    tabText: {
+        color: '#888',
+        fontSize: 13,
+        fontWeight: 'bold',
+    },
+    tabTextActive: {
+        color: '#fff',
+    },
     upgradeCard: {
         backgroundColor: '#252525',
         borderRadius: 14,

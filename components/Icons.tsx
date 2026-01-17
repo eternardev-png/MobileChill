@@ -100,27 +100,29 @@ export const GrowthRateIcon: React.FC<IconProps> = ({ size = 20, color = '#4ade8
     </Svg>
 );
 
-// Diamond/Shard icon for prestige - Enhanced with gradient
+// Diamond/Shard icon for prestige - Updated to match the requested simple diamond shape
 export const DiamondIcon: React.FC<IconProps> = ({ size = 20, color = '#a855f7' }) => (
-    <Svg width={size} height={size} viewBox="0 0 20 20">
+    <Svg width={size} height={size} viewBox="0 0 24 24">
         <Defs>
-            <LinearGradient id="diamondGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <Stop offset="0%" stopColor="#e879f9" stopOpacity="1" />
-                <Stop offset="50%" stopColor={color} stopOpacity="1" />
-                <Stop offset="100%" stopColor="#7e22ce" stopOpacity="1" />
-            </LinearGradient>
-            <LinearGradient id="diamondShine" x1="0%" y1="0%" x2="100%" y2="0%">
-                <Stop offset="0%" stopColor="#fff" stopOpacity="0" />
-                <Stop offset="50%" stopColor="#fff" stopOpacity="0.9" />
-                <Stop offset="100%" stopColor="#fff" stopOpacity="0" />
+            <LinearGradient id="shardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <Stop offset="0%" stopColor="#d8b4fe" />
+                <Stop offset="50%" stopColor={color} />
+                <Stop offset="100%" stopColor="#7e22ce" />
             </LinearGradient>
         </Defs>
-        <Polygon points="10,2 18,8 10,18 2,8" fill="url(#diamondGrad)" />
-        <Polygon points="10,2 14,8 10,12 6,8" fill="url(#diamondShine)" opacity={0.4} />
-        <Polygon points="10,2 6,8 2,8" fill="#9333ea" opacity={0.3} />
-        <Polygon points="10,2 14,8 18,8" fill="#c084fc" opacity={0.2} />
-        <Line x1="10" y1="2" x2="10" y2="18" stroke="#7e22ce" strokeWidth="0.8" opacity={0.6} />
-        <Polygon points="10,2 12,6 10,8 8,6" fill="#fff" opacity={0.6} />
+        {/* Simple Diamond Shape from reference */}
+        <Path
+            d="M12,2 L20,12 L12,22 L4,12 Z"
+            fill="url(#shardGrad)"
+            stroke="#6b21a8"
+            strokeWidth="0.5"
+        />
+        {/* Top Highlight Facet */}
+        <Path
+            d="M12,2 L16,7 L12,12 L8,7 Z"
+            fill="#fff"
+            opacity={0.3}
+        />
     </Svg>
 );
 
@@ -168,15 +170,28 @@ export const RouletteIcon: React.FC<IconProps> = ({ size = 20, color = '#f472b6'
     </Svg>
 );
 
-// Lab/Flask Icon
+// Lab/Flask Icon - Redrawn as Erlenmeyer flask based on reference
 export const LabIcon: React.FC<IconProps> = ({ size = 20, color = '#a855f7' }) => (
     <Svg width={size} height={size} viewBox="0 0 24 24">
-        <Path d="M10 2 L14 2 L14 6 L10 6 Z" fill={color} opacity={0.5} />
-        <Path d="M9 14 L15 14" stroke="#fff" strokeWidth="1" opacity={0.5} />
-        <Path d="M7 16 C7 16 10 21 17 21 C17 21 21 16 18 10 L14 6 L10 6 L6 10 C6 10 2 15 7 16 Z"
-            fill={color} fillOpacity={0.2} stroke={color} strokeWidth="1.5" strokeLinejoin="round" />
-        <Circle cx="10" cy="18" r="1.5" fill="#fff" opacity={0.5} />
-        <Circle cx="15" cy="15" r="1" fill="#fff" opacity={0.4} />
+        {/* Flask Glass Outline & Body */}
+        <Path
+            d="M9,3 L15,3 M10,3 L10,8 L5,19 C4.5,20.5 5.5,21 7,21 L17,21 C18.5,21 19.5,20.5 19,19 L14,8 L14,3"
+            fill="none"
+            stroke={color}
+            strokeWidth="1.5"
+            strokeLinejoin="round"
+        />
+        {/* Liquid Inside */}
+        <Path
+            d="M7.5,14 L16.5,14 L18.5,19 C18.7,19.5 18.2,20 17,20 L7,20 C5.8,20 5.3,19.5 5.5,19 L7.5,14 Z"
+            fill={color}
+            opacity={0.6}
+        />
+        {/* Bubbles/Shine */}
+        <Circle cx="10" cy="17" r="1" fill="#fff" opacity={0.4} />
+        <Circle cx="14" cy="18" r="0.7" fill="#fff" opacity={0.3} />
+        {/* Top Rim highlighting */}
+        <Path d="M9.5,4 L14.5,4" stroke="#fff" strokeWidth="1" opacity={0.3} />
     </Svg>
 );
 
@@ -455,8 +470,24 @@ export const TreeCherryIcon: React.FC<IconProps> = ({ size = 24 }) => (
 
 export const QuestUpgradeIcon: React.FC<IconProps> = ({ size = 20, color = '#60a5fa' }) => (
     <Svg width={size} height={size} viewBox="0 0 24 24">
-        {/* Wrench/Gear */}
-        <Path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.7-3.7a6 6 0 0 1-8.5 8.5l-2.8 2.8a1 1 0 0 1-1.4 0L7 15l-4 4 1.5 1.5 4-4 1.7-1.7a1 1 0 0 1 0-1.4l-2.8-2.8a6 6 0 0 1 8.5-8.5l-3.7 3.7a1 1 0 0 0 0 1.4z" fill={color} />
+        {/* Wrench - Diagonal based on reference silhouette */}
+        <G transform="rotate(-45, 12, 12)">
+            {/* Wrench Body/Handle */}
+            <Rect x="10" y="8" width="4" height="14" rx="2" fill={color} />
+            {/* Wrench Head */}
+            <Path
+                d="M12,2 C8.68,2 6,4.68 6,8 C6,9.25 6.39,10.41 7.05,11.36 L16.95,11.36 C17.61,10.41 18,9.25 18,8 C18,4.68 15.32,2 12,2 Z"
+                fill={color}
+            />
+            {/* The Cutout in the head */}
+            <Path
+                d="M12,2 L12,7 L8.5,10.5 L12,14 L12,14 L15.5,10.5 L12,7 Z"
+                fill="#1a1a1a"
+                transform="translate(0, -1)"
+            />
+            {/* Small hole at the bottom of handle */}
+            <Circle cx="12" cy="19.5" r="1" fill="#1a1a1a" />
+        </G>
     </Svg>
 );
 
@@ -613,6 +644,106 @@ export const ShopCoinMultiplierIcon: React.FC<IconProps> = ({ size = 28 }) => (
     </Svg>
 );
 
+// Standalone White Cursor for Quests
+export const CursorWhiteIcon: React.FC<IconProps> = ({ size = 20 }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        <G transform="rotate(-15, 12, 12)">
+            <Path d="M4,0 v13 l3,-3 l2,5 h2 l-2,-5 h5 Z" fill="#fff" stroke="#000" strokeWidth="1" />
+        </G>
+    </Svg>
+);
+
+// Colored Lab Icons
+export const LabGreyIcon: React.FC<IconProps> = (props) => <LabIcon {...props} color="#94a3b8" />;
+export const LabBlueIcon: React.FC<IconProps> = (props) => <LabIcon {...props} color="#38bdf8" />;
+export const LabPurpleIcon: React.FC<IconProps> = (props) => <LabIcon {...props} color="#a855f7" />;
+export const LabYellowIcon: React.FC<IconProps> = (props) => <LabIcon {...props} color="#fbbf24" />;
+
+// ============ PRESTIGE SHOP ICONS (Specific) ============
+
+export const PrestigeStrongArmIcon: React.FC<IconProps> = ({ size = 28 }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        <Defs>
+            <LinearGradient id="armGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <Stop offset="0%" stopColor="#e879f9" />
+                <Stop offset="100%" stopColor="#a855f7" />
+            </LinearGradient>
+        </Defs>
+        {/* Strong Arm / Flexing Muscle */}
+        <Path
+            d="M4 14 Q2 10 6 8 Q10 6 12 10 L16 8 Q20 10 18 16 Q16 22 10 20 Q6 18 4 14"
+            fill="url(#armGrad)"
+            stroke="#7e22ce"
+            strokeWidth="1.5"
+        />
+        <Path d="M10 12 Q12 10 14 12" fill="none" stroke="#fff" strokeWidth="1.5" opacity={0.4} />
+    </Svg>
+);
+
+export const PrestigeGoldenTouchIcon: React.FC<IconProps> = ({ size = 28 }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        {/* Purple Coin */}
+        <G transform="translate(-2, 2)">
+            <Circle cx="10" cy="10" r="9" fill="#a855f7" stroke="#7e22ce" strokeWidth="1.5" />
+            <Path d="M10 5 V15 M7 8 L10 5 L13 8" fill="none" stroke="#fff" strokeWidth="2" opacity={0.3} />
+        </G>
+        {/* Floating Purple Arrow Up */}
+        <G transform="translate(14, 4) scale(0.8)">
+            <Path d="M0 8 L4 0 L8 8 M4 0 L4 16" fill="none" stroke="#e879f9" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+        </G>
+    </Svg>
+);
+
+export const PrestigeLargeEnergyIcon: React.FC<IconProps> = ({ size = 28 }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        <RadialGradient id="bigEnergyGlow" cx="50%" cy="50%">
+            <Stop offset="0%" stopColor="#e879f9" stopOpacity="0.6" />
+            <Stop offset="100%" stopColor="#a855f7" stopOpacity="0" />
+        </RadialGradient>
+        <Circle cx="12" cy="12" r="11" fill="url(#bigEnergyGlow)" />
+        <Path d="M14 2 L7 13 L11 13 L9 22 L17 11 L13 11 L13 2" fill="#a855f7" stroke="#7e22ce" strokeWidth="1" />
+        <Path d="M13.5 4 L9 12 L11 12 L10 18 L15 12 L13.5 12 L13.5 4" fill="#fff" opacity={0.3} />
+    </Svg>
+);
+
+export const PrestigeRapidGrowthIcon: React.FC<IconProps> = ({ size = 28 }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        {/* Purple Tree */}
+        <G transform="translate(-2, 2) scale(0.9)">
+            <Path d="M10 22 L10 14" stroke="#7e22ce" strokeWidth="3" strokeLinecap="round" />
+            <Circle cx="10" cy="8" r="7" fill="#a855f7" stroke="#7e22ce" strokeWidth="1" />
+        </G>
+        {/* Tiny Arrow Right of Tree */}
+        <G transform="translate(16, 8) scale(0.5)">
+            <Path d="M0 8 L4 0 L8 8 M4 0 L4 16" fill="none" stroke="#e879f9" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+        </G>
+    </Svg>
+);
+
+export const PrestigeEternalEnergyIcon: React.FC<IconProps> = ({ size = 28 }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        {/* Large Energy */}
+        <Path d="M12 2 L7 12 L11 12 L9 21 L16 11 L12 11 L12 2" fill="#a855f7" stroke="#7e22ce" strokeWidth="1" />
+        {/* Tiny Time Badge Bottom Right */}
+        <G transform="translate(13, 13) scale(0.45)">
+            <Circle cx="12" cy="12" r="10" fill="#1a1a1a" stroke="#e879f9" strokeWidth="3" />
+            <Path d="M12 6 V12 L16 16" fill="none" stroke="#e879f9" strokeWidth="3" strokeLinecap="round" />
+        </G>
+    </Svg>
+);
+
+export const PrestigeEternalWealthIcon: React.FC<IconProps> = ({ size = 28 }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        {/* Purple Coin */}
+        <Circle cx="10" cy="10" r="9" fill="#a855f7" stroke="#7e22ce" strokeWidth="1.5" />
+        {/* Tiny Time Badge Bottom Right */}
+        <G transform="translate(13, 13) scale(0.45)">
+            <Circle cx="12" cy="12" r="10" fill="#1a1a1a" stroke="#e879f9" strokeWidth="3" />
+            <Path d="M12 6 V12 L16 16" fill="none" stroke="#e879f9" strokeWidth="3" strokeLinecap="round" />
+        </G>
+    </Svg>
+);
+
 // Map string identifiers to Components
 export const getIconByName = (name: string, size = 20, color?: string) => {
     const props = { size, color };
@@ -622,6 +753,14 @@ export const getIconByName = (name: string, size = 20, color?: string) => {
         case 'icon_energy': return <EnergyIcon {...props} />;
         case 'icon_gem': return <GemIcon {...props} />;
         case 'icon_prestige': return <PrestigeIcon {...props} />;
+
+        // Prestige Specific
+        case 'prestige_power': return <PrestigeStrongArmIcon {...props} />;
+        case 'prestige_coin': return <PrestigeGoldenTouchIcon {...props} />;
+        case 'prestige_energy_big': return <PrestigeLargeEnergyIcon {...props} />;
+        case 'prestige_rapid': return <PrestigeRapidGrowthIcon {...props} />;
+        case 'prestige_auto_energy': return <PrestigeEternalEnergyIcon {...props} />;
+        case 'prestige_auto_wealth': return <PrestigeEternalWealthIcon {...props} />;
 
         // Shop Specific
         case 'shop_tap': return <ShopTapIcon {...props} />;
@@ -649,10 +788,15 @@ export const getIconByName = (name: string, size = 20, color?: string) => {
         // Quests
         case 'quest_upgrade': return <QuestUpgradeIcon {...props} />;
         case 'quest_tap': return <QuestTapIcon {...props} />;
+        case 'quest_cursor': return <CursorWhiteIcon {...props} />;
         case 'quest_height': return <QuestHeightIcon {...props} />;
         case 'quest_energy': return <EnergyIcon {...props} />;
-        case 'quest_roulette': return <RouletteIcon {...props} />;
+        case 'quest_roulette': return <CasinoIcon {...props} />;
         case 'quest_lab': return <QuestLabIcon {...props} />;
+        case 'lab_grey': return <LabGreyIcon {...props} />;
+        case 'lab_blue': return <LabBlueIcon {...props} />;
+        case 'lab_purple': return <LabPurpleIcon {...props} />;
+        case 'lab_yellow': return <LabYellowIcon {...props} />;
         case 'quest_unlock': return <TreeIcon {...props} />; // Reuse genric tree
 
         // Fallback
