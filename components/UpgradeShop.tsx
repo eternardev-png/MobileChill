@@ -22,11 +22,23 @@ const getUpgradeIcon = (iconType: string, size: number = 28): JSX.Element => {
 
 export const UpgradeShop: React.FC<UpgradeShopProps> = ({ onClose }) => {
     const { state, buyUpgrade } = useGame();
+    const [activeTab, setActiveTab] = React.useState<'active' | 'idle' | 'bonus'>('active');
     const upgrades = getAllUpgrades();
 
     const handleBuy = (upgradeId: string) => {
         buyUpgrade(upgradeId);
     };
+
+    const getFilteredUpgrades = () => {
+        return upgrades.filter(u => {
+            if (activeTab === 'active') return ['tapPower', 'growthSpeed'].includes(u.id);
+            if (activeTab === 'idle') return ['autoEnergy', 'autoGrowth', 'autoCoin'].includes(u.id);
+            if (activeTab === 'bonus') return ['coinBonus'].includes(u.id);
+            return false;
+        });
+    };
+
+    const filteredUpgrades = getFilteredUpgrades();
 
     return (
         <View style={styles.overlay}>
@@ -44,8 +56,30 @@ export const UpgradeShop: React.FC<UpgradeShopProps> = ({ onClose }) => {
                     <Text style={styles.balanceValue}>{Math.floor(state.coins)}</Text>
                 </View>
 
+                {/* Tabs */}
+                <View style={styles.tabsContainer}>
+                    <TouchableOpacity
+                        style={[styles.tabButton, activeTab === 'active' && styles.tabButtonActive]}
+                        onPress={() => setActiveTab('active')}
+                    >
+                        <Text style={[styles.tabText, activeTab === 'active' && styles.tabTextActive]}>Active</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.tabButton, activeTab === 'idle' && styles.tabButtonActive]}
+                        onPress={() => setActiveTab('idle')}
+                    >
+                        <Text style={[styles.tabText, activeTab === 'idle' && styles.tabTextActive]}>Idle</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.tabButton, activeTab === 'bonus' && styles.tabButtonActive]}
+                        onPress={() => setActiveTab('bonus')}
+                    >
+                        <Text style={[styles.tabText, activeTab === 'bonus' && styles.tabTextActive]}>Bonus</Text>
+                    </TouchableOpacity>
+                </View>
+
                 <ScrollView style={styles.list}>
-                    {upgrades.map(upgrade => {
+                    {filteredUpgrades.map(upgrade => {
                         const currentLevel = state.upgradeLevels[upgrade.id] || 0;
                         const isMaxed = currentLevel >= upgrade.maxLevel;
                         const cost = calculateUpgradeCost(upgrade, currentLevel);
@@ -238,5 +272,29 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 14,
         fontWeight: 'bold',
+    },
+    tabsContainer: {
+        flexDirection: 'row',
+        marginBottom: 14,
+        paddingHorizontal: 4,
+        gap: 8,
+    },
+    tabButton: {
+        flex: 1,
+        paddingVertical: 10,
+        backgroundColor: '#333',
+        borderRadius: 10,
+        alignItems: 'center',
+    },
+    tabButtonActive: {
+        backgroundColor: '#3b82f6',
+    },
+    tabText: {
+        color: '#888',
+        fontWeight: 'bold',
+        fontSize: 13,
+    },
+    tabTextActive: {
+        color: '#fff',
     },
 });

@@ -246,7 +246,17 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setState(prev => {
                     const energyBonus = 1 + getPrestigeEnergyBonus();
                     const gain = rate * currentSpecies.energyPerTap * energyBonus;
-                    return { ...prev, energy: prev.energy + gain, totalEnergyEarned: prev.totalEnergyEarned + gain };
+
+                    const oldMilestone = Math.floor(prev.totalEnergyEarned / 1000);
+                    const newMilestone = Math.floor((prev.totalEnergyEarned + gain) / 1000);
+                    const seedsGain = newMilestone - oldMilestone;
+
+                    return {
+                        ...prev,
+                        energy: prev.energy + gain,
+                        totalEnergyEarned: prev.totalEnergyEarned + gain,
+                        seeds: prev.seeds + seedsGain
+                    };
                 });
             }, 1000 / (currentSpecies.timeMultiplier || 1.0));
         }
@@ -323,10 +333,25 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 coinReward += newLevel * 10 * coinMult * species.coinMultiplier;
             }
 
+            // Reward Calculation
+            const levelsGained = newLevel - oldStats.level;
+            const seedsFromLevel = levelsGained; // 1 Seed per Level
+
+            const oldEnergyMilestone = Math.floor(prev.totalEnergyEarned / 1000);
+            const newEnergyMilestone = Math.floor((prev.totalEnergyEarned + energyGain) / 1000);
+            const seedsFromEnergy = newEnergyMilestone - oldEnergyMilestone; // 1 Seed per 1000 Energy
+
+            const oldTapMilestone = Math.floor(prev.totalTaps / 100);
+            const newTapMilestone = Math.floor((prev.totalTaps + 1) / 100);
+            const seedsFromTaps = newTapMilestone - oldTapMilestone; // 1 Seed per 100 Taps
+
+            const totalSeedsReward = seedsFromLevel + seedsFromEnergy + seedsFromTaps;
+
             return {
                 ...prev,
                 energy: prev.energy + energyGain,
                 coins: prev.coins + coinReward,
+                seeds: prev.seeds + totalSeedsReward,
                 totalTaps: prev.totalTaps + 1,
                 totalEnergyEarned: prev.totalEnergyEarned + energyGain,
                 treeStats: {
