@@ -41,7 +41,7 @@ const RouletteGlow = () => (
 const GameContent = () => {
     const { state, saveGame, loadGame, resetGame, addResources, getClaimableQuestsCount } = useGame();
     const [activeTab, setActiveTab] = useState<'shop' | 'tree' | 'quests' | 'collection' | 'prestige' | 'lab'>('tree');
-    const [showWelcome, setShowWelcome] = useState(false);
+    const [showWelcome, setShowWelcome] = useState(true);
     const [offlineEarnings, setOfflineEarnings] = useState<{ money: number, energy: number } | null>(null);
     const [showRoulette, setShowRoulette] = useState(false);
 
@@ -55,6 +55,7 @@ const GameContent = () => {
             } else {
                 try {
                     const parsed = JSON.parse(saved);
+                    setShowWelcome(false);
                     const now = Date.now();
                     const timeDiff = (now - (parsed.lastSaveTime || now)) / 1000;
                     if (timeDiff > 60) {

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, Dimensions } from 'react-native';
-import { CoinIcon, TreeIcon } from './Icons';
+import { CherryBlossomTree } from './CherryBlossomTree';
 
 const { width, height } = Dimensions.get('window');
 
@@ -30,26 +30,15 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart }) => {
     return (
         <View style={styles.container}>
             <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-                <View style={styles.iconContainer}>
-                    <Text style={styles.cherryBlossomIcon}>🌸</Text>
+                <View style={styles.treeContainer}>
+                    <CherryBlossomTree />
                 </View>
-                <Text style={styles.title}>Eternal Tree</Text>
-                <Text style={styles.subtitle}>Grow, Cultivate, Ascend.</Text>
 
-                <View style={styles.features}>
-                    <View style={styles.featureItem}>
-                        <Text style={styles.featureEmoji}>🌸</Text>
-                        <Text style={styles.featureText}>Grow mystical trees</Text>
-                    </View>
-                    <View style={styles.featureItem}>
-                        <Text style={styles.featureEmoji}>⚡</Text>
-                        <Text style={styles.featureText}>Collect cosmic energy</Text>
-                    </View>
-                    <View style={styles.featureItem}>
-                        <Text style={styles.featureEmoji}>✨</Text>
-                        <Text style={styles.featureText}>Ascend through prestige</Text>
-                    </View>
+                <View style={styles.titleBox}>
+                    <Text style={styles.title}>Eternal Tree</Text>
                 </View>
+
+                <Text style={styles.subtitle}>🌸 Grow, Cultivate, Ascend.</Text>
 
                 <TouchableOpacity style={styles.startButton} onPress={onStart}>
                     <Text style={styles.startButtonText}>Start</Text>
@@ -70,59 +59,56 @@ const styles = StyleSheet.create({
     },
     content: {
         alignItems: 'center',
-        width: '80%',
+        width: '100%',
+        marginTop: -80, // Shift everything up
     },
-    iconContainer: {
-        marginBottom: 20,
+    treeContainer: {
+        position: 'relative',
+        marginBottom: -5,
+        zIndex: 1, // Below other elements
+    },
+    titleBox: {
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        borderWidth: 2,
+        borderColor: '#ff69b4',
+        borderRadius: 20,
+        paddingVertical: 20,
+        paddingHorizontal: 40,
         shadowColor: '#ff69b4',
         shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.8,
-        shadowRadius: 30,
-    },
-    cherryBlossomIcon: {
-        fontSize: 100,
-        textShadowColor: '#ff69b4',
-        textShadowOffset: { width: 0, height: 0 },
-        textShadowRadius: 30,
+        shadowOpacity: 0.6,
+        shadowRadius: 20,
+        zIndex: 2, // Above tree
     },
     title: {
-        fontSize: 42,
+        fontSize: 48,
         fontWeight: 'bold',
         color: '#fff',
-        marginBottom: 8,
         textAlign: 'center',
     },
     subtitle: {
-        fontSize: 18,
+        fontSize: 20,
         color: '#ffb3d9',
+        marginTop: 20,
         marginBottom: 40,
         textAlign: 'center',
+        zIndex: 2,
     },
-    features: {
-        marginBottom: 40,
-        gap: 15,
-    },
-    featureItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 10,
-    },
-    featureEmoji: { fontSize: 20 },
-    featureText: { color: '#ccc', fontSize: 16 },
     startButton: {
         backgroundColor: '#ff69b4',
-        paddingVertical: 16,
-        paddingHorizontal: 60,
+        paddingVertical: 18,
+        paddingHorizontal: 70,
         borderRadius: 30,
         elevation: 5,
         shadowColor: '#ff69b4',
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.5,
-        shadowRadius: 12,
+        shadowOpacity: 0.6,
+        shadowRadius: 15,
+        zIndex: 3, // Above everything
     },
     startButtonText: {
         color: '#fff',
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: 'bold',
     },
 });
