@@ -360,7 +360,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const level = state.upgradeLevels[upgradeId] || 0;
         const cost = calculateUpgradeCost(upgrade, level);
         if (state.coins < cost || level >= upgrade.maxLevel) return false;
-        setState(prev => ({ ...prev, coins: prev.coins - cost, upgradeLevels: { ...prev.upgradeLevels, [upgradeId]: level + 1 } }));
+        setState(prev => ({
+            ...prev,
+            coins: prev.coins - cost,
+            upgradeLevels: { ...prev.upgradeLevels, [upgradeId]: level + 1 },
+            totalUpgradesPurchased: (prev.totalUpgradesPurchased || 0) + 1
+        }));
         return true;
     }, [state.coins, state.upgradeLevels]);
 
@@ -375,6 +380,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             case 'unlock_species': completed = state.unlockedTrees.length >= quest.objective.target; break;
             case 'tree_level': completed = Object.values(state.treeStats).some(s => s.level >= quest.objective.target); break;
             case 'specific_tree_level': const t = state.treeStats[quest.objective.treeId || 'oak']; completed = t && t.level >= quest.objective.target; break;
+            case 'roulette_spins': completed = (state.totalSpins || 0) >= quest.objective.target; break;
+            case 'upgrades_purchased': completed = (state.totalUpgradesPurchased || 0) >= quest.objective.target; break;
+            case 'lab_trees_created': completed = (state.totalLabTreesCreated || 0) >= quest.objective.target; break;
         }
         if (!completed) return false;
         setState(prev => ({
@@ -442,6 +450,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 case 'unlock_species': done = state.unlockedTrees.length >= quest.objective.target; break;
                 case 'tree_level': done = Object.values(state.treeStats).some(s => s.level >= quest.objective.target); break;
                 case 'specific_tree_level': const t = state.treeStats[quest.objective.treeId || 'oak']; done = t && t.level >= quest.objective.target; break;
+                case 'roulette_spins': done = (state.totalSpins || 0) >= quest.objective.target; break;
+                case 'upgrades_purchased': done = (state.totalUpgradesPurchased || 0) >= quest.objective.target; break;
+                case 'lab_trees_created': done = (state.totalLabTreesCreated || 0) >= quest.objective.target; break;
             }
             if (done) count++;
         }

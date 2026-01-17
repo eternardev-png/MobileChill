@@ -245,16 +245,18 @@ export const TreeLab: React.FC<TreeLabProps> = ({ onClose }) => {
     return (
         <View style={styles.overlay}>
             <View style={styles.container}>
-                <View style={styles.header}>
-                    <View style={styles.headerTitleRow}>
+                <View style={[styles.header, { alignItems: 'flex-start' }]}>
+                    <View>
                         <Text style={styles.title}>Tree Laboratory</Text>
-                        <View style={[styles.costBadge, cost > state.seeds && styles.costBadgeRed]}>
-                            <Text style={styles.costText}>{cost}</Text>
-                            <SeedIcon size={14} color="#fff" />
-                        </View>
-                        {/* Rarity Badge */}
-                        <View style={[styles.rarityBadge, { backgroundColor: rarityColors[currentRarity] + '33', borderColor: rarityColors[currentRarity] }]}>
-                            <Text style={[styles.rarityText, { color: rarityColors[currentRarity] }]}>{currentRarity.toUpperCase()}</Text>
+                        <View style={styles.badgesRow}>
+                            <View style={[styles.costBadge, cost > state.seeds && styles.costBadgeRed]}>
+                                <Text style={styles.costText}>{cost}</Text>
+                                <SeedIcon size={14} color="#fff" />
+                            </View>
+                            {/* Rarity Badge */}
+                            <View style={[styles.rarityBadge, { backgroundColor: rarityColors[currentRarity] + '33', borderColor: rarityColors[currentRarity] }]}>
+                                <Text style={[styles.rarityText, { color: rarityColors[currentRarity] }]}>{currentRarity.toUpperCase()}</Text>
+                            </View>
                         </View>
                     </View>
                     <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
@@ -385,7 +387,7 @@ const styles = StyleSheet.create({
         borderBottomColor: '#222',
         marginBottom: 10,
     },
-    headerTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    badgesRow: { flexDirection: 'row', alignItems: 'center', marginTop: 8 },
     title: { fontSize: 24, fontWeight: '900', color: '#a855f7', letterSpacing: 1 },
     costBadge: { flexDirection: 'row', backgroundColor: '#222', padding: 6, borderRadius: 8, gap: 4, alignItems: 'center', borderWidth: 1, borderColor: '#333' },
     costBadgeRed: { borderColor: '#ef4444' },
