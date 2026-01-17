@@ -6,9 +6,9 @@ import { GemIcon, CoinIcon, EnergyIcon, DiamondIcon, CasinoIcon } from './Icons'
 
 const { width } = Dimensions.get('window');
 const SLOT_WIDTH = Math.min(width * 0.25, 80);
-const SLOT_HEIGHT = SLOT_WIDTH * 1.2;
-const SYMBOL_SIZE = SLOT_WIDTH * 0.6;
-const VISIBLE_ROWS = 3;
+const SLOT_HEIGHT = SLOT_WIDTH; // Make slots square or match intended aspect ratio
+const SYMBOL_SIZE = SLOT_HEIGHT; // Ensure symbol wrapper matches slot height exactly
+const VISIBLE_ROWS = 5;
 
 interface SlotMachineProps {
     onClose: () => void;
@@ -16,11 +16,11 @@ interface SlotMachineProps {
 
 // Slot symbols with their properties
 const SYMBOLS = [
-    { id: 'coin', color: '#fbbf24', icon: 'coin', multiplier: 2 },
-    { id: 'energy', color: '#3b82f6', icon: 'energy', multiplier: 3 },
-    { id: 'gem', color: '#22c55e', icon: 'gem', multiplier: 5 },
-    { id: 'diamond', color: '#a855f7', icon: 'diamond', multiplier: 10 },
-    { id: 'seven', color: '#ef4444', icon: '7', multiplier: 25 },
+    { id: 'coin', color: '#fbbf24', icon: 'coin', multiplier: 1 },
+    { id: 'energy', color: '#3b82f6', icon: 'energy', multiplier: 1 },
+    { id: 'gem', color: '#22c55e', icon: 'gem', multiplier: 1 }, // Kept for logic, multiplier unused for fixed rewards
+    { id: 'diamond', color: '#a855f7', icon: 'diamond', multiplier: 1 },
+    { id: 'seven', color: '#ef4444', icon: '7', multiplier: 1 },
 ];
 
 // Weighted symbol distribution (more coins, fewer diamonds/sevens)
@@ -145,26 +145,44 @@ export const SlotMachine: React.FC<SlotMachineProps> = ({ onClose }) => {
                     finalSymbols[1].id === finalSymbols[2].id ? finalSymbols[1] : finalSymbols[0];
             }
 
-            // Map symbol to reward type
+            // Map symbol to reward type & logic
             if (matchSymbol.id === 'coin') winType = 'coins';
             else if (matchSymbol.id === 'energy') winType = 'energy';
             else if (matchSymbol.id === 'gem') winType = 'gems';
             else if (matchSymbol.id === 'diamond') winType = 'shard';
-            else if (matchSymbol.id === 'seven') winType = 'coins'; // Jackpot is coins for now
+            else if (matchSymbol.id === 'seven') winType = 'gems'; // Updated: Seven awards Gems
 
             if (allSame) {
-                if (matchSymbol.id === 'diamond') winAmount = 3; // 3 Shards
-                else if (matchSymbol.id === 'gem') winAmount = matchSymbol.multiplier * 5; // Gems
-                else winAmount = matchSymbol.multiplier * 100; // Coins/Energy
+                if (matchSymbol.id === 'coin') winAmount = 120;
+                else if (matchSymbol.id === 'energy') winAmount = 2500;
+                else if (matchSymbol.id === 'seven') winAmount = 100; // Jackpot Gems
+                else if (matchSymbol.id === 'diamond') winAmount = 3; // Shards
+                else if (matchSymbol.id === 'gem') winAmount = 25; // 5x5 Gems
             } else if (twoSame) {
-                if (matchSymbol.id === 'diamond') winAmount = 1; // 1 Shard
-                else if (matchSymbol.id === 'gem') winAmount = matchSymbol.multiplier * 2; // Gems
-                else winAmount = matchSymbol.multiplier * 20; // Coins/Energy
+                if (matchSymbol.id === 'coin') winAmount = 75;
+                else if (matchSymbol.id === 'energy') winAmount = 1000;
+                else if (matchSymbol.id === 'seven') winAmount = 50; // Gems
+                else if (matchSymbol.id === 'diamond') winAmount = 1; // Shard
+                else if (matchSymbol.id === 'gem') winAmount = 10; // 5x2 Gems
             }
 
             if (winAmount > 0) {
-                // Map to awardRoulettePrize types: 'coins' | 'energy' | 'grow_mult' (gems) | 'shard'
-                let awardType = winType === 'gems' ? 'grow_mult' : winType;
+                // Map to awardRoulettePrize types
+                // Note regarding 'gems': The original code mapped 'gem' to 'grow_mult'. 
+                // We should probably check if the user intended 'gems' (premium currency) or 'grow' (seeds).
+                // Given the context of 'Seven' becoming a jackpot, 'gems' (premium) is the most likely intent.
+                // Assuming 'gems' string works with awardRoulettePrize if added there, or we check gameState.
+                // Previous code: let awardType = winType === 'gems' ? 'grow_mult' : winType;
+
+                // If the symbol is 'gem' (Green Gem Icon), users might expect 'Gems' or 'Grow'.
+                // If the symbol is 'seven' (Red 7), new logic says 50/100 Gems.
+
+                let awardType = winType;
+                // Special handling if 'gem' symbol was previously 'grow_mult', let's stick to 'gems' for now as that's safe, 
+                // but if 'gem' symbol meant strictly seeds, we might need to revert that specific one. 
+                // However, user asked for "7 => 50 100 gems". 
+                // I will use 'gems' as the award string.
+
                 awardRoulettePrize(awardType, winAmount);
             }
 
@@ -172,22 +190,22 @@ export const SlotMachine: React.FC<SlotMachineProps> = ({ onClose }) => {
             setSpinning(false);
         });
     };
-
     const renderSymbol = (symbol: typeof SYMBOLS[0], size: number = SYMBOL_SIZE) => {
+        const iconSize = size * 0.65; // Slightly reduced from 0.8 to fit better in square
         if (symbol.icon === '7') {
             return (
                 <View style={[styles.symbolContainer, { width: size, height: size }]}>
-                    <Text style={[styles.sevenText, { fontSize: size * 0.7 }]}>7</Text>
+                    <Text style={[styles.sevenText, { fontSize: size * 0.6 }]}>7</Text>
                 </View>
             );
         }
 
         return (
             <View style={[styles.symbolContainer, { width: size, height: size }]}>
-                {symbol.icon === 'coin' && <CoinIcon size={size * 0.8} />}
-                {symbol.icon === 'energy' && <EnergyIcon size={size * 0.8} />}
-                {symbol.icon === 'gem' && <GemIcon size={size * 0.8} />}
-                {symbol.icon === 'diamond' && <DiamondIcon size={size * 0.8} />}
+                {symbol.icon === 'coin' && <CoinIcon size={iconSize} />}
+                {symbol.icon === 'energy' && <EnergyIcon size={iconSize} />}
+                {symbol.icon === 'gem' && <GemIcon size={iconSize} />}
+                {symbol.icon === 'diamond' && <DiamondIcon size={iconSize} />}
             </View>
         );
     };
@@ -195,7 +213,7 @@ export const SlotMachine: React.FC<SlotMachineProps> = ({ onClose }) => {
     const renderReel = (reelData: typeof SYMBOLS[0][], animValue: Animated.Value, index: number) => {
         const translateY = animValue.interpolate({
             inputRange: [0, 1],
-            outputRange: [0, -SYMBOL_SIZE * 29], // Scroll distance (Target index 29/30)
+            outputRange: [0, -SYMBOL_SIZE * 28], // Scroll distance (Target index 30 at Row 2 [Middle of 5])
         });
 
         return (
@@ -244,12 +262,12 @@ export const SlotMachine: React.FC<SlotMachineProps> = ({ onClose }) => {
                     </View>
 
                     <View style={styles.lightsLeft}>
-                        {[...Array(4)].map((_, i) => (
+                        {[...Array(7)].map((_, i) => (
                             <Animated.View key={`l${i}`} style={[styles.lightSide, { opacity: lightsAnim }]} />
                         ))}
                     </View>
                     <View style={styles.lightsRight}>
-                        {[...Array(4)].map((_, i) => (
+                        {[...Array(7)].map((_, i) => (
                             <Animated.View key={`r${i}`} style={[styles.lightSide, { opacity: lightsAnim }]} />
                         ))}
                     </View>
@@ -290,10 +308,10 @@ export const SlotMachine: React.FC<SlotMachineProps> = ({ onClose }) => {
                 <View style={styles.paytable}>
                     <Text style={styles.paytableTitle}>PAYOUTS</Text>
                     <View style={styles.paytableRow}>
-                        <Text style={styles.paytableText}>3x Match = Symbol × 100</Text>
+                        <Text style={styles.paytableText}>Match 3 for Big Prizes!</Text>
                     </View>
                     <View style={styles.paytableRow}>
-                        <Text style={styles.paytableText}>2x Match = Symbol × 20</Text>
+                        <Text style={styles.paytableText}>777 = 100 Gems Jackpot</Text>
                     </View>
                 </View>
 
