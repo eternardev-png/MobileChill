@@ -39,7 +39,7 @@ export const CasinoMenu: React.FC<CasinoMenuProps> = ({ onClose }) => {
 
                 <View style={styles.header}>
                     <Text style={styles.title}>CASINO</Text>
-                    <CasinoIcon size={32} color="#fbbf24" />
+                    <GemIcon size={32} />
                 </View>
 
                 <Text style={styles.subtitle}>CHOOSE YOUR GAME</Text>

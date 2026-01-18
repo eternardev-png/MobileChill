@@ -16,14 +16,14 @@ interface RouletteWheelProps {
 const PRIZES = [
     { id: 'coins_100', label: '100', value: 100, type: 'coins', color: 'rgba(251, 191, 36, 0.85)', chance: 15 },      // Yellow bright
     { id: 'energy_500', label: '500', value: 500, type: 'energy', color: 'rgba(59, 130, 246, 0.85)', chance: 15 },    // Blue bright
-    { id: 'grow_15', label: '15', value: 15, type: 'grow_mult', color: 'rgba(74, 222, 128, 0.85)', chance: 5 },       // Green bright - no "x"
+    { id: 'grow_15', label: '15', value: 15, type: 'gems', color: 'rgba(74, 222, 128, 0.85)', chance: 5 },          // Green bright
     { id: 'coins_500', label: '500', value: 500, type: 'coins', color: 'rgba(251, 191, 36, 0.85)', chance: 10 },      // Yellow bright
     { id: 'energy_1000', label: '1K', value: 1000, type: 'energy', color: 'rgba(59, 130, 246, 0.85)', chance: 10 },   // Blue bright
     { id: 'coins_1000', label: '1K', value: 1000, type: 'coins', color: 'rgba(251, 191, 36, 0.85)', chance: 8 },      // Yellow bright
     { id: 'energy_2000', label: '2K', value: 2000, type: 'energy', color: 'rgba(59, 130, 246, 0.85)', chance: 8 },    // Blue bright
     { id: 'shard', label: 'Shard', value: 1, type: 'shard', color: 'rgba(168, 85, 247, 0.85)', chance: 3 },           // Purple for shards
     { id: 'coins_2000', label: '2K', value: 2000, type: 'coins', color: 'rgba(251, 191, 36, 0.85)', chance: 5 },      // Yellow bright
-    { id: 'grow_50', label: '50', value: 50, type: 'grow_mult', color: 'rgba(74, 222, 128, 0.85)', chance: 2 },       // Rare 50x - between 2K and 100 coins
+    { id: 'grow_50', label: '50', value: 50, type: 'gems', color: 'rgba(74, 222, 128, 0.85)', chance: 2 },          // Rare 50 gems
 ];
 
 const TOTAL_CHANCE = PRIZES.reduce((sum, p) => sum + p.chance, 0);
@@ -299,7 +299,7 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({ onClose }) => {
                                     let iconColor = '#fff';
                                     if (p.type === 'coins') iconColor = '#fbbf24';      // Yellow/Gold for coins (same as GameHUD)
                                     if (p.type === 'energy') iconColor = '#facc15';     // Yellow for energy (same as GameHUD)
-                                    if (p.type === 'grow_mult') iconColor = '#4ade80';  // Green for growth
+                                    if (p.type === 'gems') iconColor = '#4ade80';  // Green for gems
                                     if (p.type === 'shard') iconColor = '#a855f7';      // Purple for shards
 
                                     return (
@@ -320,7 +320,7 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({ onClose }) => {
 
                                                 {p.type === 'coins' && <CoinIcon size={iconSize} />}
                                                 {p.type === 'energy' && <EnergyIcon size={iconSize} />}
-                                                {p.type === 'grow_mult' && <GemIcon size={iconSize} />}
+                                                {p.type === 'gems' && <GemIcon size={iconSize} />}
                                                 {p.type === 'shard' && <DiamondIcon size={iconSize} />}
                                             </G>
 

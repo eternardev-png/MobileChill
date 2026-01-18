@@ -638,6 +638,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // const currentSpecies = ...
 
     const awardRoulettePrize = useCallback((prizeType: string, prizeValue: number) => {
+        console.log(`[GameState] Awarding prize: ${prizeType} value: ${prizeValue}`);
         setState(prev => {
             let newState = { ...prev, totalSpins: (prev.totalSpins || 0) + 1 };
 
@@ -661,8 +662,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     newState.grow += prizeValue;
                     break;
                 case 'gems':
+                    console.log(`[GameState] Adding gems: ${prizeValue}. Old: ${prev.gems}, New: ${prev.gems + prizeValue}`);
                     newState.gems += prizeValue;
                     break;
+                default:
+                    console.warn(`[GameState] Unknown prize type: ${prizeType}`);
             }
 
             return newState;
