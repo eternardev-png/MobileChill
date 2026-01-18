@@ -36,13 +36,7 @@ export const TutorialOverlay: React.FC<{ visible: boolean }> = ({ visible }) => 
                 </View>
             )}
 
-            {/* Step 4: Close Shop */}
-            {tutorialStep === 4 && (
-                <View style={[styles.pointerContainer, { top: height * 0.17, left: width * 0.5 + 90, width: 200 }]}>
-                    <Text style={styles.text}>Close the Shop!</Text>
-                    <View style={styles.arrowDown} />
-                </View>
-            )}
+
 
             {/* Step 5: Open Quests */}
             {tutorialStep === 5 && (
@@ -60,13 +54,7 @@ export const TutorialOverlay: React.FC<{ visible: boolean }> = ({ visible }) => 
                 </View>
             )}
 
-            {/* Step 7: Close Quests */}
-            {tutorialStep === 7 && (
-                <View style={[styles.pointerContainer, { top: height * 0.02, left: width * 0.5 + 85, width: 200 }]}>
-                    <Text style={styles.text}>Close Quests!</Text>
-                    <View style={styles.arrowDown} />
-                </View>
-            )}
+
 
             {/* Step 8: Open Prestige */}
             {tutorialStep === 8 && (
@@ -100,13 +88,7 @@ export const TutorialOverlay: React.FC<{ visible: boolean }> = ({ visible }) => 
                 </View>
             )}
 
-            {/* Step 12: Close Prestige */}
-            {tutorialStep === 12 && (
-                <View style={[styles.pointerContainer, { top: height * 0.01, left: width * 0.5 + 105, width: 200 }]}>
-                    <Text style={styles.text}>Close Prestige!</Text>
-                    <View style={styles.arrowDown} />
-                </View>
-            )}
+
 
             {/* Step 9 (Old 4): Prestige Info - REMOVED or MOVED TO END? User flow ends at 8->9. No modal requested, just actions. */}
         </View>

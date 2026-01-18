@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, SafeAreaView, TouchableOpacity, Text, Dimensions, ImageBackground } from 'react-native';
+import { StyleSheet, View, SafeAreaView, TouchableOpacity, Text, Dimensions, ImageBackground, Platform } from 'react-native';
 import { useGame, GameProvider } from './gameState';
 import { GameHUD } from './components/GameHUD';
 import { Tree } from './components/Tree';
@@ -38,6 +38,14 @@ const GameContent = () => {
 
     // Loading and initialization logic...
     useEffect(() => {
+        // Disable pinch-zoom on web
+        if (Platform.OS === 'web') {
+            const meta = document.createElement('meta');
+            meta.name = 'viewport';
+            meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+            document.getElementsByTagName('head')[0].appendChild(meta);
+        }
+
         const checkSave = async () => {
             const saved = await telegram.cloudLoad('mobilechill_save');
             if (!saved) {

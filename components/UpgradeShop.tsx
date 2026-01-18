@@ -34,9 +34,17 @@ export const UpgradeShop: React.FC<UpgradeShopProps> = ({ onClose }) => {
                 <View style={styles.header}>
                     <Text style={styles.title}>🛒 Upgrade Shop</Text>
                     {state.tutorialStep !== 3 && (
-                        <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-                            <Text style={styles.closeBtnText}>✕</Text>
-                        </TouchableOpacity>
+                        <View style={{ alignItems: 'center' }}>
+                            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+                                <Text style={styles.closeBtnText}>✕</Text>
+                            </TouchableOpacity>
+                            {state.tutorialStep === 4 && (
+                                <View style={styles.tutorialTooltip}>
+                                    <View style={styles.arrowUp} />
+                                    <Text style={styles.tooltipText}>Close the Shop!</Text>
+                                </View>
+                            )}
+                        </View>
                     )}
                 </View>
 
@@ -321,5 +329,32 @@ const styles = StyleSheet.create({
     },
     tabTextActive: {
         color: '#fff',
+    },
+    tutorialTooltip: {
+        position: 'absolute',
+        top: 40,
+        right: -15,
+        width: 140,
+        alignItems: 'center',
+        zIndex: 200,
+    },
+    tooltipText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 14,
+        backgroundColor: 'rgba(0,0,0,0.85)',
+        padding: 8,
+        borderRadius: 8,
+        textAlign: 'center',
+    },
+    arrowUp: {
+        width: 0,
+        height: 0,
+        borderLeftWidth: 8,
+        borderRightWidth: 8,
+        borderBottomWidth: 8,
+        borderLeftColor: 'transparent',
+        borderRightColor: 'transparent',
+        borderBottomColor: 'rgba(0,0,0,0.85)',
     },
 });
