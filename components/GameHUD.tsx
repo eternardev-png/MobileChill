@@ -149,12 +149,22 @@ export const BottomControls: React.FC = () => {
             </View>
 
             {/* Redesigned Tap Button */}
-            <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-                <TouchableOpacity style={styles.tapButton} onPress={handleTap} activeOpacity={0.8}>
-                    <View style={styles.tapInner}>
-                        {/* Content removed per user request */}
+            <Animated.View style={{ transform: [{ scale: scaleAnim }], width: '100%', alignItems: 'center' }}>
+                <View style={styles.tapButton}>
+                    <View style={styles.splitHitboxContainer}>
+                        <TouchableOpacity
+                            style={styles.hitboxSide}
+                            onPress={handleTap}
+                            activeOpacity={0.7}
+                        />
+                        <View style={styles.hitboxDivider} />
+                        <TouchableOpacity
+                            style={styles.hitboxSide}
+                            onPress={handleTap}
+                            activeOpacity={0.7}
+                        />
                     </View>
-                </TouchableOpacity>
+                </View>
             </Animated.View>
         </View>
     );
@@ -323,16 +333,29 @@ const styles = StyleSheet.create({
     },
     tapButton: {
         backgroundColor: '#22c55e',
-        width: Dimensions.get('window').width * 0.9,
+        width: '98%',
         height: 64,
         borderRadius: 16,
-        alignItems: 'center',
-        justifyContent: 'center',
+        overflow: 'hidden', // Ensure hitboxes stay within rounds
         shadowColor: '#22c55e',
         shadowOffset: { width: 0, height: 0 },
         shadowOpacity: 0.6,
         shadowRadius: 15,
         elevation: 10,
+    },
+    splitHitboxContainer: {
+        flexDirection: 'row',
+        width: '100%',
+        height: '100%',
+    },
+    hitboxSide: {
+        flex: 1,
+        height: '100%',
+    },
+    hitboxDivider: {
+        width: 1,
+        height: '100%',
+        backgroundColor: 'rgba(255,255,255,0.1)', // Very subtle divider
     },
     tapInner: {
         alignItems: 'center',

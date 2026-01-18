@@ -1,11 +1,9 @@
 import React, { useRef, useEffect } from 'react';
-import { View, StyleSheet, Dimensions, Animated, Easing, TouchableWithoutFeedback, Text } from 'react-native';
+import { View, StyleSheet, useWindowDimensions, Animated, Easing, TouchableWithoutFeedback, Text } from 'react-native';
 import Svg, { Line, G, Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
 import { useGame } from '../gameState';
 import { TreeSpecies } from '../data/treeSpecies';
 import { TREE_GROUND_POSITION } from './GameHUD';
-
-const { width, height } = Dimensions.get('window');
 
 // Recursively generate tree branches with species-specific patterns
 const generateBranches = (
@@ -112,6 +110,7 @@ const generateBranches = (
 };
 
 export const Tree: React.FC = () => {
+  const { width, height } = useWindowDimensions();
   const { state, tap, allSpecies } = useGame();
   // const allSpecies = getAllSpecies(); // REMOVED
   const currentSpecies = allSpecies.find(s => s.id === state.currentTreeId) || allSpecies[0];
@@ -172,7 +171,7 @@ export const Tree: React.FC = () => {
   };
 
 
-  const BOTTOM_CONTROLS_HEIGHT = 236; // User specified position
+  const BOTTOM_CONTROLS_HEIGHT = 232; // User specified 232
   const centerX = width / 2;
   const startY = height - BOTTOM_CONTROLS_HEIGHT; // Always touch the line
 
@@ -204,7 +203,7 @@ export const Tree: React.FC = () => {
     <TouchableWithoutFeedback onPress={handleTap}>
       <View style={styles.container}>
         {/* Animated Container for the Tree pulse effect (Scale removed, just view) */}
-        <Animated.View style={[styles.svgContainer /*, { transform: [{ scale }] } */]}>
+        <Animated.View style={[styles.svgContainer, { width: width, height: height } /*, { transform: [{ scale }] } */]}>
           <Svg width={width} height={height}>
             <Defs>
               <RadialGradient id="glow" cx="50%" cy="50%">
@@ -273,8 +272,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
-    width: width,
-    height: height,
+    width: '100%',
+    height: '100%',
   },
   ripple: {
     position: 'absolute',

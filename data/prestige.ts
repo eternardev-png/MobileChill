@@ -7,7 +7,6 @@ export interface PrestigeUpgrade {
     icon: string;
     baseCost: number;
     costIncrease: number;
-    maxLevel: number;
     category: 'core' | 'auto' | 'special';
     effect: {
         type: 'tap_bonus' | 'coin_bonus' | 'energy_bonus' | 'growth_bonus' | 'auto_energy_bonus' | 'auto_growth_bonus' | 'max_tree_size' | 'auto_coin_bonus' | 'time_acceleration' | 'cosmetic';
@@ -27,7 +26,6 @@ export const PRESTIGE_UPGRADES: Record<string, PrestigeUpgrade> = {
         icon: 'prestige_power',
         baseCost: 5,
         costIncrease: 2,
-        maxLevel: 10,
         category: 'core',
         effect: { type: 'tap_bonus', valuePerLevel: 0.1 },
     },
@@ -39,7 +37,6 @@ export const PRESTIGE_UPGRADES: Record<string, PrestigeUpgrade> = {
         icon: 'prestige_coin',
         baseCost: 8,
         costIncrease: 3,
-        maxLevel: 10,
         category: 'core',
         effect: { type: 'coin_bonus', valuePerLevel: 0.15 },
     },
@@ -51,7 +48,6 @@ export const PRESTIGE_UPGRADES: Record<string, PrestigeUpgrade> = {
         icon: 'prestige_energy_big',
         baseCost: 6,
         costIncrease: 2,
-        maxLevel: 10,
         category: 'core',
         effect: { type: 'energy_bonus', valuePerLevel: 0.1 },
     },
@@ -63,7 +59,6 @@ export const PRESTIGE_UPGRADES: Record<string, PrestigeUpgrade> = {
         icon: 'prestige_rapid',
         baseCost: 7,
         costIncrease: 2,
-        maxLevel: 10,
         category: 'core',
         effect: { type: 'growth_bonus', valuePerLevel: 0.08 },
     },
@@ -76,7 +71,6 @@ export const PRESTIGE_UPGRADES: Record<string, PrestigeUpgrade> = {
         icon: 'prestige_auto_energy',
         baseCost: 10,
         costIncrease: 4,
-        maxLevel: 15,
         category: 'auto',
         effect: { type: 'auto_energy_bonus', valuePerLevel: 0.15 },
     },
@@ -88,7 +82,6 @@ export const PRESTIGE_UPGRADES: Record<string, PrestigeUpgrade> = {
         icon: 'prestige_rapid',
         baseCost: 12,
         costIncrease: 5,
-        maxLevel: 15,
         category: 'auto',
         effect: { type: 'auto_growth_bonus', valuePerLevel: 0.1 },
     },
@@ -100,7 +93,6 @@ export const PRESTIGE_UPGRADES: Record<string, PrestigeUpgrade> = {
         icon: 'prestige_auto_wealth',
         baseCost: 15,
         costIncrease: 5,
-        maxLevel: 10,
         category: 'auto',
         effect: { type: 'auto_coin_bonus', valuePerLevel: 0.25 },
     },
@@ -112,7 +104,6 @@ export const PRESTIGE_UPGRADES: Record<string, PrestigeUpgrade> = {
         icon: 'prestige_time',
         baseCost: 20,
         costIncrease: 10,
-        maxLevel: 10,
         category: 'auto',
         effect: { type: 'time_acceleration', valuePerLevel: 0.05 },
     },
@@ -125,7 +116,6 @@ export const PRESTIGE_UPGRADES: Record<string, PrestigeUpgrade> = {
         icon: 'tree',
         baseCost: 20,
         costIncrease: 10,
-        maxLevel: 5,
         category: 'special',
         effect: { type: 'max_tree_size', valuePerLevel: 1 },
     },
@@ -138,7 +128,6 @@ export const PRESTIGE_UPGRADES: Record<string, PrestigeUpgrade> = {
         icon: 'prestige_cosmetic',
         baseCost: 15,
         costIncrease: 0,
-        maxLevel: 1,
         category: 'special',
         effect: { type: 'tap_bonus', valuePerLevel: 0.05 },
         cosmetic: { type: 'rgb_taps' },
@@ -151,7 +140,6 @@ export const PRESTIGE_UPGRADES: Record<string, PrestigeUpgrade> = {
         icon: 'prestige_cosmetic',
         baseCost: 30,
         costIncrease: 0,
-        maxLevel: 1,
         category: 'special',
         effect: { type: 'coin_bonus', valuePerLevel: 0.1 },
         cosmetic: { type: 'rgb_tree' },
@@ -164,7 +152,6 @@ export const PRESTIGE_UPGRADES: Record<string, PrestigeUpgrade> = {
         icon: 'prestige_cosmetic',
         baseCost: 12,
         costIncrease: 5,
-        maxLevel: 3,
         category: 'special',
         effect: { type: 'energy_bonus', valuePerLevel: 0.05 },
         cosmetic: { type: 'glow_intensity' },

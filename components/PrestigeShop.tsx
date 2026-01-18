@@ -139,7 +139,7 @@ export const PrestigeShop: React.FC<PrestigeShopProps> = ({ onClose }) => {
                         <ResetIcon size={18} />
                         <Text style={styles.sectionTitle}>Reset for Shards</Text>
                     </View>
-                    <Text style={styles.thresholdText}>Need {PRESTIGE_MIN_ENERGY.toLocaleString()}+ energy</Text>
+                    <Text style={styles.thresholdText}>Need {PRESTIGE_MIN_ENERGY.toLocaleString()}+ power</Text>
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 6 }}>
                         <Text style={[styles.currentEnergy, { marginVertical: 0 }]}>
                             Current: {Math.floor(state.totalEnergyEarned).toLocaleString()}
@@ -147,18 +147,26 @@ export const PrestigeShop: React.FC<PrestigeShopProps> = ({ onClose }) => {
                         <PrestigeEnergyIcon size={14} color="#4ade80" />
                     </View>
 
-                    <TouchableOpacity
-                        style={[styles.prestigeButton, !canPrestigeNow && styles.prestigeButtonDisabled]}
-                        onPress={handlePrestige}
-                        disabled={!canPrestigeNow}
-                    >
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                            <Text style={styles.prestigeButtonText}>
-                                {canPrestigeNow ? `Prestige +${shardPreview}` : 'Not enough energy'}
-                            </Text>
-                            {canPrestigeNow && <DiamondIcon size={16} />}
-                        </View>
-                    </TouchableOpacity>
+                    <View style={{ width: '100%' }}>
+                        <TouchableOpacity
+                            style={[styles.prestigeButton, !canPrestigeNow && styles.prestigeButtonDisabled]}
+                            onPress={handlePrestige}
+                            disabled={!canPrestigeNow}
+                        >
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                                <Text style={styles.prestigeButtonText}>
+                                    {canPrestigeNow ? `Prestige +${shardPreview}` : 'Not enough power'}
+                                </Text>
+                                {canPrestigeNow && <DiamondIcon size={16} />}
+                            </View>
+                        </TouchableOpacity>
+                        {state.tutorialStep === 9 && (
+                            <View style={styles.itemTooltip}>
+                                <Text style={styles.tooltipText}>🌀 Tap to Prestige!</Text>
+                                <View style={styles.arrowDown} />
+                            </View>
+                        )}
+                    </View>
                 </View>
 
                 {/* Prestige Shop Tabs */}
@@ -178,9 +186,9 @@ export const PrestigeShop: React.FC<PrestigeShopProps> = ({ onClose }) => {
 
                 {/* Upgrades shop */}
                 <ScrollView style={styles.list} scrollEnabled={![8, 9, 10, 11].includes(state.tutorialStep)}>
-                    {upgrades.map(upgrade => {
+                    {upgrades.map((upgrade, index) => {
                         const currentLevel = state.prestige.upgradeLevels[upgrade.id] || 0;
-                        const isMaxed = currentLevel >= upgrade.maxLevel;
+                        const isMaxed = false; // Infinitely upgradeable
                         const cost = calculatePrestigeCost(upgrade, currentLevel);
                         const canAfford = state.prestige.shards >= cost;
 
@@ -194,11 +202,9 @@ export const PrestigeShop: React.FC<PrestigeShopProps> = ({ onClose }) => {
                                         <Text style={styles.upgradeName}>{upgrade.name}</Text>
                                         <Text style={styles.upgradeDesc}>{upgrade.description}</Text>
                                     </View>
-                                    {upgrade.maxLevel > 1 && (
-                                        <View style={styles.levelBadge}>
-                                            <Text style={styles.levelText}>{currentLevel}/{upgrade.maxLevel}</Text>
-                                        </View>
-                                    )}
+                                    <View style={styles.levelBadge}>
+                                        <Text style={styles.levelText}>Lv. {currentLevel}</Text>
+                                    </View>
                                 </View>
 
                                 {upgrade.cosmetic && (
@@ -207,23 +213,32 @@ export const PrestigeShop: React.FC<PrestigeShopProps> = ({ onClose }) => {
                                     </View>
                                 )}
 
-                                <TouchableOpacity
-                                    style={[
-                                        styles.buyButton,
-                                        !canAfford && styles.buyButtonDisabled,
-                                        isMaxed && styles.buyButtonMaxed,
-                                    ]}
-                                    onPress={() => buyPrestigeUpgrade(upgrade.id)}
-                                    disabled={!canAfford || isMaxed}
-                                >
-                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                                        {(!isMaxed && canAfford && !upgrade.cosmetic) && <DiamondIcon size={12} />}
-                                        <Text style={styles.buyButtonText}>
-                                            {isMaxed ? (currentLevel > 0 ? '✓ Owned' : 'MAXED') : `${cost}`}
-                                        </Text>
-                                        {!isMaxed && <DiamondIcon size={12} />}
-                                    </View>
-                                </TouchableOpacity>
+                                <View style={{ width: '100%' }}>
+                                    <TouchableOpacity
+                                        style={[
+                                            styles.buyButton,
+                                            !canAfford && styles.buyButtonDisabled,
+                                            isMaxed && styles.buyButtonMaxed,
+                                        ]}
+                                        onPress={() => buyPrestigeUpgrade(upgrade.id)}
+                                        disabled={!canAfford || isMaxed}
+                                    >
+                                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                                            <DiamondIcon size={12} />
+                                            <Text style={styles.buyButtonText}>
+                                                {(upgrade.cosmetic && currentLevel > 0) ? '✓ Owned' : cost.toLocaleString()}
+                                            </Text>
+                                            <DiamondIcon size={12} />
+                                        </View>
+                                    </TouchableOpacity>
+
+                                    {state.tutorialStep === 11 && index === 0 && (
+                                        <View style={styles.itemTooltip}>
+                                            <Text style={styles.tooltipText}>💎 Buy an Eternal Upgrade!</Text>
+                                            <View style={styles.arrowDown} />
+                                        </View>
+                                    )}
+                                </View>
                             </View>
                         );
                     })}
@@ -250,9 +265,17 @@ export const PrestigeShop: React.FC<PrestigeShopProps> = ({ onClose }) => {
                                 >
                                     <Text style={styles.cancelButtonText}>Cancel</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity style={styles.confirmButton} onPress={confirmPrestige}>
-                                    <Text style={styles.confirmButtonText}>Prestige!</Text>
-                                </TouchableOpacity>
+                                <View>
+                                    <TouchableOpacity style={styles.confirmButton} onPress={confirmPrestige}>
+                                        <Text style={styles.confirmButtonText}>Prestige!</Text>
+                                    </TouchableOpacity>
+                                    {state.tutorialStep === 10 && (
+                                        <View style={styles.itemTooltip}>
+                                            <Text style={styles.tooltipText}>✅ Confirm Reset!</Text>
+                                            <View style={styles.arrowDown} />
+                                        </View>
+                                    )}
+                                </View>
                             </View>
                         </View>
                     </View>
@@ -263,6 +286,15 @@ export const PrestigeShop: React.FC<PrestigeShopProps> = ({ onClose }) => {
 };
 
 const styles = StyleSheet.create({
+    itemTooltip: {
+        position: 'absolute',
+        bottom: '100%',
+        left: 0,
+        right: 0,
+        alignItems: 'center',
+        paddingBottom: 5,
+        zIndex: 200,
+    },
     overlay: {
         position: 'absolute',
         top: 0, left: 0, right: 0, bottom: 0,
@@ -357,6 +389,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderWidth: 1,
         borderColor: '#333',
+        zIndex: 5,
     },
     sectionHeader: {
         flexDirection: 'row',
@@ -430,6 +463,7 @@ const styles = StyleSheet.create({
         marginBottom: 8,
         borderWidth: 1,
         borderColor: '#333',
+        zIndex: 1,
     },
     upgradeHeader: {
         flexDirection: 'row',
@@ -511,6 +545,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 20,
+        zIndex: 1000,
     },
     confirmModal: {
         backgroundColor: '#222',
@@ -587,5 +622,15 @@ const styles = StyleSheet.create({
         borderLeftColor: 'transparent',
         borderRightColor: 'transparent',
         borderBottomColor: 'rgba(0,0,0,0.85)',
+    },
+    arrowDown: {
+        width: 0,
+        height: 0,
+        borderLeftWidth: 8,
+        borderRightWidth: 8,
+        borderTopWidth: 8,
+        borderLeftColor: 'transparent',
+        borderRightColor: 'transparent',
+        borderTopColor: 'rgba(0,0,0,0.85)',
     },
 });

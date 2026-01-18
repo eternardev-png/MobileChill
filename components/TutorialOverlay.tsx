@@ -1,10 +1,9 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Dimensions, Modal } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, useWindowDimensions, Modal } from 'react-native';
 import { useGame } from '../gameState';
 
-const { width, height } = Dimensions.get('window');
-
 export const TutorialOverlay: React.FC<{ visible: boolean }> = ({ visible }) => {
+    const { width, height } = useWindowDimensions();
     const { state, advanceTutorial } = useGame();
     const { tutorialStep } = state;
 
@@ -22,75 +21,27 @@ export const TutorialOverlay: React.FC<{ visible: boolean }> = ({ visible }) => 
 
             {/* Step 2: Open Shop */}
             {tutorialStep === 2 && (
-                <View style={[styles.pointerContainer, { bottom: 85, left: width * 0.25 - 100, width: 200 }]}>
+                <View style={[styles.pointerContainer, { bottom: 85, left: width * (1.5 / 6) - 100, width: 200 }]}>
                     <Text style={styles.text}>🛒 Buy Upgrades here!</Text>
                     <View style={styles.arrowDown} />
                 </View>
             )}
 
-            {/* Step 3: Buy Upgrade (Targeting first item in list usually) */}
-            {tutorialStep === 3 && (
-                <View style={[styles.pointerContainer, { top: 530, left: width * 0.5 - 125, width: 250 }]}>
-                    <View style={styles.arrowUp} />
-                    <Text style={styles.text}>Buy "Stronger Taps"</Text>
-                </View>
-            )}
-
-
-
             {/* Step 5: Open Quests */}
             {tutorialStep === 5 && (
-                <View style={[styles.pointerContainer, { bottom: 85, left: width * 0.416 - 100, width: 200 }]}>
+                <View style={[styles.pointerContainer, { bottom: 85, left: width * (2.5 / 6) - 100, width: 200 }]}>
                     <Text style={styles.text}>📜 Open Quests!</Text>
                     <View style={styles.arrowDown} />
                 </View>
             )}
 
-            {/* Step 6: Claim Quest */}
-            {tutorialStep === 6 && (
-                <View style={[styles.pointerContainer, { top: height * 0.40, left: width * 0.5 - 125, width: 250 }]}>
-                    <View style={styles.arrowUp} />
-                    <Text style={styles.text}>🎁 Claim your reward!</Text>
-                </View>
-            )}
-
-
-
             {/* Step 8: Open Prestige */}
             {tutorialStep === 8 && (
-                <View style={[styles.pointerContainer, { bottom: 85, left: width * 0.583 - 100, width: 200 }]}>
+                <View style={[styles.pointerContainer, { bottom: 85, left: width * (3.5 / 6) - 100, width: 200 }]}>
                     <Text style={styles.text}>✨ Prestige Menu!</Text>
                     <View style={styles.arrowDown} />
                 </View>
             )}
-
-            {/* Step 9: Click Reset */}
-            {tutorialStep === 9 && (
-                <View style={[styles.pointerContainer, { top: height * 0.42, left: width * 0.5 - 100, width: 200 }]}>
-                    <View style={styles.arrowUp} />
-                    <Text style={styles.text}>🌀 Tap to Prestige!</Text>
-                </View>
-            )}
-
-            {/* Step 10: Confirm Prestige */}
-            {tutorialStep === 10 && (
-                <View style={[styles.pointerContainer, { top: height * 0.46, left: width * 0.5 - 50, width: 200 }]}>
-                    <Text style={styles.text}>✅ Confirm Reset!</Text>
-                    <View style={styles.arrowDown} />
-                </View>
-            )}
-
-            {/* Step 11: Buy Prestige Upgrade */}
-            {tutorialStep === 11 && (
-                <View style={[styles.pointerContainer, { top: height * 0.6, left: width * 0.5 - 100, width: 200 }]}>
-                    <View style={styles.arrowUp} />
-                    <Text style={styles.text}>💎 Buy an Eternal Upgrade!</Text>
-                </View>
-            )}
-
-
-
-            {/* Step 9 (Old 4): Prestige Info - REMOVED or MOVED TO END? User flow ends at 8->9. No modal requested, just actions. */}
         </View>
     );
 };

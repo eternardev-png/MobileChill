@@ -193,20 +193,29 @@ export const QuestPanel: React.FC<QuestPanelProps> = ({ onClose }) => {
                                             isTutorialStep7;
 
                                         return (
-                                            <TouchableOpacity
-                                                style={[
-                                                    styles.claimButton,
-                                                    isDisabled && styles.claimButtonDisabled,
-                                                    (isTutorialStep6 && !isTutorialQuest) && { opacity: 0.5 },
-                                                    isTutorialStep7 && { opacity: 0.5 }
-                                                ]}
-                                                onPress={() => handleClaim(quest.id)}
-                                                disabled={isDisabled}
-                                            >
-                                                <Text style={styles.claimButtonText}>
-                                                    {completed ? '✓ Claim Reward' : 'In Progress'}
-                                                </Text>
-                                            </TouchableOpacity>
+                                            <View style={{ width: '100%' }}>
+                                                <TouchableOpacity
+                                                    style={[
+                                                        styles.claimButton,
+                                                        isDisabled && styles.claimButtonDisabled,
+                                                        (isTutorialStep6 && !isTutorialQuest) && { opacity: 0.5 },
+                                                        isTutorialStep7 && { opacity: 0.5 }
+                                                    ]}
+                                                    onPress={() => handleClaim(quest.id)}
+                                                    disabled={isDisabled}
+                                                >
+                                                    <Text style={styles.claimButtonText}>
+                                                        {completed ? '✓ Claim Reward' : 'In Progress'}
+                                                    </Text>
+                                                </TouchableOpacity>
+
+                                                {isTutorialStep6 && isTutorialQuest && (
+                                                    <View style={styles.itemTooltip}>
+                                                        <Text style={styles.tooltipText}>🎁 Claim your reward!</Text>
+                                                        <View style={styles.arrowDown} />
+                                                    </View>
+                                                )}
+                                            </View>
                                         );
                                     })()}
                                 </View>
@@ -220,6 +229,24 @@ export const QuestPanel: React.FC<QuestPanelProps> = ({ onClose }) => {
 };
 
 const styles = StyleSheet.create({
+    itemTooltip: {
+        position: 'absolute',
+        bottom: '100%',
+        left: 0,
+        right: 0,
+        alignItems: 'center',
+        paddingBottom: 5,
+        zIndex: 200,
+    },
+    questCard: {
+        backgroundColor: '#252525',
+        borderRadius: 16,
+        padding: 16,
+        marginBottom: 12,
+        borderWidth: 2,
+        borderColor: 'transparent',
+        zIndex: 1, // Base zIndex
+    },
     overlay: {
         position: 'absolute',
         top: 0, left: 0, right: 0, bottom: 0,
@@ -279,14 +306,7 @@ const styles = StyleSheet.create({
         marginTop: 12,
         fontSize: 16,
     },
-    questCard: {
-        backgroundColor: '#252525',
-        borderRadius: 16,
-        padding: 16,
-        marginBottom: 12,
-        borderWidth: 2,
-        borderColor: 'transparent',
-    },
+
     questCardClaimable: {
         borderColor: '#22c55e',
         backgroundColor: '#1a2f1a',
@@ -424,5 +444,15 @@ const styles = StyleSheet.create({
         borderLeftColor: 'transparent',
         borderRightColor: 'transparent',
         borderBottomColor: 'rgba(0,0,0,0.85)',
+    },
+    arrowDown: {
+        width: 0,
+        height: 0,
+        borderLeftWidth: 8,
+        borderRightWidth: 8,
+        borderTopWidth: 8,
+        borderLeftColor: 'transparent',
+        borderRightColor: 'transparent',
+        borderTopColor: 'rgba(0,0,0,0.85)',
     },
 });

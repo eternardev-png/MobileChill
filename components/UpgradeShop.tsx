@@ -89,7 +89,7 @@ export const UpgradeShop: React.FC<UpgradeShopProps> = ({ onClose }) => {
                 <ScrollView style={styles.list}>
                     {filteredUpgrades.map(upgrade => {
                         const currentLevel = state.upgradeLevels[upgrade.id] || 0;
-                        const isMaxed = currentLevel >= upgrade.maxLevel;
+                        const isMaxed = false; // Infinitely upgradeable
                         const cost = calculateUpgradeCost(upgrade, currentLevel);
                         const canAfford = state.coins >= cost;
                         const currentEffect = calculateUpgradeEffect(upgrade, currentLevel);
@@ -109,7 +109,7 @@ export const UpgradeShop: React.FC<UpgradeShopProps> = ({ onClose }) => {
                                         <Text style={styles.upgradeDesc}>{upgrade.description}</Text>
                                     </View>
                                     <View style={styles.levelBadge}>
-                                        <Text style={styles.levelText}>{currentLevel}/{upgrade.maxLevel}</Text>
+                                        <Text style={styles.levelText}>Lv. {currentLevel}</Text>
                                     </View>
                                 </View>
 
@@ -124,23 +124,32 @@ export const UpgradeShop: React.FC<UpgradeShopProps> = ({ onClose }) => {
                                     )}
                                 </View>
 
-                                <TouchableOpacity
-                                    style={[
-                                        styles.buyButton,
-                                        (!canAfford || isDisabledByTutorial || isFullyLockedByStep4) && styles.buyButtonDisabled,
-                                        isMaxed && styles.buyButtonMaxed,
-                                        (isDisabledByTutorial || isFullyLockedByStep4) && { opacity: 0.5 }
-                                    ]}
-                                    onPress={() => handleBuy(upgrade.id)}
-                                    disabled={!canAfford || isMaxed || isDisabledByTutorial || isFullyLockedByStep4}
-                                >
-                                    <View style={styles.buyButtonInner}>
-                                        {!isMaxed && <CoinIcon size={16} />}
-                                        <Text style={styles.buyButtonText}>
-                                            {isMaxed ? '✓ MAXED' : `${cost}`}
-                                        </Text>
-                                    </View>
-                                </TouchableOpacity>
+                                <View style={{ width: '100%' }}>
+                                    <TouchableOpacity
+                                        style={[
+                                            styles.buyButton,
+                                            (!canAfford || isDisabledByTutorial || isFullyLockedByStep4) && styles.buyButtonDisabled,
+                                            isMaxed && styles.buyButtonMaxed,
+                                            (isDisabledByTutorial || isFullyLockedByStep4) && { opacity: 0.5 }
+                                        ]}
+                                        onPress={() => handleBuy(upgrade.id)}
+                                        disabled={!canAfford || isMaxed || isDisabledByTutorial || isFullyLockedByStep4}
+                                    >
+                                        <View style={styles.buyButtonInner}>
+                                            <CoinIcon size={16} />
+                                            <Text style={styles.buyButtonText}>
+                                                {cost.toLocaleString()}
+                                            </Text>
+                                        </View>
+                                    </TouchableOpacity>
+
+                                    {state.tutorialStep === 3 && isTapPower && (
+                                        <View style={styles.itemTooltip}>
+                                            <Text style={styles.tooltipText}>Buy "Stronger Taps"</Text>
+                                            <View style={styles.arrowDown} />
+                                        </View>
+                                    )}
+                                </View>
                             </View>
                         );
                     })}
@@ -151,6 +160,22 @@ export const UpgradeShop: React.FC<UpgradeShopProps> = ({ onClose }) => {
 };
 
 const styles = StyleSheet.create({
+    itemTooltip: {
+        position: 'absolute',
+        bottom: '100%',
+        left: 0,
+        right: 0,
+        alignItems: 'center',
+        paddingBottom: 5,
+        zIndex: 200,
+    },
+    upgradeCard: {
+        backgroundColor: '#252525',
+        borderRadius: 16,
+        padding: 14,
+        marginBottom: 10,
+        zIndex: 1, // Base zIndex
+    },
     overlay: {
         position: 'absolute',
         top: 0, left: 0, right: 0, bottom: 0,
@@ -229,12 +254,7 @@ const styles = StyleSheet.create({
     list: {
         flex: 1,
     },
-    upgradeCard: {
-        backgroundColor: '#252525',
-        borderRadius: 16,
-        padding: 14,
-        marginBottom: 10,
-    },
+
     upgradeHeader: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -358,5 +378,15 @@ const styles = StyleSheet.create({
         borderLeftColor: 'transparent',
         borderRightColor: 'transparent',
         borderBottomColor: 'rgba(0,0,0,0.85)',
+    },
+    arrowDown: {
+        width: 0,
+        height: 0,
+        borderLeftWidth: 8,
+        borderRightWidth: 8,
+        borderTopWidth: 8,
+        borderLeftColor: 'transparent',
+        borderRightColor: 'transparent',
+        borderTopColor: 'rgba(0,0,0,0.85)',
     },
 });
