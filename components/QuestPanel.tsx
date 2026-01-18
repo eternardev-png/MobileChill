@@ -4,13 +4,15 @@ import { useGame } from '../gameState';
 import { QUESTS, Quest, getAllQuests } from '../data/quests';
 import { getTreeSpecies } from '../data/treeSpecies';
 import { CoinIcon, EnergyIcon, GemIcon, getIconByName } from './Icons';
+import { telegram } from '../telegram';
+
 
 interface QuestPanelProps {
     onClose: () => void;
 }
 
 export const QuestPanel: React.FC<QuestPanelProps> = ({ onClose }) => {
-    const { state, claimQuestReward, getAvailableQuestsList } = useGame();
+    const { state, claimQuestReward, getAvailableQuestsList, checkTelegramSubscription } = useGame();
     const availableQuests = getAvailableQuestsList();
 
     const getProgress = (quest: Quest): { current: number; target: number; completed: boolean } => {
@@ -50,6 +52,9 @@ export const QuestPanel: React.FC<QuestPanelProps> = ({ onClose }) => {
                 } else {
                     current = state.totalLabTreesCreated || 0;
                 }
+                break;
+            case 'telegram_join':
+                current = state.isTelegramSubscribed ? 1 : 0;
                 break;
         }
 
@@ -193,6 +198,27 @@ export const QuestPanel: React.FC<QuestPanelProps> = ({ onClose }) => {
                                         const isDisabled = !completed ||
                                             (isTutorialStep6 && !isTutorialQuest) ||
                                             isTutorialStep7;
+
+                                        // Special handling for Telegram Quest
+                                        if (quest.objective.type === 'telegram_join' && !completed) {
+                                            return (
+                                                <View style={{ width: '100%', flexDirection: 'row', gap: 8 }}>
+                                                    <TouchableOpacity
+                                                        style={[styles.claimButton, { flex: 1, backgroundColor: '#229ED9' }]} // Telegram Blue
+                                                        onPress={() => telegram.openTelegramLink('https://t.me/Eternaltreeofficial')}
+                                                    >
+                                                        <Text style={styles.claimButtonText}>Join</Text>
+                                                    </TouchableOpacity>
+
+                                                    <TouchableOpacity
+                                                        style={[styles.claimButton, { flex: 1, backgroundColor: '#333' }]}
+                                                        onPress={() => checkTelegramSubscription()}
+                                                    >
+                                                        <Text style={styles.claimButtonText}>Check</Text>
+                                                    </TouchableOpacity>
+                                                </View>
+                                            );
+                                        }
 
                                         return (
                                             <View style={{ width: '100%' }}>

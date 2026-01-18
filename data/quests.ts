@@ -13,7 +13,8 @@ export interface Quest {
     | 'specific_tree_level'
     | 'roulette_spins'    // NEW
     | 'upgrades_purchased' // NEW
-    | 'lab_trees_created'; // NEW
+    | 'lab_trees_created' // NEW
+    | 'telegram_join';    // NEW
     target: number;
     treeId?: string;
     rarity?: 'common' | 'rare' | 'epic' | 'legendary';
@@ -639,6 +640,16 @@ export const QUESTS: Record<string, Quest> = {
     objective: { type: 'tap_count', target: 10000 },
     rewards: { coins: 2000, gems: 75 },
     prerequisite: 'tap_grandmaster',
+  },
+
+  // === SOCIAL QUESTS ===
+  telegram_official: {
+    id: 'telegram_official',
+    name: 'Join Community',
+    description: 'Join our Telegram Channel',
+    icon: 'icon_gem', // We will handle this in UI if needed
+    objective: { type: 'telegram_join', target: 1 },
+    rewards: { coins: 500, gems: 20 },
   },
 
 };

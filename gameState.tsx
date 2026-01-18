@@ -49,6 +49,7 @@ export interface GameState {
         showWelcomeAlways: boolean;
     };
     usedPromoCodes: string[];
+    isTelegramSubscribed: boolean;
 }
 
 const defaultTreeStats: TreeStats = { level: 1, xp: 0, totalEnergy: 0, height: 50 };
@@ -78,6 +79,7 @@ const initialState: GameState = {
         showWelcomeAlways: false,
     },
     usedPromoCodes: [],
+    isTelegramSubscribed: false,
 };
 
 interface GameContextType {
@@ -126,6 +128,9 @@ interface GameContextType {
 
     // Promo Codes
     redeemPromoCode: (code: string) => { success: boolean; message: string; reward?: string };
+
+    // Social
+    checkTelegramSubscription: () => void;
 }
 
 const GameContext = createContext<GameContextType | null>(null);
@@ -171,6 +176,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     if ((!parsed.tutorialStep || parsed.tutorialStep === 0) && (parsed.totalTaps > 10 || parsed.coins > 100)) {
                         parsed.tutorialStep = 13;
                     }
+
+                    if (parsed.isTelegramSubscribed === undefined) parsed.isTelegramSubscribed = false;
 
                     // FIX: Register Dynamic Quests for Retroactive/Loaded Trees
                     if (parsed.customTrees) {
@@ -466,6 +473,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             case 'roulette_spins': completed = (state.totalSpins || 0) >= quest.objective.target; break;
             case 'upgrades_purchased': completed = (state.totalUpgradesPurchased || 0) >= quest.objective.target; break;
             case 'lab_trees_created': completed = (state.totalLabTreesCreated || 0) >= quest.objective.target; break;
+            case 'telegram_join': completed = state.isTelegramSubscribed; break;
         }
         if (!completed) return false;
         setState(prev => ({
@@ -551,6 +559,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 case 'roulette_spins': done = (state.totalSpins || 0) >= quest.objective.target; break;
                 case 'upgrades_purchased': done = (state.totalUpgradesPurchased || 0) >= quest.objective.target; break;
                 case 'lab_trees_created': done = (state.totalLabTreesCreated || 0) >= quest.objective.target; break;
+                case 'telegram_join': done = state.isTelegramSubscribed; break;
             }
             if (done) count++;
         }
@@ -796,7 +805,15 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         currentTreeHeight: currentStats.height,
         saveGame, loadGame, resetGame, addResources,
         tutorialStep: state.tutorialStep, advanceTutorial,
-        updateSettings, redeemPromoCode
+        updateSettings, redeemPromoCode,
+        checkTelegramSubscription: useCallback(() => {
+            setState(prev => {
+                if (prev.isTelegramSubscribed) return prev;
+                const next = { ...prev, isTelegramSubscribed: true };
+                telegram.cloudSave(STORAGE_KEY, JSON.stringify({ ...next, lastSaveTime: Date.now() })).catch(console.error);
+                return next;
+            });
+        }, [])
     };
 
     return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
