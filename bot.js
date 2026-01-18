@@ -9,7 +9,7 @@ const bot = new TelegramBot(token, { polling: true });
 
 // URL to your Vercel App
 // REPLACE THIS with your actual Vercel URL
-const webAppUrl = 'https://mobile-chill.vercel.app';
+const webAppUrl = 'https://eternaltree.netlify.app/';
 
 // Listen for '/start' command
 bot.onText(/\/start/, (msg) => {
