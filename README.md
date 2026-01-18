@@ -1,4 +1,4 @@
-# 🌳 MobileChill - Fractal Tree Mobile App
+# 🌳 Eternal tree - Fractal Tree Mobile App
 
 Interactive fractal tree visualization with real-time debug controls.
 
