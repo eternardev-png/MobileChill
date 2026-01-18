@@ -45,6 +45,9 @@ export interface GameState {
     prestige: PrestigeState;
     customTrees: Record<string, TreeSpecies>;
     tutorialStep: number; // 0=None, 1=TapTree, 2=OpenShop, 3=BuyUpgrade, 4=CloseShop, 5=OpenQuests, 6=ClaimQuest, 7=CloseQuests, 8=OpenPrestige, 9=ClickReset, 10=ConfirmReset, 11=BuyUpgrade, 12=ClosePrestige, 13=Done
+    settings: {
+        showWelcomeAlways: boolean;
+    };
 }
 
 const defaultTreeStats: TreeStats = { level: 1, xp: 0, totalEnergy: 0, height: 50 };
@@ -70,6 +73,9 @@ const initialState: GameState = {
     prestige: { ...defaultPrestige },
     customTrees: {},
     tutorialStep: 0,
+    settings: {
+        showWelcomeAlways: false,
+    },
 };
 
 interface GameContextType {
@@ -111,6 +117,9 @@ interface GameContextType {
     // Tutorial
     tutorialStep: number;
     advanceTutorial: (toStep?: number) => void;
+
+    // Settings
+    updateSettings: (settings: Partial<GameState['settings']>) => void;
 }
 
 const GameContext = createContext<GameContextType | null>(null);
@@ -193,6 +202,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     useEffect(() => {
         const interval = setInterval(async () => {
             setState(prev => {
+                // Don't save if tutorial is active and no prestige yet
+                if (prev.tutorialStep < 13 && prev.prestige.prestigeCount === 0) {
+                    return prev;
+                }
                 const toSave = { ...prev, lastSaveTime: Date.now() };
                 telegram.cloudSave(STORAGE_KEY, JSON.stringify(toSave)).catch(e => console.error('Auto-save failed', e));
                 return toSave;
@@ -420,7 +433,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (!upgrade) return false;
         const level = state.upgradeLevels[upgradeId] || 0;
         const cost = calculateUpgradeCost(upgrade, level);
-        if (state.coins < cost || level >= upgrade.maxLevel) return false;
+        if (state.coins < cost) return false;
         setState(prev => ({
             ...prev,
             coins: prev.coins - cost,
@@ -495,7 +508,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (!upgrade) return false;
         const level = state.prestige.upgradeLevels[upgradeId] || 0;
         const cost = calculatePrestigeCost(upgrade, level);
-        if (state.prestige.shards < cost || level >= upgrade.maxLevel) return false;
+        if (state.prestige.shards < cost) return false;
         setState(prev => ({
             ...prev,
             prestige: { ...prev.prestige, shards: prev.prestige.shards - cost, upgradeLevels: { ...prev.prestige.upgradeLevels, [upgradeId]: level + 1 } },
@@ -528,6 +541,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Save/Load/Reset functions
     const saveGame = useCallback(async () => {
+        // Don't save if tutorial is active and no prestige yet
+        if (state.tutorialStep < 13 && state.prestige.prestigeCount === 0) return;
         try {
             const toSave = { ...state, lastSaveTime: Date.now() };
             await telegram.cloudSave(STORAGE_KEY, JSON.stringify(toSave));
@@ -682,12 +697,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             let updates: Partial<GameState> = { tutorialStep: nextStep };
 
             // Step 8 -> 9: Give enough energy for 5 Shards (When Entering Prestige Menu Step 9)
-            // Wait, flow is: 7(Close Quests) -> 8(Open Prestige).
-            // Opening Prestige (Step 8) triggers transition to 9? No.
-            // Flow:
-            // 7: Close Quest -> 8 (Open Prestige)
-            // 8: Open Prestige -> 9 (Click Reset)
-            // So when we enter Step 9, we need resources.
             if (nextStep === 9 && prev.tutorialStep !== 9) {
                 const targetShards = 5;
                 const requiredEnergy = 500 * Math.pow(targetShards, 1 / 0.6);
@@ -707,6 +716,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
     }, []);
 
+    const updateSettings = useCallback((newSettings: Partial<GameState['settings']>) => {
+        setState(prev => ({
+            ...prev,
+            settings: { ...prev.settings, ...newSettings }
+        }));
+    }, []);
+
     const value: GameContextType = {
         state, currentSpecies, allSpecies, tap, switchTree, unlockTree, buyUpgrade, claimQuestReward,
         performPrestige, buyPrestigeUpgrade,
@@ -717,7 +733,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         getPrestigeTapBonus, getPrestigeCoinBonus, getPrestigeEnergyBonus, getPrestigeGrowthBonus, hasCosmetic,
         currentTreeHeight: currentStats.height,
         saveGame, loadGame, resetGame, addResources,
-        tutorialStep: state.tutorialStep, advanceTutorial
+        tutorialStep: state.tutorialStep, advanceTutorial,
+        updateSettings
     };
 
     return <GameContext.Provider value={value}>{children}</GameContext.Provider>;

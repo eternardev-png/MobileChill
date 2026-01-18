@@ -53,11 +53,18 @@ const GameContent = () => {
             } else {
                 try {
                     const parsed = JSON.parse(saved);
-                    setShowWelcome(false);
+
+                    // IF settings say show always, we show it
+                    if (parsed.settings?.showWelcomeAlways) {
+                        setShowWelcome(true);
+                    } else {
+                        setShowWelcome(false);
+                    }
+
                     const now = Date.now();
                     const timeDiff = (now - (parsed.lastSaveTime || now)) / 1000;
                     if (timeDiff > 60) {
-                        // Calculate offline earnings (simplified for brevity)
+                        // Offline logic...
                     }
                 } catch (e) {
                     setShowWelcome(true);
