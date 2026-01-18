@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Animated, Easing, Dimensions } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Animated, Easing, Dimensions, ScrollView } from 'react-native';
 import Svg, { Rect, G, Text as SvgText, Defs, LinearGradient, Stop, ClipPath, Circle, RadialGradient } from 'react-native-svg';
 import { useGame } from '../gameState';
 import { GemIcon, CoinIcon, EnergyIcon, DiamondIcon, CasinoIcon } from './Icons';
@@ -240,115 +240,121 @@ export const SlotMachine: React.FC<SlotMachineProps> = ({ onClose }) => {
                     <Text style={styles.closeBtnText}>✕</Text>
                 </TouchableOpacity>
 
-                <View style={styles.header}>
-                    {/* Top-left Icon as requested */}
-                    <View style={styles.headerIconContainer}>
-                        <CasinoIcon size={24} color="#ef4444" />
-                    </View>
-                    <Text style={styles.title}>SLOTS</Text>
-                </View>
-
-                {/* Slot Machine Frame */}
-                <View style={styles.machineFrame}>
-                    {/* Perimeter Lights */}
-                    <View style={styles.lightsTop}>
-                        {[...Array(6)].map((_, i) => (
-                            <Animated.View key={`t${i}`} style={[styles.lightSmall, { opacity: lightsAnim }]} />
-                        ))}
-                    </View>
-
-                    <View style={styles.lightsBottom}>
-                        {[...Array(6)].map((_, i) => (
-                            <Animated.View key={`b${i}`} style={[styles.lightSmall, { opacity: lightsAnim }]} />
-                        ))}
-                    </View>
-
-                    <View style={styles.lightsLeft}>
-                        {[...Array(7)].map((_, i) => (
-                            <Animated.View key={`l${i}`} style={[styles.lightSide, { opacity: lightsAnim }]} />
-                        ))}
-                    </View>
-                    <View style={styles.lightsRight}>
-                        {[...Array(7)].map((_, i) => (
-                            <Animated.View key={`r${i}`} style={[styles.lightSide, { opacity: lightsAnim }]} />
-                        ))}
-                    </View>
-
-
-                    {/* Win Line Indicator */}
-                    <View style={styles.winLine} />
-
-                    {/* Reels */}
-                    <View style={styles.reelsContainer}>
-                        {renderReel(reels[0], reel1Anim, 0)}
-                        {renderReel(reels[1], reel2Anim, 1)}
-                        {renderReel(reels[2], reel3Anim, 2)}
-                    </View>
-                </View>
-
-                {/* Result or Paytable Display - Swapped to maintain layout stability */}
-                {result ? (
-                    <View style={styles.resultContainer}>
-                        {result.win > 0 ? (
-                            <>
-                                <Text style={styles.winText}>YOU WON!</Text>
-                                <View style={styles.winAmount}>
-                                    {result.winType === 'coins' && <CoinIcon size={28} />}
-                                    {result.winType === 'energy' && <EnergyIcon size={28} />}
-                                    {result.winType === 'gems' && <GemIcon size={28} />}
-                                    {result.winType === 'shard' && <DiamondIcon size={28} />}
-                                    <Text style={styles.winValue}>{result.win}</Text>
-                                </View>
-                            </>
-                        ) : (
-                            <Text style={styles.loseText}>Try Again!</Text>
-                        )}
-                    </View>
-                ) : (
-                    <View style={styles.paytable}>
-                        <Text style={styles.paytableTitle}>PAYOUTS</Text>
-                        <View style={styles.paytableRow}>
-                            <Text style={styles.paytableText}>Match 3 for Big Prizes!</Text>
-                        </View>
-                        <View style={styles.paytableRow}>
-                            <Text style={styles.paytableText}>777 = 100 Gems Jackpot</Text>
-                        </View>
-                    </View>
-                )}
-
-                {/* Multiplier/Bet Toggle */}
-                <View style={styles.multiplierContainer}>
-                    {[1, 3, 5].map((m) => (
-                        <TouchableOpacity
-                            key={m}
-                            style={[
-                                styles.multiplierBtn,
-                                spinMultiplier === m && styles.multiplierBtnActive
-                            ]}
-                            onPress={() => !spinning && setSpinMultiplier(m)}
-                            disabled={spinning}
-                            activeOpacity={0.7}
-                        >
-                            <Text style={[
-                                styles.multiplierText,
-                                spinMultiplier === m && styles.multiplierTextActive
-                            ]}>{m}x</Text>
-                        </TouchableOpacity>
-                    ))}
-                </View>
-
-                {/* Spin Button */}
-                <TouchableOpacity
-                    style={[styles.spinButton, state.gems < (SPIN_COST * spinMultiplier) && styles.spinButtonDisabled]}
-                    onPress={handleSpin}
-                    disabled={spinning || state.gems < (SPIN_COST * spinMultiplier)}
+                <ScrollView
+                    style={{ width: '100%' }}
+                    contentContainerStyle={{ alignItems: 'center', paddingBottom: 20 }}
+                    showsVerticalScrollIndicator={false}
                 >
-                    <Text style={styles.spinButtonText}>SPIN</Text>
-                    <View style={styles.costBadge}>
-                        <Text style={styles.costText}>{SPIN_COST * spinMultiplier}</Text>
-                        <GemIcon size={16} color="#fff" />
+                    <View style={styles.header}>
+                        {/* Top-left Icon as requested */}
+                        <View style={styles.headerIconContainer}>
+                            <CasinoIcon size={24} color="#ef4444" />
+                        </View>
+                        <Text style={styles.title}>SLOTS</Text>
                     </View>
-                </TouchableOpacity>
+
+                    {/* Slot Machine Frame */}
+                    <View style={styles.machineFrame}>
+                        {/* Perimeter Lights */}
+                        <View style={styles.lightsTop}>
+                            {[...Array(6)].map((_, i) => (
+                                <Animated.View key={`t${i}`} style={[styles.lightSmall, { opacity: lightsAnim }]} />
+                            ))}
+                        </View>
+
+                        <View style={styles.lightsBottom}>
+                            {[...Array(6)].map((_, i) => (
+                                <Animated.View key={`b${i}`} style={[styles.lightSmall, { opacity: lightsAnim }]} />
+                            ))}
+                        </View>
+
+                        <View style={styles.lightsLeft}>
+                            {[...Array(7)].map((_, i) => (
+                                <Animated.View key={`l${i}`} style={[styles.lightSide, { opacity: lightsAnim }]} />
+                            ))}
+                        </View>
+                        <View style={styles.lightsRight}>
+                            {[...Array(7)].map((_, i) => (
+                                <Animated.View key={`r${i}`} style={[styles.lightSide, { opacity: lightsAnim }]} />
+                            ))}
+                        </View>
+
+
+                        {/* Win Line Indicator */}
+                        <View style={styles.winLine} />
+
+                        {/* Reels */}
+                        <View style={styles.reelsContainer}>
+                            {renderReel(reels[0], reel1Anim, 0)}
+                            {renderReel(reels[1], reel2Anim, 1)}
+                            {renderReel(reels[2], reel3Anim, 2)}
+                        </View>
+                    </View>
+
+                    {/* Result or Paytable Display - Swapped to maintain layout stability */}
+                    {result ? (
+                        <View style={styles.resultContainer}>
+                            {result.win > 0 ? (
+                                <>
+                                    <Text style={styles.winText}>YOU WON!</Text>
+                                    <View style={styles.winAmount}>
+                                        {result.winType === 'coins' && <CoinIcon size={28} />}
+                                        {result.winType === 'energy' && <EnergyIcon size={28} />}
+                                        {result.winType === 'gems' && <GemIcon size={28} />}
+                                        {result.winType === 'shard' && <DiamondIcon size={28} />}
+                                        <Text style={styles.winValue}>{result.win}</Text>
+                                    </View>
+                                </>
+                            ) : (
+                                <Text style={styles.loseText}>Try Again!</Text>
+                            )}
+                        </View>
+                    ) : (
+                        <View style={styles.paytable}>
+                            <Text style={styles.paytableTitle}>PAYOUTS</Text>
+                            <View style={styles.paytableRow}>
+                                <Text style={styles.paytableText}>Match 3 for Big Prizes!</Text>
+                            </View>
+                            <View style={styles.paytableRow}>
+                                <Text style={styles.paytableText}>777 = 100 Gems Jackpot</Text>
+                            </View>
+                        </View>
+                    )}
+
+                    {/* Multiplier/Bet Toggle */}
+                    <View style={styles.multiplierContainer}>
+                        {[1, 3, 5].map((m) => (
+                            <TouchableOpacity
+                                key={m}
+                                style={[
+                                    styles.multiplierBtn,
+                                    spinMultiplier === m && styles.multiplierBtnActive
+                                ]}
+                                onPress={() => !spinning && setSpinMultiplier(m)}
+                                disabled={spinning}
+                                activeOpacity={0.7}
+                            >
+                                <Text style={[
+                                    styles.multiplierText,
+                                    spinMultiplier === m && styles.multiplierTextActive
+                                ]}>{m}x</Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+
+                    {/* Spin Button */}
+                    <TouchableOpacity
+                        style={[styles.spinButton, state.gems < (SPIN_COST * spinMultiplier) && styles.spinButtonDisabled]}
+                        onPress={handleSpin}
+                        disabled={spinning || state.gems < (SPIN_COST * spinMultiplier)}
+                    >
+                        <Text style={styles.spinButtonText}>SPIN</Text>
+                        <View style={styles.costBadge}>
+                            <Text style={styles.costText}>{SPIN_COST * spinMultiplier}</Text>
+                            <GemIcon size={16} color="#fff" />
+                        </View>
+                    </TouchableOpacity>
+                </ScrollView>
             </View>
         </View>
     );
@@ -366,6 +372,7 @@ const styles = StyleSheet.create({
     container: {
         width: '95%',
         maxWidth: 380,
+        maxHeight: '90%', // Ensure it fits on screen
         backgroundColor: '#1a1a1a',
         borderRadius: 32,
         padding: 24,

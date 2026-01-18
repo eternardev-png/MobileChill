@@ -27,6 +27,8 @@ export const TopBar: React.FC = () => {
     // Calculate rates
     const autoEnergy = getAutoEnergyRate();
     const autoCoin = getAutoCoinRate();
+    // Gems are earned every 500 energy (2 gems). So rate = (energyRate / 500) * 2
+    const autoGems = autoEnergy > 0 ? (autoEnergy / 500) * 2 : 0;
 
     // Calculate per-click energy
     const energyBonus = 1 + getPrestigeEnergyBonus();
@@ -45,8 +47,8 @@ export const TopBar: React.FC = () => {
                         <EnergyIcon size={20} />
                         <Text style={styles.resourceValue}>{Math.floor(state.energy)}</Text>
                     </View>
-                    <View style={styles.ratesRow}>
-                        {autoEnergy > 0 && <Text style={styles.rateText}>+{autoEnergy.toFixed(1)}/s</Text>}
+                    <View style={[styles.ratesRow, { opacity: autoEnergy > 0 ? 1 : 0 }]}>
+                        <Text style={styles.rateText}>+{autoEnergy.toFixed(1)}/s</Text>
                     </View>
                 </View>
 
@@ -56,11 +58,9 @@ export const TopBar: React.FC = () => {
                         <CoinIcon size={20} />
                         <Text style={styles.resourceValue}>{Math.floor(state.coins)}</Text>
                     </View>
-                    {autoCoin > 0 && (
-                        <View style={styles.ratesRow}>
-                            <Text style={styles.rateText}>+{autoCoin.toFixed(1)}/s</Text>
-                        </View>
-                    )}
+                    <View style={[styles.ratesRow, { opacity: autoCoin > 0 ? 1 : 0 }]}>
+                        <Text style={styles.rateText}>+{autoCoin.toFixed(1)}/s</Text>
+                    </View>
                 </View>
 
                 {/* Gems */}
@@ -68,6 +68,9 @@ export const TopBar: React.FC = () => {
                     <View style={styles.resourceRowMain}>
                         <GemIcon size={20} />
                         <Text style={styles.resourceValue}>{Math.floor(state.gems)}</Text>
+                    </View>
+                    <View style={[styles.ratesRow, { opacity: autoGems > 0 ? 1 : 0 }]}>
+                        <Text style={styles.rateText}>+{autoGems.toFixed(2)}/s</Text>
                     </View>
                 </View>
             </View>
@@ -276,10 +279,10 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
     },
     resourceItemColumn: {
+        flex: 1,
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        minWidth: 70,
     },
     resourceRowMain: {
         flexDirection: 'row',

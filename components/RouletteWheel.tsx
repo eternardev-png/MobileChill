@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Animated, Easing, Dimensions } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Animated, Easing, Dimensions, ScrollView } from 'react-native';
 import Svg, { Path, G, Text as SvgText, Circle, Polygon, LinearGradient, RadialGradient, Stop, Defs, ClipPath, Rect } from 'react-native-svg';
 import { useGame } from '../gameState';
 import { GemIcon, EnergyIcon, CoinIcon, GrowthRateIcon, DiamondIcon } from './Icons'; // Updated import
@@ -178,294 +178,300 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({ onClose }) => {
                     <Text style={styles.closeBtnText}>✕</Text>
                 </TouchableOpacity>
 
-                <View style={styles.header}>
-                    <Text style={styles.title}>FORTUNE WHEEL</Text>
-                </View>
-
-                <View style={styles.wheelContainer}>
-                    {/* SVG POINTER - Fixed at top center */}
-                    <View style={styles.pointerContainer}>
-                        <Svg width="40" height="40" viewBox="0 0 40 40" style={{ marginTop: 5 }}>
-                            <Defs>
-                                <LinearGradient id="grad_pointer" x1="0" y1="0" x2="0" y2="1">
-                                    <Stop offset="0" stopColor="#fff" />
-                                    <Stop offset="1" stopColor="#ccc" />
-                                </LinearGradient>
-                            </Defs>
-                            {/* Shadow */}
-                            <Path d="M10,0 L30,0 L20,30 Z" fill="rgba(0,0,0,0.5)" transform="translate(0, 4)" />
-                            {/* Arrow */}
-                            <Path d="M10,0 L30,0 L20,30 Z" fill="url(#grad_pointer)" stroke="#999" strokeWidth="1" />
-                        </Svg>
-                    </View>
-
-                    {/* PULSING GLOW BEHIND WHEEL */}
-                    <Animated.View style={[
-                        styles.wheelGlow,
-                        {
-                            opacity: pulseAnim,
-                            transform: [{ scale: pulseAnim.interpolate({ inputRange: [0, 1], outputRange: [1.0, 1.35] }) }]
-                        }
-                    ]}>
-                        <Svg width={WHEEL_SIZE * 1.5} height={WHEEL_SIZE * 1.5}>
-                            <Defs>
-                                <RadialGradient id="glow_pulse" cx="50%" cy="50%" r="50%">
-                                    <Stop offset="40%" stopColor="#fbbf24" stopOpacity="1.0" />
-                                    <Stop offset="100%" stopColor="transparent" stopOpacity="0" />
-                                </RadialGradient>
-                            </Defs>
-                            {/* Draw glow slightly larger */}
-                            <Circle cx={(WHEEL_SIZE * 1.5) / 2} cy={(WHEEL_SIZE * 1.5) / 2} r={(WHEEL_SIZE * 1.4) / 2} fill="url(#glow_pulse)" />
-                        </Svg>
-                    </Animated.View>
-
-                    <Animated.View style={[styles.wheel, {
-                        transform: [{
-                            rotate: spinAnim.interpolate({
-                                inputRange: [0, 360],
-                                outputRange: ['0deg', '360deg']
-                            })
-                        }]
-                    }]}>
-                        <Svg width={WHEEL_SIZE} height={WHEEL_SIZE} viewBox={`0 0 ${WHEEL_SIZE} ${WHEEL_SIZE} `}>
-                            <Defs>
-                                <ClipPath id="wheelClip">
-                                    <Circle cx={CENTER} cy={CENTER} r={RADIUS} />
-                                </ClipPath>
-
-                                {/* COINS (Orange/Gold) */}
-                                <LinearGradient id="grad_coins" x1="0" y1="0" x2="1" y2="1">
-                                    <Stop offset="0%" stopColor="#f59e0b" />
-                                    <Stop offset="100%" stopColor="#d97706" />
-                                </LinearGradient>
-                                <LinearGradient id="grad_coins_dark" x1="0" y1="0" x2="1" y2="1">
-                                    <Stop offset="0%" stopColor="#b45309" />
-                                    <Stop offset="100%" stopColor="#78350f" />
-                                </LinearGradient>
-                                <LinearGradient id="grad_gold_premium" x1="0" y1="0" x2="1" y2="1">
-                                    <Stop offset="0%" stopColor="#fbbf24" />
-                                    <Stop offset="50%" stopColor="#f59e0b" />
-                                    <Stop offset="100%" stopColor="#b45309" />
-                                </LinearGradient>
-
-                                {/* ENERGY (Blue) */}
-                                <LinearGradient id="grad_energy" x1="0" y1="0" x2="1" y2="1">
-                                    <Stop offset="0%" stopColor="#3b82f6" />
-                                    <Stop offset="100%" stopColor="#1d4ed8" />
-                                </LinearGradient>
-                                <LinearGradient id="grad_energy_dark" x1="0" y1="0" x2="1" y2="1">
-                                    <Stop offset="0%" stopColor="#1e40af" />
-                                    <Stop offset="100%" stopColor="#172554" />
-                                </LinearGradient>
-
-                                {/* GREEN (Growth) */}
-                                <LinearGradient id="grad_green" x1="0" y1="0" x2="1" y2="1">
-                                    <Stop offset="0%" stopColor="#4ade80" />
-                                    <Stop offset="100%" stopColor="#16a34a" />
-                                </LinearGradient>
-
-                                {/* PURPLE (Shard) */}
-                                <LinearGradient id="grad_purple" x1="0" y1="0" x2="1" y2="1">
-                                    <Stop offset="0%" stopColor="#c084fc" />
-                                    <Stop offset="100%" stopColor="#7e22ce" />
-                                </LinearGradient>
-
-                                {/* KNOB */}
-                                <RadialGradient id="grad_knob" cx="50%" cy="50%" r="50%">
-                                    <Stop offset="0%" stopColor="#fbbf24" />
-                                    <Stop offset="80%" stopColor="#d97706" />
-                                    <Stop offset="100%" stopColor="#b45309" />
-                                </RadialGradient>
-
-                                {/* PULSE GLOW GRADIENT */}
-                                <RadialGradient id="grad_glow" cx="50%" cy="50%" r="50%">
-                                    <Stop offset="0%" stopColor="#fbbf24" stopOpacity="0.8" />
-                                    <Stop offset="100%" stopColor="transparent" stopOpacity="0" />
-                                </RadialGradient>
-
-                                {/* ICON GLOW (Dark Shadow/Glow) */}
-                                <RadialGradient id="grad_icon_glow" cx="50%" cy="50%" r="50%">
-                                    <Stop offset="0%" stopColor="#000" stopOpacity="0.8" />
-                                    <Stop offset="100%" stopColor="#000" stopOpacity="0" />
-                                </RadialGradient>
-                            </Defs>
-
-                            {/* Background Circle (Dark fill behind segments) */}
-                            <Circle cx={CENTER} cy={CENTER} r={RADIUS} fill="#1a1a1a" />
-
-                            {/* Segments Group with ClipPath for perfect circle */}
-                            <G rotation={0} origin={`${CENTER}, ${CENTER} `} clipPath="url(#wheelClip)">
-                                {currentPrizes.map((p, i) => {
-                                    // Calculate cumulative angles based on chance
-                                    const cumulativeBefore = currentPrizes.slice(0, i).reduce((sum, prize) => sum + prize.chance, 0);
-                                    const startAngle = (cumulativeBefore / TOTAL_CHANCE) * 360;
-                                    const sliceAngle = (p.chance / TOTAL_CHANCE) * 360;
-                                    const endAngle = startAngle + sliceAngle;
-
-                                    // Oversize segments slightly to ensure no gaps, clipped by ClipPath
-                                    const x1 = CENTER + (RADIUS + 2) * Math.cos(Math.PI * startAngle / 180);
-                                    const y1 = CENTER + (RADIUS + 2) * Math.sin(Math.PI * startAngle / 180);
-                                    const x2 = CENTER + (RADIUS + 2) * Math.cos(Math.PI * endAngle / 180);
-                                    const y2 = CENTER + (RADIUS + 2) * Math.sin(Math.PI * endAngle / 180);
-                                    const largeArc = sliceAngle > 180 ? 1 : 0;
-
-                                    const midAngle = startAngle + sliceAngle / 2;
-                                    // Adjusted distances - Moved EVEN FURTHER OUT
-                                    const iconDist = RADIUS * 0.82;
-                                    const textDist = RADIUS * 0.60;
-
-                                    const iconX = CENTER + iconDist * Math.cos(Math.PI * midAngle / 180);
-                                    const iconY = CENTER + iconDist * Math.sin(Math.PI * midAngle / 180);
-
-                                    const textX = CENTER + textDist * Math.cos(Math.PI * midAngle / 180);
-                                    const textY = CENTER + textDist * Math.sin(Math.PI * midAngle / 180);
-
-                                    // Fix rotation: Use midAngle for Radial alignment (reading outwards)
-                                    const rotation = midAngle;
-
-                                    // Transform for Icon (Center at iconX, iconY)
-                                    const iconSize = 22;
-                                    const iconOffset = iconSize / 2;
-
-                                    // Determine icon color based on type - match GameHUD colors
-                                    let iconColor = '#fff';
-                                    if (p.type === 'coins') iconColor = '#fbbf24';      // Yellow/Gold for coins (same as GameHUD)
-                                    if (p.type === 'energy') iconColor = '#facc15';     // Yellow for energy (same as GameHUD)
-                                    if (p.type === 'gems') iconColor = '#4ade80';  // Green for gems
-                                    if (p.type === 'shard') iconColor = '#a855f7';      // Purple for shards
-
-                                    return (
-                                        <G key={i}>
-
-                                            <Path
-                                                d={`M${CENTER},${CENTER} L${x1},${y1} A${RADIUS + 2},${RADIUS + 2} 0 ${largeArc}, 1 ${x2},${y2} Z`}
-                                                fill={p.color}
-                                                stroke="rgba(0,0,0,0.3)"
-                                                strokeWidth="2"
-                                            />
-
-                                            {/* Render Icon Component inside G with Transform */}
-                                            {/* Note: In nested SVG, transform order matters. Translate to pos, then rotate. */}
-                                            <G transform={`translate(${iconX - iconOffset}, ${iconY - iconOffset}) rotate(${rotation}, ${iconOffset}, ${iconOffset})`}>
-                                                {/* Dark Glow behind icons */}
-                                                <Circle cx={iconOffset} cy={iconOffset} r={iconSize * 0.8} fill="url(#grad_icon_glow)" />
-
-                                                {p.type === 'coins' && <CoinIcon size={iconSize} />}
-                                                {p.type === 'energy' && <EnergyIcon size={iconSize} />}
-                                                {p.type === 'gems' && <GemIcon size={iconSize} />}
-                                                {p.type === 'shard' && <DiamondIcon size={iconSize} />}
-                                            </G>
-
-                                            {/* Dark background for text - Glow/Shadow (Rectangular) */}
-                                            {(() => {
-                                                const isLong = p.label.length > 3;
-                                                const fSize = isLong ? 14 : 18;
-                                                const bgW = p.label.length * (fSize * 0.6) + 20;
-                                                const bgH = fSize + 12;
-                                                return (
-                                                    <Rect
-                                                        x={textX - bgW / 2}
-                                                        y={textY - bgH / 2}
-                                                        width={bgW}
-                                                        height={bgH}
-                                                        rx={bgH / 2}
-                                                        fill="url(#grad_icon_glow)"
-                                                        transform={`rotate(${rotation}, ${textX}, ${textY})`}
-                                                    />
-                                                );
-                                            })()}
-
-                                            {/* Text - Radial Alignment with heavy shadow/glow look */}
-                                            <SvgText
-                                                x={textX}
-                                                y={textY}
-                                                fill="#fff"
-                                                fontSize={p.label.length > 3 ? "14" : "18"}
-                                                fontWeight="900"
-                                                textAnchor="middle"
-                                                alignmentBaseline="central"
-                                                transform={`rotate(${rotation}, ${textX}, ${textY})`}
-                                                letterSpacing="1"
-                                                stroke="rgba(0,0,0,0.8)"
-                                                strokeWidth="3" // Heavy stroke acting as glow/outline
-                                            >
-                                                {p.label}
-                                            </SvgText>
-                                            {/* Foreground text for sharpness */}
-                                            <SvgText
-                                                x={textX}
-                                                y={textY}
-                                                fill="#fff"
-                                                fontSize={p.label.length > 3 ? "14" : "18"}
-                                                fontWeight="900"
-                                                textAnchor="middle"
-                                                alignmentBaseline="central"
-                                                transform={`rotate(${rotation}, ${textX}, ${textY})`}
-                                                letterSpacing="1"
-                                            >
-                                                {p.label}
-                                            </SvgText>
-                                        </G>
-                                    );
-                                })}
-                            </G>
-
-                            {/* Outer Border REMOVED as requested */}
-                            {/* <Circle cx={CENTER} cy={CENTER} r={RADIUS} fill="none" stroke="#4b5563" strokeWidth="8" /> */}
-
-                            {/* Center Knob */}
-                            <Circle cx={CENTER} cy={CENTER} r={28} fill="url(#grad_knob)" stroke="#78350f" strokeWidth="2" />
-                            <Circle cx={CENTER} cy={CENTER} r={20} fill="#f59e0b" opacity="0.5" />
-                        </Svg>
-                    </Animated.View>
-                </View>
-
-                {prize && (
-                    <View style={styles.resultContainer}>
-                        <Text style={styles.resultLabel}>YOU WON</Text>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                            {prize.type === 'coins' && <CoinIcon size={32} />}
-                            {prize.type === 'energy' && <EnergyIcon size={32} />}
-                            {prize.type === 'grow_mult' && <GemIcon size={32} />}
-                            {prize.type === 'shard' && <DiamondIcon size={32} />}
-                            <Text style={[styles.prizeText, { marginTop: 0 }]}>
-                                {prize.label}
-                            </Text>
-                        </View>
-                    </View>
-                )}
-
-                <View style={styles.multiplierContainer}>
-                    {[1, 3, 5].map((m) => (
-                        <TouchableOpacity
-                            key={m}
-                            style={[
-                                styles.multiplierBtn,
-                                spinMultiplier === m && styles.multiplierBtnActive
-                            ]}
-                            onPress={() => !spinning && setSpinMultiplier(m)}
-                            disabled={spinning}
-                            activeOpacity={0.7}
-                        >
-                            <Text style={[
-                                styles.multiplierText,
-                                spinMultiplier === m && styles.multiplierTextActive
-                            ]}>{m}x</Text>
-                        </TouchableOpacity>
-                    ))}
-                </View>
-
-                <TouchableOpacity
-                    style={[styles.spinButton, state.gems < (5 * spinMultiplier) && styles.spinButtonDisabled]}
-                    onPress={handleSpin}
-                    disabled={spinning || state.gems < (5 * spinMultiplier)}
+                <ScrollView
+                    style={{ width: '100%' }}
+                    contentContainerStyle={{ alignItems: 'center', paddingBottom: 20 }}
+                    showsVerticalScrollIndicator={false}
                 >
-                    <Text style={styles.spinButtonText}>SPIN</Text>
-                    <View style={styles.costBadge}>
-                        <Text style={styles.costText}>{5 * spinMultiplier}</Text>
-                        <GemIcon size={16} color="#fff" />
+                    <View style={styles.header}>
+                        <Text style={styles.title}>FORTUNE WHEEL</Text>
                     </View>
-                </TouchableOpacity>
+
+                    <View style={styles.wheelContainer}>
+                        {/* SVG POINTER - Fixed at top center */}
+                        <View style={styles.pointerContainer}>
+                            <Svg width="40" height="40" viewBox="0 0 40 40" style={{ marginTop: 5 }}>
+                                <Defs>
+                                    <LinearGradient id="grad_pointer" x1="0" y1="0" x2="0" y2="1">
+                                        <Stop offset="0" stopColor="#fff" />
+                                        <Stop offset="1" stopColor="#ccc" />
+                                    </LinearGradient>
+                                </Defs>
+                                {/* Shadow */}
+                                <Path d="M10,0 L30,0 L20,30 Z" fill="rgba(0,0,0,0.5)" transform="translate(0, 4)" />
+                                {/* Arrow */}
+                                <Path d="M10,0 L30,0 L20,30 Z" fill="url(#grad_pointer)" stroke="#999" strokeWidth="1" />
+                            </Svg>
+                        </View>
+
+                        {/* PULSING GLOW BEHIND WHEEL */}
+                        <Animated.View style={[
+                            styles.wheelGlow,
+                            {
+                                opacity: pulseAnim,
+                                transform: [{ scale: pulseAnim.interpolate({ inputRange: [0, 1], outputRange: [1.0, 1.35] }) }]
+                            }
+                        ]}>
+                            <Svg width={WHEEL_SIZE * 1.5} height={WHEEL_SIZE * 1.5}>
+                                <Defs>
+                                    <RadialGradient id="glow_pulse" cx="50%" cy="50%" r="50%">
+                                        <Stop offset="40%" stopColor="#fbbf24" stopOpacity="1.0" />
+                                        <Stop offset="100%" stopColor="transparent" stopOpacity="0" />
+                                    </RadialGradient>
+                                </Defs>
+                                {/* Draw glow slightly larger */}
+                                <Circle cx={(WHEEL_SIZE * 1.5) / 2} cy={(WHEEL_SIZE * 1.5) / 2} r={(WHEEL_SIZE * 1.4) / 2} fill="url(#glow_pulse)" />
+                            </Svg>
+                        </Animated.View>
+
+                        <Animated.View style={[styles.wheel, {
+                            transform: [{
+                                rotate: spinAnim.interpolate({
+                                    inputRange: [0, 360],
+                                    outputRange: ['0deg', '360deg']
+                                })
+                            }]
+                        }]}>
+                            <Svg width={WHEEL_SIZE} height={WHEEL_SIZE} viewBox={`0 0 ${WHEEL_SIZE} ${WHEEL_SIZE} `}>
+                                <Defs>
+                                    <ClipPath id="wheelClip">
+                                        <Circle cx={CENTER} cy={CENTER} r={RADIUS} />
+                                    </ClipPath>
+
+                                    {/* COINS (Orange/Gold) */}
+                                    <LinearGradient id="grad_coins" x1="0" y1="0" x2="1" y2="1">
+                                        <Stop offset="0%" stopColor="#f59e0b" />
+                                        <Stop offset="100%" stopColor="#d97706" />
+                                    </LinearGradient>
+                                    <LinearGradient id="grad_coins_dark" x1="0" y1="0" x2="1" y2="1">
+                                        <Stop offset="0%" stopColor="#b45309" />
+                                        <Stop offset="100%" stopColor="#78350f" />
+                                    </LinearGradient>
+                                    <LinearGradient id="grad_gold_premium" x1="0" y1="0" x2="1" y2="1">
+                                        <Stop offset="0%" stopColor="#fbbf24" />
+                                        <Stop offset="50%" stopColor="#f59e0b" />
+                                        <Stop offset="100%" stopColor="#b45309" />
+                                    </LinearGradient>
+
+                                    {/* ENERGY (Blue) */}
+                                    <LinearGradient id="grad_energy" x1="0" y1="0" x2="1" y2="1">
+                                        <Stop offset="0%" stopColor="#3b82f6" />
+                                        <Stop offset="100%" stopColor="#1d4ed8" />
+                                    </LinearGradient>
+                                    <LinearGradient id="grad_energy_dark" x1="0" y1="0" x2="1" y2="1">
+                                        <Stop offset="0%" stopColor="#1e40af" />
+                                        <Stop offset="100%" stopColor="#172554" />
+                                    </LinearGradient>
+
+                                    {/* GREEN (Growth) */}
+                                    <LinearGradient id="grad_green" x1="0" y1="0" x2="1" y2="1">
+                                        <Stop offset="0%" stopColor="#4ade80" />
+                                        <Stop offset="100%" stopColor="#16a34a" />
+                                    </LinearGradient>
+
+                                    {/* PURPLE (Shard) */}
+                                    <LinearGradient id="grad_purple" x1="0" y1="0" x2="1" y2="1">
+                                        <Stop offset="0%" stopColor="#c084fc" />
+                                        <Stop offset="100%" stopColor="#7e22ce" />
+                                    </LinearGradient>
+
+                                    {/* KNOB */}
+                                    <RadialGradient id="grad_knob" cx="50%" cy="50%" r="50%">
+                                        <Stop offset="0%" stopColor="#fbbf24" />
+                                        <Stop offset="80%" stopColor="#d97706" />
+                                        <Stop offset="100%" stopColor="#b45309" />
+                                    </RadialGradient>
+
+                                    {/* PULSE GLOW GRADIENT */}
+                                    <RadialGradient id="grad_glow" cx="50%" cy="50%" r="50%">
+                                        <Stop offset="0%" stopColor="#fbbf24" stopOpacity="0.8" />
+                                        <Stop offset="100%" stopColor="transparent" stopOpacity="0" />
+                                    </RadialGradient>
+
+                                    {/* ICON GLOW (Dark Shadow/Glow) */}
+                                    <RadialGradient id="grad_icon_glow" cx="50%" cy="50%" r="50%">
+                                        <Stop offset="0%" stopColor="#000" stopOpacity="0.8" />
+                                        <Stop offset="100%" stopColor="#000" stopOpacity="0" />
+                                    </RadialGradient>
+                                </Defs>
+
+                                {/* Background Circle (Dark fill behind segments) */}
+                                <Circle cx={CENTER} cy={CENTER} r={RADIUS} fill="#1a1a1a" />
+
+                                {/* Segments Group with ClipPath for perfect circle */}
+                                <G rotation={0} origin={`${CENTER}, ${CENTER} `} clipPath="url(#wheelClip)">
+                                    {currentPrizes.map((p, i) => {
+                                        // Calculate cumulative angles based on chance
+                                        const cumulativeBefore = currentPrizes.slice(0, i).reduce((sum, prize) => sum + prize.chance, 0);
+                                        const startAngle = (cumulativeBefore / TOTAL_CHANCE) * 360;
+                                        const sliceAngle = (p.chance / TOTAL_CHANCE) * 360;
+                                        const endAngle = startAngle + sliceAngle;
+
+                                        // Oversize segments slightly to ensure no gaps, clipped by ClipPath
+                                        const x1 = CENTER + (RADIUS + 2) * Math.cos(Math.PI * startAngle / 180);
+                                        const y1 = CENTER + (RADIUS + 2) * Math.sin(Math.PI * startAngle / 180);
+                                        const x2 = CENTER + (RADIUS + 2) * Math.cos(Math.PI * endAngle / 180);
+                                        const y2 = CENTER + (RADIUS + 2) * Math.sin(Math.PI * endAngle / 180);
+                                        const largeArc = sliceAngle > 180 ? 1 : 0;
+
+                                        const midAngle = startAngle + sliceAngle / 2;
+                                        // Adjusted distances - Moved EVEN FURTHER OUT
+                                        const iconDist = RADIUS * 0.82;
+                                        const textDist = RADIUS * 0.60;
+
+                                        const iconX = CENTER + iconDist * Math.cos(Math.PI * midAngle / 180);
+                                        const iconY = CENTER + iconDist * Math.sin(Math.PI * midAngle / 180);
+
+                                        const textX = CENTER + textDist * Math.cos(Math.PI * midAngle / 180);
+                                        const textY = CENTER + textDist * Math.sin(Math.PI * midAngle / 180);
+
+                                        // Fix rotation: Use midAngle for Radial alignment (reading outwards)
+                                        const rotation = midAngle;
+
+                                        // Transform for Icon (Center at iconX, iconY)
+                                        const iconSize = 22;
+                                        const iconOffset = iconSize / 2;
+
+                                        // Determine icon color based on type - match GameHUD colors
+                                        let iconColor = '#fff';
+                                        if (p.type === 'coins') iconColor = '#fbbf24';      // Yellow/Gold for coins (same as GameHUD)
+                                        if (p.type === 'energy') iconColor = '#facc15';     // Yellow for energy (same as GameHUD)
+                                        if (p.type === 'gems') iconColor = '#4ade80';  // Green for gems
+                                        if (p.type === 'shard') iconColor = '#a855f7';      // Purple for shards
+
+                                        return (
+                                            <G key={i}>
+
+                                                <Path
+                                                    d={`M${CENTER},${CENTER} L${x1},${y1} A${RADIUS + 2},${RADIUS + 2} 0 ${largeArc}, 1 ${x2},${y2} Z`}
+                                                    fill={p.color}
+                                                    stroke="rgba(0,0,0,0.3)"
+                                                    strokeWidth="2"
+                                                />
+
+                                                {/* Render Icon Component inside G with Transform */}
+                                                {/* Note: In nested SVG, transform order matters. Translate to pos, then rotate. */}
+                                                <G transform={`translate(${iconX - iconOffset}, ${iconY - iconOffset}) rotate(${rotation}, ${iconOffset}, ${iconOffset})`}>
+                                                    {/* Dark Glow behind icons */}
+                                                    <Circle cx={iconOffset} cy={iconOffset} r={iconSize * 0.8} fill="url(#grad_icon_glow)" />
+
+                                                    {p.type === 'coins' && <CoinIcon size={iconSize} />}
+                                                    {p.type === 'energy' && <EnergyIcon size={iconSize} />}
+                                                    {p.type === 'gems' && <GemIcon size={iconSize} />}
+                                                    {p.type === 'shard' && <DiamondIcon size={iconSize} />}
+                                                </G>
+
+                                                {/* Dark background for text - Glow/Shadow (Rectangular) */}
+                                                {(() => {
+                                                    const isLong = p.label.length > 3;
+                                                    const fSize = isLong ? 14 : 18;
+                                                    const bgW = p.label.length * (fSize * 0.6) + 20;
+                                                    const bgH = fSize + 12;
+                                                    return (
+                                                        <Rect
+                                                            x={textX - bgW / 2}
+                                                            y={textY - bgH / 2}
+                                                            width={bgW}
+                                                            height={bgH}
+                                                            rx={bgH / 2}
+                                                            fill="url(#grad_icon_glow)"
+                                                            transform={`rotate(${rotation}, ${textX}, ${textY})`}
+                                                        />
+                                                    );
+                                                })()}
+
+                                                {/* Text - Radial Alignment with heavy shadow/glow look */}
+                                                <SvgText
+                                                    x={textX}
+                                                    y={textY}
+                                                    fill="#fff"
+                                                    fontSize={p.label.length > 3 ? "14" : "18"}
+                                                    fontWeight="900"
+                                                    textAnchor="middle"
+                                                    alignmentBaseline="central"
+                                                    transform={`rotate(${rotation}, ${textX}, ${textY})`}
+                                                    letterSpacing="1"
+                                                    stroke="rgba(0,0,0,0.8)"
+                                                    strokeWidth="3" // Heavy stroke acting as glow/outline
+                                                >
+                                                    {p.label}
+                                                </SvgText>
+                                                {/* Foreground text for sharpness */}
+                                                <SvgText
+                                                    x={textX}
+                                                    y={textY}
+                                                    fill="#fff"
+                                                    fontSize={p.label.length > 3 ? "14" : "18"}
+                                                    fontWeight="900"
+                                                    textAnchor="middle"
+                                                    alignmentBaseline="central"
+                                                    transform={`rotate(${rotation}, ${textX}, ${textY})`}
+                                                    letterSpacing="1"
+                                                >
+                                                    {p.label}
+                                                </SvgText>
+                                            </G>
+                                        );
+                                    })}
+                                </G>
+
+                                {/* Outer Border REMOVED as requested */}
+                                {/* <Circle cx={CENTER} cy={CENTER} r={RADIUS} fill="none" stroke="#4b5563" strokeWidth="8" /> */}
+
+                                {/* Center Knob */}
+                                <Circle cx={CENTER} cy={CENTER} r={28} fill="url(#grad_knob)" stroke="#78350f" strokeWidth="2" />
+                                <Circle cx={CENTER} cy={CENTER} r={20} fill="#f59e0b" opacity="0.5" />
+                            </Svg>
+                        </Animated.View>
+                    </View>
+
+                    {prize && (
+                        <View style={styles.resultContainer}>
+                            <Text style={styles.resultLabel}>YOU WON</Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                                {prize.type === 'coins' && <CoinIcon size={32} />}
+                                {prize.type === 'energy' && <EnergyIcon size={32} />}
+                                {prize.type === 'grow_mult' && <GemIcon size={32} />}
+                                {prize.type === 'shard' && <DiamondIcon size={32} />}
+                                <Text style={[styles.prizeText, { marginTop: 0 }]}>
+                                    {prize.label}
+                                </Text>
+                            </View>
+                        </View>
+                    )}
+
+                    <View style={styles.multiplierContainer}>
+                        {[1, 3, 5].map((m) => (
+                            <TouchableOpacity
+                                key={m}
+                                style={[
+                                    styles.multiplierBtn,
+                                    spinMultiplier === m && styles.multiplierBtnActive
+                                ]}
+                                onPress={() => !spinning && setSpinMultiplier(m)}
+                                disabled={spinning}
+                                activeOpacity={0.7}
+                            >
+                                <Text style={[
+                                    styles.multiplierText,
+                                    spinMultiplier === m && styles.multiplierTextActive
+                                ]}>{m}x</Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+
+                    <TouchableOpacity
+                        style={[styles.spinButton, state.gems < (5 * spinMultiplier) && styles.spinButtonDisabled]}
+                        onPress={handleSpin}
+                        disabled={spinning || state.gems < (5 * spinMultiplier)}
+                    >
+                        <Text style={styles.spinButtonText}>SPIN</Text>
+                        <View style={styles.costBadge}>
+                            <Text style={styles.costText}>{5 * spinMultiplier}</Text>
+                            <GemIcon size={16} color="#fff" />
+                        </View>
+                    </TouchableOpacity>
+                </ScrollView>
             </View>
         </View>
     );
@@ -483,6 +489,7 @@ const styles = StyleSheet.create({
     container: {
         width: '95%',
         maxWidth: 420,  // Increased from 380 -> 420 (Larger Menu)
+        maxHeight: '90%', // Ensure it fits on screen
         backgroundColor: '#1a1a1a',
         borderRadius: 32,
         padding: 32,    // Increased padding from 24 -> 32
