@@ -10,7 +10,7 @@ export interface PrestigeUpgrade {
     maxLevel: number;
     category: 'core' | 'auto' | 'special';
     effect: {
-        type: 'tap_bonus' | 'coin_bonus' | 'energy_bonus' | 'growth_bonus' | 'auto_energy_bonus' | 'auto_growth_bonus' | 'max_tree_size' | 'auto_coin_bonus' | 'cosmetic';
+        type: 'tap_bonus' | 'coin_bonus' | 'energy_bonus' | 'growth_bonus' | 'auto_energy_bonus' | 'auto_growth_bonus' | 'max_tree_size' | 'auto_coin_bonus' | 'time_acceleration' | 'cosmetic';
         valuePerLevel: number;
     };
     cosmetic?: {
@@ -47,7 +47,7 @@ export const PRESTIGE_UPGRADES: Record<string, PrestigeUpgrade> = {
     nature_blessing: {
         id: 'nature_blessing',
         name: "Nature's Blessing",
-        description: '+10% energy gain per level',
+        description: '+10% power gain per level',
         icon: 'prestige_energy_big',
         baseCost: 6,
         costIncrease: 2,
@@ -71,8 +71,8 @@ export const PRESTIGE_UPGRADES: Record<string, PrestigeUpgrade> = {
     // Auto bonuses
     eternal_energy: {
         id: 'eternal_energy',
-        name: 'Eternal Energy',
-        description: '+0.15/s permanent auto energy',
+        name: 'Eternal Power',
+        description: '+0.15/s permanent auto power',
         icon: 'prestige_auto_energy',
         baseCost: 10,
         costIncrease: 4,
@@ -103,6 +103,18 @@ export const PRESTIGE_UPGRADES: Record<string, PrestigeUpgrade> = {
         maxLevel: 10,
         category: 'auto',
         effect: { type: 'auto_coin_bonus', valuePerLevel: 0.25 },
+    },
+
+    time_warp: {
+        id: 'time_warp',
+        name: 'Made in Heaven',
+        description: '+5% game speed (auto) per level',
+        icon: 'prestige_time',
+        baseCost: 20,
+        costIncrease: 10,
+        maxLevel: 10,
+        category: 'auto',
+        effect: { type: 'time_acceleration', valuePerLevel: 0.05 },
     },
 
     // Max tree size upgrade
@@ -148,7 +160,7 @@ export const PRESTIGE_UPGRADES: Record<string, PrestigeUpgrade> = {
     mega_glow: {
         id: 'mega_glow',
         name: 'Mega Glow',
-        description: 'Intense glow +5% energy',
+        description: 'Intense glow +5% power',
         icon: 'prestige_cosmetic',
         baseCost: 12,
         costIncrease: 5,
@@ -180,7 +192,7 @@ export const getAllPrestigeUpgrades = (): PrestigeUpgrade[] => Object.values(PRE
 
 export const calculatePrestigeBonus = (
     prestigeLevels: Record<string, number>,
-    bonusType: 'tap_bonus' | 'coin_bonus' | 'energy_bonus' | 'growth_bonus' | 'auto_energy_bonus' | 'auto_growth_bonus' | 'max_tree_size' | 'auto_coin_bonus'
+    bonusType: 'tap_bonus' | 'coin_bonus' | 'energy_bonus' | 'growth_bonus' | 'auto_energy_bonus' | 'auto_growth_bonus' | 'max_tree_size' | 'auto_coin_bonus' | 'time_acceleration'
 ): number => {
     let totalBonus = 0;
     for (const [id, level] of Object.entries(prestigeLevels)) {

@@ -208,6 +208,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const getPrestigeGrowthBonus = useCallback(() => calculatePrestigeBonus(state.prestige.upgradeLevels, 'growth_bonus'), [state.prestige.upgradeLevels]);
     const getPrestigeAutoEnergyBonus = useCallback(() => calculatePrestigeBonus(state.prestige.upgradeLevels, 'auto_energy_bonus'), [state.prestige.upgradeLevels]);
     const getPrestigeAutoGrowthBonus = useCallback(() => calculatePrestigeBonus(state.prestige.upgradeLevels, 'auto_growth_bonus'), [state.prestige.upgradeLevels]);
+    const getPrestigeTimeAcceleration = useCallback(() => calculatePrestigeBonus(state.prestige.upgradeLevels, 'time_acceleration'), [state.prestige.upgradeLevels]);
 
     const getMaxTreeDepth = useCallback(() => {
         const base = 9;
@@ -279,10 +280,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         gems: prev.gems + gemsGain
                     };
                 });
-            }, 1000 / (currentSpecies.timeMultiplier || 1.0));
+            }, 1000 / ((currentSpecies.timeMultiplier || 1.0) * (1 + getPrestigeTimeAcceleration())));
         }
         return () => { if (autoEnergyRef.current) clearInterval(autoEnergyRef.current); };
-    }, [state.upgradeLevels.autoEnergy, state.prestige.upgradeLevels, currentSpecies.timeMultiplier]);
+    }, [state.upgradeLevels.autoEnergy, state.prestige.upgradeLevels, currentSpecies.timeMultiplier, getPrestigeTimeAcceleration]);
 
     // Auto-Coins
     useEffect(() => {
@@ -316,10 +317,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         treeStats: { ...prev.treeStats, [prev.currentTreeId]: { ...oldStats, height: oldStats.height + rate } },
                     };
                 });
-            }, 1000 / (currentSpecies.timeMultiplier || 1.0));
+            }, 1000 / ((currentSpecies.timeMultiplier || 1.0) * (1 + getPrestigeTimeAcceleration())));
         }
         return () => { if (autoGrowthRef.current) clearInterval(autoGrowthRef.current); };
-    }, [state.upgradeLevels.autoGrowth, state.prestige.upgradeLevels, currentSpecies.timeMultiplier]);
+    }, [state.upgradeLevels.autoGrowth, state.prestige.upgradeLevels, currentSpecies.timeMultiplier, getPrestigeTimeAcceleration]);
 
     // TAP
     const tap = useCallback(() => {

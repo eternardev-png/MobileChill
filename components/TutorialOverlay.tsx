@@ -15,7 +15,7 @@ export const TutorialOverlay: React.FC<{ visible: boolean }> = ({ visible }) => 
             {/* Step 1: Tap Tree */}
             {tutorialStep === 1 && (
                 <View style={[styles.pointerContainer, { top: height * 0.4, left: width * 0.5 - 100 }]}>
-                    <Text style={styles.text}>👆 Tap the Tree to get Energy!</Text>
+                    <Text style={styles.text}>👆 Tap the Tree to get Power Points!</Text>
                     <View style={styles.arrowDown} />
                 </View>
             )}

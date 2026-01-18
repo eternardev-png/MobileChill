@@ -16,8 +16,8 @@ export interface Upgrade {
 export const UPGRADES: Record<string, Upgrade> = {
   tapPower: {
     id: 'tapPower',
-    name: 'Energy per Tap',
-    description: 'Increase energy gained per tap',
+    name: 'Power per Tap',
+    description: 'Increase power gained per tap',
     icon: 'shop_tap',
     maxLevel: 20,
     baseCost: 10,
@@ -38,8 +38,8 @@ export const UPGRADES: Record<string, Upgrade> = {
 
   autoEnergy: {
     id: 'autoEnergy',
-    name: 'Auto Energy',
-    description: 'Generate energy passively',
+    name: 'Auto Power',
+    description: 'Generate power points passively',
     icon: 'shop_auto_energy',
     maxLevel: 20,
     baseCost: 40,

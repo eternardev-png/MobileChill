@@ -26,32 +26,30 @@ export const CoinIcon: React.FC<IconProps> = ({ size = 20, color = '#fbbf24' }) 
 );
 
 // Energy/Lightning icon - Enhanced with glow
-export const EnergyIcon: React.FC<IconProps> = ({ size = 20, color = '#facc15' }) => (
-    <Svg width={size} height={size} viewBox="0 0 20 20">
-        <defs>
-            <radialGradient id="energyGlow" cx="50%" cy="50%">
-                <stop offset="0%" stopColor="#fef08a" stopOpacity="0.8" />
-                <stop offset="100%" stopColor={color} stopOpacity="0" />
-            </radialGradient>
-            <linearGradient id="lightningGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#fef08a" />
-                <stop offset="50%" stopColor={color} />
-                <stop offset="100%" stopColor="#eab308" />
-            </linearGradient>
-        </defs>
-        {/* Glow effect */}
-        <Circle cx="10" cy="10" r="9" fill="url(#energyGlow)" opacity={0.6} />
-        {/* Lightning bolt */}
-        <Path d="M11 2 L6 11 L9 11 L7 18 L14 9 L11 9 L11 2"
-            fill="url(#lightningGrad)"
-            stroke="#eab308"
-            strokeWidth="0.5" />
-        {/* Inner highlight */}
-        <Path d="M10.5 3 L7 10 L9 10 L8 15 L12 10 L10.5 10 L10.5 3"
-            fill="#fff"
-            opacity={0.3} />
+// Crown Icon (Power Points) - Replaces Energy
+export const CrownIcon: React.FC<IconProps> = ({ size = 20, color = '#facc15' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        <Defs>
+            <LinearGradient id="crownGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <Stop offset="0%" stopColor="#fef08a" />
+                <Stop offset="100%" stopColor="#eab308" />
+            </LinearGradient>
+        </Defs>
+        <Path
+            d="M2 18 L22 18 L22 20 L2 20 Z M3 16 L5 8 L9 13 L12 6 L15 13 L19 8 L21 16 Z"
+            fill="url(#crownGrad)"
+            stroke="#b45309"
+            strokeWidth="1"
+            strokeLinejoin="round"
+        />
+        <Circle cx="5" cy="7" r="1.5" fill="#facc15" stroke="#b45309" strokeWidth="0.5" />
+        <Circle cx="12" cy="5" r="1.5" fill="#facc15" stroke="#b45309" strokeWidth="0.5" />
+        <Circle cx="19" cy="7" r="1.5" fill="#facc15" stroke="#b45309" strokeWidth="0.5" />
     </Svg>
 );
+
+// Alias EnergyIcon to CrownIcon for backward compatibility
+export const EnergyIcon = CrownIcon;
 
 // Gem Icon - Green Diamond (Classic Gem Shape)
 export const GemIcon: React.FC<IconProps> = ({ size = 20, color = '#22c55e' }) => (
@@ -321,23 +319,34 @@ export const PrestigeCoinIcon: React.FC<IconProps> = ({ size = 28, color = '#a85
 );
 
 // Prestige Energy Icon
-export const PrestigeEnergyIcon: React.FC<IconProps> = ({ size = 28, color = '#a855f7' }) => (
+// Prestige Crown Icon (Power)
+export const PrestigeCrownIcon: React.FC<IconProps> = ({ size = 28, color = '#a855f7' }) => (
     <Svg width={size} height={size} viewBox="0 0 24 24">
         <Defs>
-            <LinearGradient id="prestigeEnergyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <LinearGradient id="prestigeCrownGrad" x1="0%" y1="0%" x2="0%" y2="100%">
                 <Stop offset="0%" stopColor="#e879f9" />
                 <Stop offset="100%" stopColor="#7e22ce" />
             </LinearGradient>
-            <RadialGradient id="energyGlowPurple" cx="50%" cy="50%">
+            <RadialGradient id="crownGlowPurple" cx="50%" cy="50%">
                 <Stop offset="0%" stopColor="#e879f9" stopOpacity="0.6" />
                 <Stop offset="100%" stopColor={color} stopOpacity="0" />
             </RadialGradient>
         </Defs>
-        <Circle cx="12" cy="12" r="11" fill="url(#energyGlowPurple)" />
-        <Path d="M13 3 L8 13 L11 13 L9 21 L16 11 L13 11 L13 3" fill="url(#prestigeEnergyGrad)" stroke="#9333ea" strokeWidth="0.5" />
-        <Path d="M12.5 5 L9 12 L11 12 L10 18 L14 12 L12.5 12 L12.5 5" fill="#fff" opacity={0.25} />
+        <Circle cx="12" cy="12" r="11" fill="url(#crownGlowPurple)" />
+        <Path
+            d="M3 19 L21 19 L21 21 L3 21 Z M4 17 L6 9 L10 14 L12 7 L14 14 L18 9 L20 17 Z"
+            fill="url(#prestigeCrownGrad)"
+            stroke="#581c87"
+            strokeWidth="1"
+            strokeLinejoin="round"
+        />
+        <Circle cx="6" cy="8" r="1.5" fill="#e879f9" stroke="#581c87" strokeWidth="0.5" />
+        <Circle cx="12" cy="6" r="1.5" fill="#e879f9" stroke="#581c87" strokeWidth="0.5" />
+        <Circle cx="18" cy="8" r="1.5" fill="#e879f9" stroke="#581c87" strokeWidth="0.5" />
     </Svg>
 );
+
+export const PrestigeEnergyIcon = PrestigeCrownIcon;
 
 // Prestige Growth Icon
 export const PrestigeGrowthIcon: React.FC<IconProps> = ({ size = 28, color = '#a855f7' }) => (
@@ -589,14 +598,19 @@ export const ShopFasterGrowthIcon: React.FC<IconProps> = ({ size = 28 }) => (
     </Svg>
 );
 
+// Shop Auto Power (Crown + Clock)
 export const ShopAutoEnergyIcon: React.FC<IconProps> = ({ size = 28 }) => (
     <Svg width={size} height={size} viewBox="0 0 24 24">
-        {/* Energy Part */}
         <G transform="translate(-1, 0) scale(1.0)">
-            <Path d="M13 3 L8 13 L11 13 L9 21 L16 11 L13 11 L13 3" fill="#facc15" stroke="#eab308" strokeWidth="1" />
+            <Path
+                d="M2 18 L22 18 L22 20 L2 20 Z M3 16 L5 8 L9 13 L12 6 L15 13 L19 8 L21 16 Z"
+                fill="#facc15"
+                stroke="#b45309"
+                strokeWidth="1"
+                strokeLinejoin="round"
+            />
         </G>
-        {/* Mini Time Part - closer */}
-        <G transform="translate(11, 11) scale(0.55)">
+        <G transform="translate(13, 13) scale(0.55)">
             <Circle cx="12" cy="12" r="9" fill="#1a1a1a" stroke="#fff" strokeWidth="2.5" />
             <Path d="M12 7 V12 L15 15" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" />
         </G>
@@ -637,13 +651,19 @@ export const ShopGoldMineIcon: React.FC<IconProps> = ({ size = 28 }) => (
 
 export const ShopTapIcon: React.FC<IconProps> = ({ size = 28 }) => (
     <Svg width={size} height={size} viewBox="0 0 24 24">
-        {/* The Energy Bolt (on the left) */}
-        <G transform="translate(2, 4) scale(0.8)">
-            <Path d="M11 2 L6 11 L9 11 L7 18 L14 9 L11 9 L11 2" fill="#facc15" stroke="#eab308" strokeWidth="1" />
+        {/* The Power Crown (on the left) */}
+        <G transform="translate(2, -2) scale(0.8)">
+            <Path
+                d="M2 18 L22 18 L22 20 L2 20 Z M3 16 L5 8 L9 13 L12 6 L15 13 L19 8 L21 16 Z"
+                fill="#facc15"
+                stroke="#b45309"
+                strokeWidth="1"
+                strokeLinejoin="round"
+            />
         </G>
 
-        {/* White Mouse Arrow Cursor (to the right of the bolt) */}
-        <G transform="translate(10, 6) rotate(-10)">
+        {/* White Mouse Arrow Cursor (to the right of the crown) */}
+        <G transform="translate(10, 8) rotate(-10)">
             {/* Black Outline */}
             <Path
                 d="M0,0 v13 l3,-3 l2,5 h2 l-2,-5 h5 Z"
@@ -770,29 +790,47 @@ export const PrestigeEternalWealthIcon: React.FC<IconProps> = ({ size = 28 }) =>
     </Svg>
 );
 
+export const PrestigeTimeIcon: React.FC<IconProps> = ({ size = 28, color = '#a855f7' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        <Defs>
+            <RadialGradient id="timeGlow" cx="50%" cy="50%">
+                <Stop offset="0%" stopColor="#e879f9" stopOpacity="0.8" />
+                <Stop offset="100%" stopColor={color} stopOpacity="0" />
+            </RadialGradient>
+        </Defs>
+        <Circle cx="12" cy="12" r="11" fill="url(#timeGlow)" opacity={0.3} />
+        <Circle cx="12" cy="12" r="9" fill="#1a1a1a" stroke="#e879f9" strokeWidth="2" />
+        <Path d="M12 7 V12 L16 16" fill="none" stroke="#e879f9" strokeWidth="2.5" strokeLinecap="round" />
+        <Circle cx="12" cy="12" r="2" fill="#fff" />
+        {/* Speed lines */}
+        <Path d="M18 5 L21 2 M6 5 L3 2" stroke="#c084fc" strokeWidth="2" strokeLinecap="round" opacity={0.6} />
+    </Svg>
+);
+
 // Map string identifiers to Components
 export const getIconByName = (name: string, size = 20, color?: string) => {
     const props = { size, color };
     switch (name) {
         // Resources
         case 'icon_coin': return <CoinIcon {...props} />;
-        case 'icon_energy': return <EnergyIcon {...props} />;
+        case 'icon_energy': return <CrownIcon {...props} />; // Replaced Energy with Crown
         case 'icon_gem': return <GemIcon {...props} />;
         case 'icon_prestige': return <PrestigeIcon {...props} />;
 
         // Prestige Specific
         case 'prestige_power': return <PrestigeStrongArmIcon {...props} />;
         case 'prestige_coin': return <PrestigeGoldenTouchIcon {...props} />;
-        case 'prestige_energy_big': return <PrestigeLargeEnergyIcon {...props} />;
+        case 'prestige_energy_big': return <PrestigeCrownIcon {...props} />; // Replaced Energy with Crown
         case 'prestige_rapid': return <PrestigeRapidGrowthIcon {...props} />;
-        case 'prestige_auto_energy': return <PrestigeEternalEnergyIcon {...props} />;
+        case 'prestige_auto_energy': return <PrestigeCrownIcon {...props} />; // Replaced Energy with Crown
         case 'prestige_auto_wealth': return <PrestigeEternalWealthIcon {...props} />;
         case 'prestige_cosmetic': return <PrestigeCosmeticIcon {...props} />;
+        case 'prestige_time': return <PrestigeTimeIcon {...props} />;
 
         // Shop Specific
         case 'shop_tap': return <ShopTapIcon {...props} />;
         case 'shop_faster_growth': return <ShopFasterGrowthIcon {...props} />;
-        case 'shop_auto_energy': return <ShopAutoEnergyIcon {...props} />;
+        case 'shop_auto_energy': return <ShopAutoEnergyIcon {...props} />; // Updated to Crown
         case 'shop_auto_growth': return <ShopAutoGrowthIcon {...props} />;
         case 'shop_gold_mine': return <ShopGoldMineIcon {...props} />;
         case 'shop_coin_multiplier': return <ShopCoinMultiplierIcon {...props} />;
@@ -817,7 +855,7 @@ export const getIconByName = (name: string, size = 20, color?: string) => {
         case 'quest_tap': return <QuestTapIcon {...props} />;
         case 'quest_cursor': return <CursorWhiteIcon {...props} />;
         case 'quest_height': return <QuestHeightIcon {...props} />;
-        case 'quest_energy': return <EnergyIcon {...props} />;
+        case 'quest_energy': return <CrownIcon {...props} />;
         case 'quest_roulette': return <CasinoIcon {...props} />;
         case 'quest_lab': return <QuestLabIcon {...props} />;
         case 'lab_grey': return <LabGreyIcon {...props} />;
@@ -827,6 +865,6 @@ export const getIconByName = (name: string, size = 20, color?: string) => {
         case 'quest_unlock': return <TreeIcon {...props} />; // Reuse genric tree
 
         // Fallback
-        default: return <EnergyIcon {...props} />; // Default
+        default: return <CrownIcon {...props} />; // Default
     }
 };
