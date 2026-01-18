@@ -290,6 +290,8 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: 12,
+        zIndex: 10,
+        elevation: 10,
     },
     titleRow: {
         flexDirection: 'row',

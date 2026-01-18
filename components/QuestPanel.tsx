@@ -241,6 +241,8 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: 10,
+        zIndex: 10,
+        elevation: 10,
     },
     title: {
         fontSize: 24,
