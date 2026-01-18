@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useCallback } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Animated, Dimensions, Easing } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Animated, Dimensions, Easing, Pressable } from 'react-native';
 import { useGame } from '../gameState';
 import { CoinIcon, EnergyIcon, GemIcon, HeightIcon, TapIcon, AutoIcon, getIconByName } from './Icons';
 
@@ -152,16 +152,20 @@ export const BottomControls: React.FC = () => {
             <Animated.View style={{ transform: [{ scale: scaleAnim }], width: '100%', alignItems: 'center' }}>
                 <View style={styles.tapButton}>
                     <View style={styles.splitHitboxContainer}>
-                        <TouchableOpacity
-                            style={styles.hitboxSide}
+                        <Pressable
+                            style={({ pressed }) => [
+                                styles.hitboxSide,
+                                { backgroundColor: pressed ? 'rgba(255,255,255,0.1)' : 'transparent' }
+                            ]}
                             onPress={handleTap}
-                            activeOpacity={0.7}
                         />
                         <View style={styles.hitboxDivider} />
-                        <TouchableOpacity
-                            style={styles.hitboxSide}
+                        <Pressable
+                            style={({ pressed }) => [
+                                styles.hitboxSide,
+                                { backgroundColor: pressed ? 'rgba(255,255,255,0.1)' : 'transparent' }
+                            ]}
                             onPress={handleTap}
-                            activeOpacity={0.7}
                         />
                     </View>
                 </View>

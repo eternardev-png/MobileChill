@@ -293,14 +293,14 @@ const styles = StyleSheet.create({
   zoomControls: {
     position: 'absolute',
     right: 20,
-    bottom: 250, // Just above the HUD area
+    bottom: 260, // Just above the HUD area
     zIndex: 50,
     alignItems: 'center',
   },
   zoomButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     backgroundColor: 'rgba(255,255,255,0.15)', // Glass effect
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.3)',

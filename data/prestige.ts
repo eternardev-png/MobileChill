@@ -22,12 +22,12 @@ export const PRESTIGE_UPGRADES: Record<string, PrestigeUpgrade> = {
     eternal_power: {
         id: 'eternal_power',
         name: 'Eternal Power',
-        description: '+10% tap power per level',
+        description: '+15% tap power per level',
         icon: 'prestige_power',
         baseCost: 5,
         costIncrease: 2,
         category: 'core',
-        effect: { type: 'tap_bonus', valuePerLevel: 0.1 },
+        effect: { type: 'tap_bonus', valuePerLevel: 0.15 },
     },
 
     golden_touch: {
@@ -44,23 +44,23 @@ export const PRESTIGE_UPGRADES: Record<string, PrestigeUpgrade> = {
     nature_blessing: {
         id: 'nature_blessing',
         name: "Nature's Blessing",
-        description: '+10% power gain per level',
+        description: '+15% power gain per level',
         icon: 'prestige_energy_big',
         baseCost: 6,
         costIncrease: 2,
         category: 'core',
-        effect: { type: 'energy_bonus', valuePerLevel: 0.1 },
+        effect: { type: 'energy_bonus', valuePerLevel: 0.15 },
     },
 
     rapid_growth: {
         id: 'rapid_growth',
         name: 'Rapid Growth',
-        description: '+8% growth speed per level',
+        description: '+15% growth speed per level',
         icon: 'prestige_rapid',
         baseCost: 7,
         costIncrease: 2,
         category: 'core',
-        effect: { type: 'growth_bonus', valuePerLevel: 0.08 },
+        effect: { type: 'growth_bonus', valuePerLevel: 0.15 },
     },
 
     // Auto bonuses
@@ -100,12 +100,12 @@ export const PRESTIGE_UPGRADES: Record<string, PrestigeUpgrade> = {
     time_warp: {
         id: 'time_warp',
         name: 'Made in Heaven',
-        description: '+5% game speed (auto) per level',
+        description: '+15% game speed (auto) per level',
         icon: 'prestige_time',
         baseCost: 20,
         costIncrease: 10,
         category: 'auto',
-        effect: { type: 'time_acceleration', valuePerLevel: 0.05 },
+        effect: { type: 'time_acceleration', valuePerLevel: 0.15 },
     },
 
     // Max tree size upgrade
