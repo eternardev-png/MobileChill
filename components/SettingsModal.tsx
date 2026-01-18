@@ -1,5 +1,5 @@
-import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Modal, Switch, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, Modal, Switch, ScrollView, TextInput } from 'react-native';
 import { useGame } from '../gameState';
 import { CloseIcon, SettingsIcon } from './Icons';
 import { telegram } from '../telegram';
@@ -10,7 +10,23 @@ interface SettingsModalProps {
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({ visible, onClose }) => {
-    const { state, updateSettings } = useGame();
+    const { state, updateSettings, redeemPromoCode } = useGame();
+    const [promoCode, setPromoCode] = useState('');
+    const [promoMessage, setPromoMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
+
+    const handleRedeem = () => {
+        if (!promoCode.trim()) return;
+        const result = redeemPromoCode(promoCode);
+        if (result.success) {
+            setPromoMessage({ text: result.reward ? `${result.message} ${result.reward}` : result.message, type: 'success' });
+            setPromoCode('');
+        } else {
+            setPromoMessage({ text: result.message, type: 'error' });
+        }
+
+        // Clear message after 3 seconds
+        setTimeout(() => setPromoMessage(null), 3000);
+    };
 
     const toggleShowWelcome = (value: boolean) => {
         telegram.haptic('light');
@@ -56,6 +72,36 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ visible, onClose }
                             </View>
                         </View>
 
+                        {/* Promo Code Section */}
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>Promo Code</Text>
+                            <View style={styles.promoContainer}>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Enter Code"
+                                    placeholderTextColor="#666"
+                                    value={promoCode}
+                                    onChangeText={setPromoCode}
+                                    autoCapitalize="characters"
+                                />
+                                <TouchableOpacity
+                                    style={[styles.redeemButton, !promoCode.trim() && styles.redeemButtonDisabled]}
+                                    onPress={handleRedeem}
+                                    disabled={!promoCode.trim()}
+                                >
+                                    <Text style={styles.redeemText}>Redeem</Text>
+                                </TouchableOpacity>
+                            </View>
+                            {promoMessage && (
+                                <Text style={[
+                                    styles.messageText,
+                                    promoMessage.type === 'success' ? styles.successText : styles.errorText
+                                ]}>
+                                    {promoMessage.text}
+                                </Text>
+                            )}
+                        </View>
+
                         {/* Version Info */}
                         <View style={styles.versionInfo}>
                             <Text style={styles.versionText}>MobileChill v1.3.0</Text>
@@ -63,8 +109,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ visible, onClose }
                         </View>
                     </ScrollView>
                 </View>
-            </View>
-        </Modal>
+            </View >
+        </Modal >
     );
 };
 
@@ -161,5 +207,48 @@ const styles = StyleSheet.create({
         color: '#666',
         fontSize: 10,
         marginTop: 2,
+    },
+    promoContainer: {
+        flexDirection: 'row',
+        gap: 10,
+        marginBottom: 10,
+    },
+    input: {
+        flex: 1,
+        backgroundColor: '#222',
+        borderWidth: 1,
+        borderColor: '#444',
+        borderRadius: 12,
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        color: '#fff',
+        fontSize: 14,
+    },
+    redeemButton: {
+        backgroundColor: '#22c55e',
+        borderRadius: 12,
+        paddingHorizontal: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    redeemButtonDisabled: {
+        backgroundColor: '#444',
+        opacity: 0.5,
+    },
+    redeemText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 14,
+    },
+    messageText: {
+        fontSize: 12,
+        marginTop: 4,
+        marginLeft: 4,
+    },
+    successText: {
+        color: '#4ade80',
+    },
+    errorText: {
+        color: '#ef4444',
     },
 });

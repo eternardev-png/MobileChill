@@ -48,6 +48,7 @@ export interface GameState {
     settings: {
         showWelcomeAlways: boolean;
     };
+    usedPromoCodes: string[];
 }
 
 const defaultTreeStats: TreeStats = { level: 1, xp: 0, totalEnergy: 0, height: 50 };
@@ -76,6 +77,7 @@ const initialState: GameState = {
     settings: {
         showWelcomeAlways: false,
     },
+    usedPromoCodes: [],
 };
 
 interface GameContextType {
@@ -119,7 +121,11 @@ interface GameContextType {
     advanceTutorial: (toStep?: number) => void;
 
     // Settings
+    // Settings
     updateSettings: (settings: Partial<GameState['settings']>) => void;
+
+    // Promo Codes
+    redeemPromoCode: (code: string) => { success: boolean; message: string; reward?: string };
 }
 
 const GameContext = createContext<GameContextType | null>(null);
@@ -157,6 +163,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         const realUpgradeCount = Object.values(levels).reduce((a, b) => a + (Number(b) || 0), 0);
                         parsed.totalUpgradesPurchased = Math.max(Number(parsed.totalUpgradesPurchased) || 0, realUpgradeCount);
                     }
+
+                    if (!parsed.usedPromoCodes) parsed.usedPromoCodes = [];
 
                     // MIGRATION: Fix missing Tutorial Step for existing players
                     // If player has taps/progress but tutorialStep is 0/undefined, set to 13 (Done)
@@ -744,6 +752,39 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
     }, []);
 
+    const redeemPromoCode = useCallback((code: string): { success: boolean; message: string; reward?: string } => {
+        const normalizedCode = code.trim().toUpperCase();
+
+        if (state.usedPromoCodes.includes(normalizedCode)) {
+            return { success: false, message: 'Code already used!' };
+        }
+
+        let rewardMessage = '';
+        let success = false;
+
+        if (normalizedCode === 'PROMO_1000') {
+            setState(prev => ({
+                ...prev,
+                gems: prev.gems + 1000,
+                usedPromoCodes: [...prev.usedPromoCodes, normalizedCode],
+                lastSaveTime: Date.now() // Trigger save
+            }));
+            rewardMessage = '+1000 Gems';
+            success = true;
+        } else {
+            return { success: false, message: 'Invalid code' };
+        }
+
+        // Save immediately if successful
+        if (success) {
+            telegram.cloudSave(STORAGE_KEY, JSON.stringify({ ...state, gems: state.gems + 1000, usedPromoCodes: [...state.usedPromoCodes, normalizedCode], lastSaveTime: Date.now() })).catch(e => console.error(e));
+            return { success: true, message: 'Code Redeemed!', reward: rewardMessage };
+        }
+
+        return { success: false, message: 'Unknown error' };
+
+    }, [state.usedPromoCodes, state.gems]);
+
     const value: GameContextType = {
         state, currentSpecies, allSpecies, tap, switchTree, unlockTree, buyUpgrade, claimQuestReward,
         performPrestige, buyPrestigeUpgrade,
@@ -755,7 +796,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         currentTreeHeight: currentStats.height,
         saveGame, loadGame, resetGame, addResources,
         tutorialStep: state.tutorialStep, advanceTutorial,
-        updateSettings
+        updateSettings, redeemPromoCode
     };
 
     return <GameContext.Provider value={value}>{children}</GameContext.Provider>;

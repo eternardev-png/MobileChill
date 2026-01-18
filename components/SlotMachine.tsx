@@ -61,6 +61,7 @@ export const SlotMachine: React.FC<SlotMachineProps> = ({ onClose }) => {
     const [spinning, setSpinning] = useState(false);
     const [reels, setReels] = useState([generateReel(), generateReel(), generateReel()]);
     const [result, setResult] = useState<{ symbols: typeof SYMBOLS[0][], win: number, winType: 'coins' | 'energy' | 'gems' | 'shard' } | null>(null);
+    const [spinMultiplier, setSpinMultiplier] = useState(1); // 1, 3, 5
 
     // Pulse lights when spinning
     useEffect(() => {
@@ -81,7 +82,8 @@ export const SlotMachine: React.FC<SlotMachineProps> = ({ onClose }) => {
     const handleSpin = () => {
         if (spinning) return;
 
-        const success = spendGems(SPIN_COST);
+        const cost = SPIN_COST * spinMultiplier;
+        const success = spendGems(cost);
         if (!success) return;
 
         setSpinning(true);
@@ -183,10 +185,10 @@ export const SlotMachine: React.FC<SlotMachineProps> = ({ onClose }) => {
                 // However, user asked for "7 => 50 100 gems". 
                 // I will use 'gems' as the award string.
 
-                awardRoulettePrize(awardType, winAmount);
+                awardRoulettePrize(awardType, winAmount * spinMultiplier);
             }
 
-            setResult({ symbols: finalSymbols, win: winAmount, winType });
+            setResult({ symbols: finalSymbols, win: winAmount * spinMultiplier, winType });
             setSpinning(false);
         });
     };
@@ -314,15 +316,36 @@ export const SlotMachine: React.FC<SlotMachineProps> = ({ onClose }) => {
                     </View>
                 )}
 
+                {/* Multiplier/Bet Toggle */}
+                <View style={styles.multiplierContainer}>
+                    {[1, 3, 5].map((m) => (
+                        <TouchableOpacity
+                            key={m}
+                            style={[
+                                styles.multiplierBtn,
+                                spinMultiplier === m && styles.multiplierBtnActive
+                            ]}
+                            onPress={() => !spinning && setSpinMultiplier(m)}
+                            disabled={spinning}
+                            activeOpacity={0.7}
+                        >
+                            <Text style={[
+                                styles.multiplierText,
+                                spinMultiplier === m && styles.multiplierTextActive
+                            ]}>{m}x</Text>
+                        </TouchableOpacity>
+                    ))}
+                </View>
+
                 {/* Spin Button */}
                 <TouchableOpacity
-                    style={[styles.spinButton, state.gems < SPIN_COST && styles.spinButtonDisabled]}
+                    style={[styles.spinButton, state.gems < (SPIN_COST * spinMultiplier) && styles.spinButtonDisabled]}
                     onPress={handleSpin}
-                    disabled={spinning || state.gems < SPIN_COST}
+                    disabled={spinning || state.gems < (SPIN_COST * spinMultiplier)}
                 >
                     <Text style={styles.spinButtonText}>SPIN</Text>
                     <View style={styles.costBadge}>
-                        <Text style={styles.costText}>{SPIN_COST}</Text>
+                        <Text style={styles.costText}>{SPIN_COST * spinMultiplier}</Text>
                         <GemIcon size={16} color="#fff" />
                     </View>
                 </TouchableOpacity>
@@ -592,5 +615,41 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         color: '#ffffff',
+    },
+    multiplierContainer: {
+        flexDirection: 'row',
+        gap: 10,
+        marginBottom: 10,
+        marginTop: 10,
+        width: '100%',
+        justifyContent: 'center',
+    },
+    multiplierBtn: {
+        backgroundColor: '#333',
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: '#555',
+        minWidth: 60,
+        alignItems: 'center',
+    },
+    multiplierBtnActive: {
+        backgroundColor: '#ef4444', // Red matches theme
+        borderColor: '#fca5a5',
+        shadowColor: '#ef4444',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.5,
+        shadowRadius: 10,
+        elevation: 5,
+    },
+    multiplierText: {
+        color: '#888',
+        fontWeight: 'bold',
+        fontSize: 14,
+    },
+    multiplierTextActive: {
+        color: '#fff',
+        fontWeight: '900',
     },
 });

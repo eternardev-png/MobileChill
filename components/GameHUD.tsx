@@ -12,7 +12,7 @@ export const BOTTOM_CONTROLS_HEIGHT = 160; // Height of stats + tap button area
 export const TREE_GROUND_POSITION = height - BOTTOM_CONTROLS_HEIGHT; // Tree base position
 
 // Top bar with resources
-export const TopBar: React.FC<{ onOpenSettings: () => void }> = ({ onOpenSettings }) => {
+export const TopBar: React.FC = () => {
     const {
         state,
         currentSpecies,
@@ -35,15 +35,7 @@ export const TopBar: React.FC<{ onOpenSettings: () => void }> = ({ onOpenSetting
     return (
         <View style={styles.topSection}>
             <View style={styles.topHeader}>
-                <TouchableOpacity
-                    style={styles.settingsBtn}
-                    onPress={() => {
-                        telegram.haptic('light');
-                        onOpenSettings();
-                    }}
-                >
-                    <SettingsIcon size={24} color="#888" />
-                </TouchableOpacity>
+                {/* Settings Button Removed from here */}
                 <View style={{ flex: 1 }} />
             </View>
             <View style={styles.resourceBar}>
@@ -192,7 +184,19 @@ export const GameHUD: React.FC = () => {
 
     return (
         <View style={styles.hudContainer} pointerEvents="box-none">
-            <TopBar onOpenSettings={() => setSettingsVisible(true)} />
+            <View>
+                <TopBar />
+                {/* Floating Settings Button below TopBar */}
+                <TouchableOpacity
+                    style={styles.floatingSettingsBtn}
+                    onPress={() => {
+                        telegram.haptic('light');
+                        setSettingsVisible(true);
+                    }}
+                >
+                    <SettingsIcon size={24} color="#888" />
+                </TouchableOpacity>
+            </View>
             <BottomControls />
             <SettingsModal
                 visible={settingsVisible}
@@ -252,12 +256,19 @@ const styles = StyleSheet.create({
         paddingBottom: 4,
     },
     settingsBtn: {
+        // Removed original styles, replaced with floating below
+    },
+    floatingSettingsBtn: {
         width: 40,
         height: 40,
         borderRadius: 20,
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: 'rgba(255,255,255,0.05)',
+        marginTop: 10,
+        marginLeft: 15, // Align with left edge padding
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.1)',
     },
     resourceBar: {
         flexDirection: 'row',

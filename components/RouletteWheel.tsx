@@ -13,7 +13,7 @@ interface RouletteWheelProps {
     onClose: () => void;
 }
 
-const PRIZES = [
+const BASE_PRIZES = [
     { id: 'coins_100', label: '100', value: 100, type: 'coins', color: 'rgba(251, 191, 36, 0.85)', chance: 15 },      // Yellow bright
     { id: 'energy_500', label: '500', value: 500, type: 'energy', color: 'rgba(59, 130, 246, 0.85)', chance: 15 },    // Blue bright
     { id: 'grow_15', label: '15', value: 15, type: 'gems', color: 'rgba(74, 222, 128, 0.85)', chance: 5 },          // Green bright
@@ -26,7 +26,35 @@ const PRIZES = [
     { id: 'grow_50', label: '50', value: 50, type: 'gems', color: 'rgba(74, 222, 128, 0.85)', chance: 2 },          // Rare 50 gems
 ];
 
-const TOTAL_CHANCE = PRIZES.reduce((sum, p) => sum + p.chance, 0);
+const getPrizes = (multiplier: number) => {
+    return BASE_PRIZES.map(p => {
+        let newLabel = p.label;
+        if (p.type === 'shard') {
+            // For shard, keep label simple or append x3 if needed? 
+            // "figures change" -> Shard might not be a figure. 
+            // Let's leave Shard as 'Shard' but maybe 'x3' in popup? 
+            // Actually, let's try to make it clear.
+            // If multiplier > 1, maybe "3 Shards"? Label space is tight.
+            // Let's stick to base label for Shard, but scale numbers.
+            // Wait, user said "on roulette figures change".
+        } else {
+            // Scale numbers
+            if (p.label.endsWith('K')) {
+                const val = parseFloat(p.label);
+                newLabel = (val * multiplier) + 'K';
+            } else if (!isNaN(Number(p.label))) {
+                newLabel = (Number(p.label) * multiplier).toString();
+            }
+        }
+        return {
+            ...p,
+            value: p.value * multiplier,
+            label: newLabel
+        };
+    });
+};
+
+const TOTAL_CHANCE = BASE_PRIZES.reduce((sum, p) => sum + p.chance, 0);
 
 export const RouletteWheel: React.FC<RouletteWheelProps> = ({ onClose }) => {
     const { state, spendGems, awardRoulettePrize } = useGame();
@@ -36,6 +64,9 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({ onClose }) => {
 
     const [spinning, setSpinning] = useState(false);
     const [prize, setPrize] = useState<any>(null);
+    const [spinMultiplier, setSpinMultiplier] = useState(1); // 1, 3, 5
+
+    const currentPrizes = React.useMemo(() => getPrizes(spinMultiplier), [spinMultiplier]);
 
     const pendingPrizeRef = useRef<any>(null); // Track pending prize to award on finish/close
 
@@ -67,29 +98,30 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({ onClose }) => {
         if (spinning) return;
 
         // Attempt to spend cost immediately
-        const success = spendGems(5);
+        const cost = 5 * spinMultiplier;
+        const success = spendGems(cost);
         if (!success) return; // Not enough currency
 
         setSpinning(true);
         setPrize(null);
 
-        const totalChance = PRIZES.reduce((sum, p) => sum + p.chance, 0);
+        const totalChance = currentPrizes.reduce((sum, p) => sum + p.chance, 0);
         let random = Math.random() * totalChance;
         let selectedIndex = 0;
-        for (let i = 0; i < PRIZES.length; i++) {
-            random -= PRIZES[i].chance;
+        for (let i = 0; i < currentPrizes.length; i++) {
+            random -= currentPrizes[i].chance;
             if (random <= 0) {
                 selectedIndex = i;
                 break;
             }
         }
 
-        const wonPrize = PRIZES[selectedIndex];
+        const wonPrize = currentPrizes[selectedIndex];
         // Store pending prize (Don't award yet, don't show UI yet)
         pendingPrizeRef.current = wonPrize;
 
         // Calculate segment center based on chance-proportional angles
-        const cumulativeBefore = PRIZES.slice(0, selectedIndex).reduce((sum, prize) => sum + prize.chance, 0);
+        const cumulativeBefore = currentPrizes.slice(0, selectedIndex).reduce((sum, prize) => sum + prize.chance, 0);
         const sliceAngle = (wonPrize.chance / TOTAL_CHANCE) * 360;
         const segmentCenter = ((cumulativeBefore / TOTAL_CHANCE) * 360) + (sliceAngle / 2);
 
@@ -263,9 +295,9 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({ onClose }) => {
 
                             {/* Segments Group with ClipPath for perfect circle */}
                             <G rotation={0} origin={`${CENTER}, ${CENTER} `} clipPath="url(#wheelClip)">
-                                {PRIZES.map((p, i) => {
+                                {currentPrizes.map((p, i) => {
                                     // Calculate cumulative angles based on chance
-                                    const cumulativeBefore = PRIZES.slice(0, i).reduce((sum, prize) => sum + prize.chance, 0);
+                                    const cumulativeBefore = currentPrizes.slice(0, i).reduce((sum, prize) => sum + prize.chance, 0);
                                     const startAngle = (cumulativeBefore / TOTAL_CHANCE) * 360;
                                     const sliceAngle = (p.chance / TOTAL_CHANCE) * 360;
                                     const endAngle = startAngle + sliceAngle;
@@ -403,14 +435,34 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({ onClose }) => {
                     </View>
                 )}
 
+                <View style={styles.multiplierContainer}>
+                    {[1, 3, 5].map((m) => (
+                        <TouchableOpacity
+                            key={m}
+                            style={[
+                                styles.multiplierBtn,
+                                spinMultiplier === m && styles.multiplierBtnActive
+                            ]}
+                            onPress={() => !spinning && setSpinMultiplier(m)}
+                            disabled={spinning}
+                            activeOpacity={0.7}
+                        >
+                            <Text style={[
+                                styles.multiplierText,
+                                spinMultiplier === m && styles.multiplierTextActive
+                            ]}>{m}x</Text>
+                        </TouchableOpacity>
+                    ))}
+                </View>
+
                 <TouchableOpacity
-                    style={[styles.spinButton, state.gems < 5 && styles.spinButtonDisabled]}
+                    style={[styles.spinButton, state.gems < (5 * spinMultiplier) && styles.spinButtonDisabled]}
                     onPress={handleSpin}
-                    disabled={spinning || state.gems < 5}
+                    disabled={spinning || state.gems < (5 * spinMultiplier)}
                 >
                     <Text style={styles.spinButtonText}>SPIN</Text>
                     <View style={styles.costBadge}>
-                        <Text style={styles.costText}>5</Text>
+                        <Text style={styles.costText}>{5 * spinMultiplier}</Text>
                         <GemIcon size={16} color="#fff" />
                     </View>
                 </TouchableOpacity>
@@ -564,5 +616,40 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         color: '#ffffff', // White text for contrast
+    },
+    multiplierContainer: {
+        flexDirection: 'row',
+        gap: 10,
+        marginBottom: 15,
+        width: '100%',
+        justifyContent: 'center',
+    },
+    multiplierBtn: {
+        backgroundColor: '#333',
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: '#555',
+        minWidth: 60,
+        alignItems: 'center',
+    },
+    multiplierBtnActive: {
+        backgroundColor: '#f59e0b', // Gold/Yellow matches theme
+        borderColor: '#fbbf24',
+        shadowColor: '#f59e0b',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.5,
+        shadowRadius: 10,
+        elevation: 5,
+    },
+    multiplierText: {
+        color: '#888',
+        fontWeight: 'bold',
+        fontSize: 14,
+    },
+    multiplierTextActive: {
+        color: '#000',
+        fontWeight: '900',
     },
 });
