@@ -796,6 +796,44 @@ export const PrestigeEternalWealthIcon: React.FC<IconProps> = ({ size = 28 }) =>
     </Svg>
 );
 
+// Prestige Initial Coin Icon (Purple Coin)
+export const PrestigePurpleCoinIcon: React.FC<IconProps> = ({ size = 28, color = '#a855f7' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        <Defs>
+            <RadialGradient id="purpleCoinGrad" cx="40%" cy="30%">
+                <Stop offset="0%" stopColor="#e879f9" />
+                <Stop offset="70%" stopColor={color} />
+                <Stop offset="100%" stopColor="#7e22ce" />
+            </RadialGradient>
+        </Defs>
+        <Circle cx="12" cy="12" r="10" fill="url(#purpleCoinGrad)" stroke="#6b21a8" strokeWidth="1" />
+        <Circle cx="12" cy="12" r="7" fill="none" stroke="#d8b4fe" strokeWidth="1" opacity={0.5} />
+        <Path d="M12 7 V17 M9 9 L15 9" stroke="#ead4ff" strokeWidth="2" strokeLinecap="round" />
+    </Svg>
+);
+
+// Prestige Gem Bag Icon (Gem with Bag)
+export const PrestigeGemBagIcon: React.FC<IconProps> = ({ size = 28, color = '#a855f7' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        {/* Money Bag */}
+        <Path
+            d="M12 21 C8 21 5 18 5 13 C5 9 8 7 12 7 C16 7 19 9 19 13 C19 18 16 21 12 21 Z"
+            fill="#581c87"
+            stroke="#7e22ce"
+            strokeWidth="1.5"
+        />
+        <Path d="M9 7 L10 4 L14 4 L15 7" fill="none" stroke="#7e22ce" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <Path d="M12 7 L12 9" stroke="#6b21a8" strokeWidth="1.5" />
+
+        {/* Floating Purple Gem */}
+        <G transform="translate(12, 14) scale(0.6)">
+            <Polygon points="0,-10 8,-4 0,10 -8,-4" fill="#d8b4fe" stroke="#fff" strokeWidth="2" />
+        </G>
+        {/* Shine */}
+        <Circle cx="9" cy="12" r="1" fill="#fff" opacity={0.3} />
+    </Svg>
+);
+
 export const PrestigeTimeIcon: React.FC<IconProps> = ({ size = 28, color = '#a855f7' }) => (
     <Svg width={size} height={size} viewBox="0 0 24 24">
         <Defs>
@@ -832,6 +870,8 @@ export const getIconByName = (name: string, size = 20, color?: string) => {
         case 'prestige_auto_wealth': return <PrestigeEternalWealthIcon {...props} />;
         case 'prestige_cosmetic': return <PrestigeCosmeticIcon {...props} />;
         case 'prestige_time': return <PrestigeTimeIcon {...props} />;
+        case 'prestige_initial_coin': return <PrestigePurpleCoinIcon {...props} />;
+        case 'prestige_initial_gem': return <PrestigeGemBagIcon {...props} />;
 
         // Shop Specific
         case 'shop_tap': return <ShopTapIcon {...props} />;

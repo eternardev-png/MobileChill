@@ -129,7 +129,9 @@ export const QuestPanel: React.FC<QuestPanelProps> = ({ onClose }) => {
                                     ]}
                                 >
                                     <View style={styles.questHeader}>
-                                        {getIconByName(quest.icon, 32)}
+                                        <View style={styles.questIconContainer}>
+                                            {getIconByName(quest.icon, 32)}
+                                        </View>
                                         <View style={styles.questInfo}>
                                             <Text style={styles.questName}>{quest.name}</Text>
                                             <Text style={styles.questDesc}>{quest.description}</Text>
@@ -316,6 +318,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: 12,
         marginBottom: 12,
+    },
+    questIconContainer: {
+        width: 32,
+        height: 32,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     questIcon: {
         fontSize: 32,

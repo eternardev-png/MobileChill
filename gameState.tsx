@@ -494,14 +494,24 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const performPrestige = useCallback(() => {
         if (!canPrestige(state.totalEnergyEarned)) return false;
         const shards = calculatePrestigeShards(state.totalEnergyEarned);
+
+        // Calculate Initial Resources from Prestige Upgrades
+        const initialCoinsLevel = state.prestige.upgradeLevels['initial_coins'] || 0;
+        const initialGemsLevel = state.prestige.upgradeLevels['initial_gems'] || 0;
+
+        const startingCoins = 50 + (initialCoinsLevel * 500); // Base 50 + 500 per level
+        const startingGems = 0 + (initialGemsLevel * 15);     // Base 0 + 15 per level
+
         setState(prev => ({
             ...initialState,
+            coins: startingCoins,
+            gems: startingGems,
             prestige: { ...prev.prestige, shards: prev.prestige.shards + shards, totalShards: prev.prestige.totalShards + shards, prestigeCount: prev.prestige.prestigeCount + 1 },
             lastSaveTime: Date.now(),
             tutorialStep: prev.tutorialStep === 10 ? 11 : prev.tutorialStep // 10(Confirm) -> 11(Buy Prestige Upgrade)
         }));
         return true;
-    }, [state.totalEnergyEarned]);
+    }, [state.totalEnergyEarned, state.prestige.upgradeLevels]);
 
     const buyPrestigeUpgrade = useCallback((upgradeId: string) => {
         const upgrade = PRESTIGE_UPGRADES[upgradeId];
@@ -717,10 +727,21 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
     const updateSettings = useCallback((newSettings: Partial<GameState['settings']>) => {
-        setState(prev => ({
-            ...prev,
-            settings: { ...prev.settings, ...newSettings }
-        }));
+        setState(prev => {
+            const nextState = {
+                ...prev,
+                settings: { ...prev.settings, ...newSettings }
+            };
+
+            // Force immediate save for settings changes
+            // Check save restriction (Tutorial < 13 & No Prestige)
+            if (!(nextState.tutorialStep < 13 && nextState.prestige.prestigeCount === 0)) {
+                const toSave = { ...nextState, lastSaveTime: Date.now() };
+                telegram.cloudSave(STORAGE_KEY, JSON.stringify(toSave)).catch(e => console.error('Settings save failed', e));
+            }
+
+            return nextState;
+        });
     }, []);
 
     const value: GameContextType = {

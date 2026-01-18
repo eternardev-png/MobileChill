@@ -156,6 +156,29 @@ export const PRESTIGE_UPGRADES: Record<string, PrestigeUpgrade> = {
         effect: { type: 'energy_bonus', valuePerLevel: 0.05 },
         cosmetic: { type: 'glow_intensity' },
     },
+
+    // Starting Resources
+    initial_coins: {
+        id: 'initial_coins',
+        name: 'Head Start: Coins',
+        description: '+500 Starting Coins per level',
+        icon: 'prestige_initial_coin',
+        baseCost: 10,
+        costIncrease: 5,
+        category: 'core',
+        effect: { type: 'coin_bonus', valuePerLevel: 500 }, // valuePerLevel misused here but handled in gameState
+    },
+
+    initial_gems: {
+        id: 'initial_gems',
+        name: 'Head Start: Gems',
+        description: '+15 Starting Gems per level',
+        icon: 'prestige_initial_gem',
+        baseCost: 15,
+        costIncrease: 10,
+        category: 'core',
+        effect: { type: 'coin_bonus', valuePerLevel: 15 }, // valuePerLevel misused here but handled in gameState
+    },
 };
 
 export const calculatePrestigeCost = (upgrade: PrestigeUpgrade, currentLevel: number): number => {
