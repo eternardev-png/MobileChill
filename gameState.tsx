@@ -320,10 +320,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     const gain = rate * coinMult;
                     return { ...prev, coins: prev.coins + gain };
                 });
-            }, 1000); // 1 tick per second fixed for coins usually
+            }, 1000 / (1 + getPrestigeTimeAcceleration())); // Apply Made in Heaven (Time Acceleration)
         }
         return () => { if (autoCoinRef.current) clearInterval(autoCoinRef.current); };
-    }, [state.upgradeLevels.autoCoin, state.prestige.upgradeLevels, getCoinMultiplier]);
+    }, [state.upgradeLevels.autoCoin, state.prestige.upgradeLevels, getCoinMultiplier, getPrestigeTimeAcceleration]);
 
     // Auto-growth
     useEffect(() => {
