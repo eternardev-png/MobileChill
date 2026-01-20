@@ -18,6 +18,7 @@ class TelegramService {
 
     constructor() {
         this.isAvailable = typeof window !== 'undefined' && !!WebApp;
+        console.log('[Telegram] Service initialized. Version check enabled: 6.9+');
         if (this.isAvailable) {
             WebApp.ready();
             WebApp.expand();
@@ -127,26 +128,43 @@ class TelegramService {
     }
 
     /**
+     * Helper to check if CloudStorage is truly available
+     */
+    private isCloudStorageSupported(): boolean {
+        // CloudStorage is only available from version 6.9
+        return this.isAvailable &&
+            !!WebApp.CloudStorage &&
+            WebApp.isVersionAtLeast('6.9');
+    }
+
+    /**
      * Cloud Storage - Save data
      */
     async cloudSave(key: string, value: string): Promise<void> {
-        if (!this.isAvailable || !WebApp.CloudStorage) {
-            // Fallback to localStorage
-            localStorage.setItem(key, value);
+        // If cloud unavailable or old version -> use LocalStorage
+        if (!this.isCloudStorageSupported()) {
+            try {
+                localStorage.setItem(key, value);
+            } catch (e) {
+                console.warn('LocalStorage save failed:', e);
+            }
             return;
         }
 
-        return new Promise((resolve, reject) => {
-            WebApp.CloudStorage.setItem(key, value, (error, result) => {
-                if (error) {
-                    console.error('Failed to save to cloud storage:', error);
-                    // Fallback to localStorage
-                    localStorage.setItem(key, value);
+        return new Promise((resolve) => {
+            try {
+                WebApp.CloudStorage.setItem(key, value, (error, result) => {
+                    if (error) {
+                        console.warn('Cloud save error, falling back to local:', error);
+                        localStorage.setItem(key, value);
+                    }
                     resolve();
-                } else {
-                    resolve();
-                }
-            });
+                });
+            } catch (e) {
+                console.error('Cloud save crashed:', e);
+                localStorage.setItem(key, value);
+                resolve();
+            }
         });
     }
 
@@ -154,21 +172,25 @@ class TelegramService {
      * Cloud Storage - Load data
      */
     async cloudLoad(key: string): Promise<string | null> {
-        if (!this.isAvailable || !WebApp.CloudStorage) {
-            // Fallback to localStorage
+        if (!this.isCloudStorageSupported()) {
             return localStorage.getItem(key);
         }
 
         return new Promise((resolve) => {
-            WebApp.CloudStorage.getItem(key, (error, value) => {
-                if (error) {
-                    console.error('Failed to load from cloud storage:', error);
-                    // Fallback to localStorage
-                    resolve(localStorage.getItem(key));
-                } else {
-                    resolve(value || null);
-                }
-            });
+            try {
+                WebApp.CloudStorage.getItem(key, (error, value) => {
+                    if (error) {
+                        console.warn('Cloud load error:', error);
+                        resolve(localStorage.getItem(key));
+                    } else {
+                        // If cloud empty, try local just in case
+                        resolve(value || localStorage.getItem(key));
+                    }
+                });
+            } catch (e) {
+                console.error('Cloud load crashed:', e);
+                resolve(localStorage.getItem(key));
+            }
         });
     }
 
@@ -176,21 +198,25 @@ class TelegramService {
      * Cloud Storage - Remove data
      */
     async cloudRemove(key: string): Promise<void> {
-        if (!this.isAvailable || !WebApp.CloudStorage) {
-            // Fallback to localStorage
+        if (!this.isCloudStorageSupported()) {
             localStorage.removeItem(key);
             return;
         }
 
         return new Promise((resolve) => {
-            WebApp.CloudStorage.removeItem(key, (error) => {
-                if (error) {
-                    console.error('Failed to remove from cloud storage:', error);
-                    // Fallback to localStorage
-                    localStorage.removeItem(key);
-                }
+            try {
+                WebApp.CloudStorage.removeItem(key, (error) => {
+                    if (error) {
+                        console.warn('Cloud remove error:', error);
+                        localStorage.removeItem(key);
+                    }
+                    resolve();
+                });
+            } catch (e) {
+                console.error('Cloud remove crashed:', e);
+                localStorage.removeItem(key);
                 resolve();
-            });
+            }
         });
     }
 

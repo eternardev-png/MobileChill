@@ -4,10 +4,11 @@ import Svg, { Rect, G, Text as SvgText, Defs, LinearGradient, Stop, ClipPath, Ci
 import { useGame } from '../gameState';
 import { GemIcon, CoinIcon, EnergyIcon, DiamondIcon, CasinoIcon } from './Icons';
 
-const { width } = Dimensions.get('window');
-const SLOT_WIDTH = Math.min(width * 0.25, 80);
-const SLOT_HEIGHT = SLOT_WIDTH; // Make slots square or match intended aspect ratio
-const SYMBOL_SIZE = SLOT_HEIGHT; // Ensure symbol wrapper matches slot height exactly
+const { width, height } = Dimensions.get('window');
+// Responsive slot size: Constrain by both width and height to fit 5 rows vertically
+const SLOT_WIDTH = Math.min(width * 0.25, height * 0.15, 80);
+const SLOT_HEIGHT = SLOT_WIDTH;
+const SYMBOL_SIZE = SLOT_HEIGHT;
 const VISIBLE_ROWS = 5;
 
 interface SlotMachineProps {
@@ -372,10 +373,10 @@ const styles = StyleSheet.create({
     container: {
         width: '95%',
         maxWidth: 380,
-        maxHeight: '90%', // Ensure it fits on screen
+        maxHeight: '98%', // Use almost full height if needed
         backgroundColor: '#1a1a1a',
-        borderRadius: 32,
-        padding: 24,
+        borderRadius: 24,
+        padding: 12,    // Reduced padding 24 -> 12
         alignItems: 'center',
         borderWidth: 1,
         borderColor: '#333',
@@ -398,7 +399,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     header: {
-        marginBottom: 20,
+        marginBottom: 10, // Reduced from 20 -> 10
         alignItems: 'center',
         flexDirection: 'row', // Align icon and title
         justifyContent: 'center',
@@ -422,7 +423,7 @@ const styles = StyleSheet.create({
     machineFrame: {
         backgroundColor: '#2a2a2a',
         borderRadius: 16,
-        padding: 24, // Increased padding for lights inside
+        padding: 16, // Reduced padding 24 -> 16
         borderWidth: 4,
         borderColor: '#444',
         position: 'relative',
@@ -432,31 +433,43 @@ const styles = StyleSheet.create({
     lightsTop: {
         position: 'absolute',
         top: 6,
+        left: 0, // Stretch to allow centering
+        right: 0,
         flexDirection: 'row',
-        gap: 15,
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 20, // Tighter grouping
         zIndex: 5,
     },
     lightsBottom: {
         position: 'absolute',
         bottom: 6,
+        left: 0,
+        right: 0,
         flexDirection: 'row',
-        gap: 15,
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 20, // Tighter grouping
         zIndex: 5,
     },
     lightsLeft: {
         position: 'absolute',
         left: 6,
-        top: 20,
-        bottom: 20,
-        justifyContent: 'space-between',
+        top: 0,
+        bottom: 0,
+        justifyContent: 'space-between', // Spread out vertically
+        alignItems: 'center',
+        paddingVertical: 40, // Add padding to avoid corners but fill height
         zIndex: 5,
     },
     lightsRight: {
         position: 'absolute',
         right: 6,
-        top: 20,
-        bottom: 20,
-        justifyContent: 'space-between',
+        top: 0,
+        bottom: 0,
+        justifyContent: 'space-between', // Spread out vertically
+        alignItems: 'center',
+        paddingVertical: 40, // Add padding to avoid corners but fill height
         zIndex: 5,
     },
     lightSmall: {
@@ -581,14 +594,14 @@ const styles = StyleSheet.create({
     },
     spinButton: {
         backgroundColor: '#ef4444',
-        paddingVertical: 12,
-        paddingHorizontal: 32,
+        paddingVertical: 10,  // Reduced 12 -> 10
+        paddingHorizontal: 24, // Reduced 32 -> 24
         borderRadius: 50,
         width: '100%',
         alignItems: 'center',
         flexDirection: 'row',
         justifyContent: 'center',
-        marginTop: 20,
+        marginTop: 10, // Reduced margin 20 -> 10
         shadowColor: '#ef4444',
         shadowOffset: { width: 0, height: 0 },
         shadowOpacity: 0.6,
@@ -626,8 +639,8 @@ const styles = StyleSheet.create({
     multiplierContainer: {
         flexDirection: 'row',
         gap: 10,
-        marginBottom: 10,
-        marginTop: 10,
+        marginBottom: 5,
+        marginTop: 8,
         width: '100%',
         justifyContent: 'center',
     },

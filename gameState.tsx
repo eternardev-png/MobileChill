@@ -4,6 +4,7 @@ import { UPGRADES, calculateUpgradeCost, calculateUpgradeEffect } from './data/u
 import { QUESTS, getAvailableQuests, Quest } from './data/quests';
 import { PRESTIGE_UPGRADES, calculatePrestigeShards, canPrestige, calculatePrestigeBonus, PRESTIGE_MIN_ENERGY, calculatePrestigeCost } from './data/prestige';
 import { telegram } from './telegram';
+import { useSound } from './components/SoundContext';
 
 // Types
 export interface TreeStats {
@@ -138,6 +139,7 @@ const STORAGE_KEY = 'mobilechill_save';
 
 export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [state, setState] = useState<GameState>(initialState);
+    const { playSfx } = useSound();
     const autoEnergyRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const autoGrowthRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -380,6 +382,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             while (newXp >= xpForLevel(newLevel) && newLevel < 100) {
                 newXp -= xpForLevel(newLevel);
                 newLevel++;
+                playSfx('level_up'); // Sound Trigger
                 coinReward += newLevel * 10 * coinMult * species.coinMultiplier;
             }
 
@@ -434,6 +437,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (!prevTreeStats || prevTreeStats.level < minLevel) return false;
         }
 
+        playSfx('tree_unlock'); // Sound Trigger
         setState(prev => ({
             ...prev,
             gems: prev.gems - species.unlockCost,
@@ -449,6 +453,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const level = state.upgradeLevels[upgradeId] || 0;
         const cost = calculateUpgradeCost(upgrade, level);
         if (state.coins < cost) return false;
+        playSfx('upgrade_buy'); // Sound Trigger
         setState(prev => ({
             ...prev,
             coins: prev.coins - cost,
@@ -472,10 +477,17 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             case 'specific_tree_level': const t = state.treeStats[quest.objective.treeId || 'oak']; completed = t && t.level >= quest.objective.target; break;
             case 'roulette_spins': completed = (state.totalSpins || 0) >= quest.objective.target; break;
             case 'upgrades_purchased': completed = (state.totalUpgradesPurchased || 0) >= quest.objective.target; break;
-            case 'lab_trees_created': completed = (state.totalLabTreesCreated || 0) >= quest.objective.target; break;
+            case 'lab_trees_created':
+                if (quest.objective.rarity) {
+                    completed = (state.labTreesByRarity?.[quest.objective.rarity] || 0) >= quest.objective.target;
+                } else {
+                    completed = (state.totalLabTreesCreated || 0) >= quest.objective.target;
+                }
+                break;
             case 'telegram_join': completed = state.isTelegramSubscribed; break;
         }
         if (!completed) return false;
+        playSfx('quest_claim'); // Sound Trigger
         setState(prev => ({
             ...prev,
             coins: prev.coins + (quest.rewards.coins || 0),
@@ -558,7 +570,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 case 'specific_tree_level': const t = state.treeStats[quest.objective.treeId || 'oak']; done = t && t.level >= quest.objective.target; break;
                 case 'roulette_spins': done = (state.totalSpins || 0) >= quest.objective.target; break;
                 case 'upgrades_purchased': done = (state.totalUpgradesPurchased || 0) >= quest.objective.target; break;
-                case 'lab_trees_created': done = (state.totalLabTreesCreated || 0) >= quest.objective.target; break;
+                case 'lab_trees_created':
+                    if (quest.objective.rarity) {
+                        done = (state.labTreesByRarity?.[quest.objective.rarity] || 0) >= quest.objective.target;
+                    } else {
+                        done = (state.totalLabTreesCreated || 0) >= quest.objective.target;
+                    }
+                    break;
                 case 'telegram_join': done = state.isTelegramSubscribed; break;
             }
             if (done) count++;
@@ -762,37 +780,60 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
     const redeemPromoCode = useCallback((code: string): { success: boolean; message: string; reward?: string } => {
-        const normalizedCode = code.trim().toUpperCase();
+        const cleanCode = code.trim().toLowerCase();
 
-        if (state.usedPromoCodes.includes(normalizedCode)) {
+        if (state.usedPromoCodes.includes(cleanCode)) {
             return { success: false, message: 'Code already used!' };
         }
 
         let rewardMessage = '';
         let success = false;
+        let gemsToAdd = 0;
+        let setTutorialDone = false;
 
-        if (normalizedCode === 'PROMO_1000') {
-            setState(prev => ({
-                ...prev,
-                gems: prev.gems + 1000,
-                usedPromoCodes: [...prev.usedPromoCodes, normalizedCode],
-                lastSaveTime: Date.now() // Trigger save
-            }));
+        if (cleanCode === 'gem1000') {
+            gemsToAdd = 1000;
             rewardMessage = '+1000 Gems';
+            success = true;
+        } else if (cleanCode === 'gem5000') {
+            gemsToAdd = 5000;
+            rewardMessage = '+5000 Gems';
+            success = true;
+        } else if (cleanCode === 'skip') {
+            if (state.tutorialStep >= 13) {
+                return { success: false, message: 'Tutorial already finished' };
+            }
+            setTutorialDone = true;
+            rewardMessage = 'Tutorial Skipped';
             success = true;
         } else {
             return { success: false, message: 'Invalid code' };
         }
 
-        // Save immediately if successful
         if (success) {
-            telegram.cloudSave(STORAGE_KEY, JSON.stringify({ ...state, gems: state.gems + 1000, usedPromoCodes: [...state.usedPromoCodes, normalizedCode], lastSaveTime: Date.now() })).catch(e => console.error(e));
+            setState(prev => ({
+                ...prev,
+                gems: prev.gems + gemsToAdd,
+                tutorialStep: setTutorialDone ? 13 : prev.tutorialStep,
+                usedPromoCodes: [...prev.usedPromoCodes, cleanCode],
+                lastSaveTime: Date.now()
+            }));
+
+            // Save immediately
+            telegram.cloudSave(STORAGE_KEY, JSON.stringify({
+                ...state,
+                gems: state.gems + gemsToAdd,
+                tutorialStep: setTutorialDone ? 13 : state.tutorialStep,
+                usedPromoCodes: [...state.usedPromoCodes, cleanCode],
+                lastSaveTime: Date.now()
+            })).catch(e => console.error(e));
+
             return { success: true, message: 'Code Redeemed!', reward: rewardMessage };
         }
 
         return { success: false, message: 'Unknown error' };
 
-    }, [state.usedPromoCodes, state.gems]);
+    }, [state]);
 
     const value: GameContextType = {
         state, currentSpecies, allSpecies, tap, switchTree, unlockTree, buyUpgrade, claimQuestReward,

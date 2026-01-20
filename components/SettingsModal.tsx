@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Modal, Switch, ScrollView, TextInput } from 'react-native';
 import { useGame } from '../gameState';
+import { useSound } from './SoundContext';
 import { CloseIcon, SettingsIcon } from './Icons';
 import { telegram } from '../telegram';
+import Slider from '@react-native-community/slider';
 
 interface SettingsModalProps {
     visible: boolean;
@@ -11,11 +13,15 @@ interface SettingsModalProps {
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({ visible, onClose }) => {
     const { state, updateSettings, redeemPromoCode } = useGame();
+    const { musicVolume, sfxVolume, setMusicVolume, setSfxVolume } = useSound();
+
+    // Promo Code State
     const [promoCode, setPromoCode] = useState('');
     const [promoMessage, setPromoMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
 
     const handleRedeem = () => {
         if (!promoCode.trim()) return;
+
         const result = redeemPromoCode(promoCode);
         if (result.success) {
             setPromoMessage({ text: result.reward ? `${result.message} ${result.reward}` : result.message, type: 'success' });
@@ -68,6 +74,45 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ visible, onClose }
                                     onValueChange={toggleShowWelcome}
                                     trackColor={{ false: '#444', true: '#22c55e' }}
                                     thumbColor={state.settings?.showWelcomeAlways ? '#fff' : '#888'}
+                                />
+                            </View>
+                        </View>
+
+                        {/* Audio Settings */}
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>Audio</Text>
+
+                            <View style={styles.settingRowColumn}>
+                                <View style={styles.settingHeader}>
+                                    <Text style={styles.settingLabel}>Music Volume</Text>
+                                    <Text style={styles.settingValue}>{Math.round(musicVolume * 100)}%</Text>
+                                </View>
+                                <Slider
+                                    style={{ width: '100%', height: 40 }}
+                                    minimumValue={0}
+                                    maximumValue={1}
+                                    value={musicVolume}
+                                    onValueChange={setMusicVolume}
+                                    minimumTrackTintColor="#a855f7"
+                                    maximumTrackTintColor="#444"
+                                    thumbTintColor="#fff"
+                                />
+                            </View>
+
+                            <View style={styles.settingRowColumn}>
+                                <View style={styles.settingHeader}>
+                                    <Text style={styles.settingLabel}>SFX Volume</Text>
+                                    <Text style={styles.settingValue}>{Math.round(sfxVolume * 100)}%</Text>
+                                </View>
+                                <Slider
+                                    style={{ width: '100%', height: 40 }}
+                                    minimumValue={0}
+                                    maximumValue={1}
+                                    value={sfxVolume}
+                                    onValueChange={setSfxVolume}
+                                    minimumTrackTintColor="#fbbf24"
+                                    maximumTrackTintColor="#444"
+                                    thumbTintColor="#fff"
                                 />
                             </View>
                         </View>
@@ -250,5 +295,23 @@ const styles = StyleSheet.create({
     },
     errorText: {
         color: '#ef4444',
+    },
+    settingRowColumn: {
+        backgroundColor: '#222',
+        padding: 16,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: '#333',
+        marginBottom: 12,
+    },
+    settingHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 8,
+    },
+    settingValue: {
+        color: '#888',
+        fontSize: 14,
+        fontWeight: 'bold',
     },
 });

@@ -4,8 +4,9 @@ import Svg, { Path, G, Text as SvgText, Circle, Polygon, LinearGradient, RadialG
 import { useGame } from '../gameState';
 import { GemIcon, EnergyIcon, CoinIcon, GrowthRateIcon, DiamondIcon } from './Icons'; // Updated import
 
-const { width } = Dimensions.get('window');
-const WHEEL_SIZE = Math.min(width * 0.85, 300);
+const { width, height } = Dimensions.get('window');
+// Responsive wheel size: limit by width AND height to avoid clipping on landscape/small screens
+const WHEEL_SIZE = Math.min(width * 0.85, height * 0.35, 300);
 const RADIUS = WHEEL_SIZE / 2;
 const CENTER = RADIUS;
 
@@ -488,11 +489,11 @@ const styles = StyleSheet.create({
     },
     container: {
         width: '95%',
-        maxWidth: 420,  // Increased from 380 -> 420 (Larger Menu)
-        maxHeight: '90%', // Ensure it fits on screen
+        maxWidth: 420,
+        maxHeight: '95%', // increased from 90%
         backgroundColor: '#1a1a1a',
-        borderRadius: 32,
-        padding: 32,    // Increased padding from 24 -> 32
+        borderRadius: 24, // slightly reduced radius
+        padding: 16,    // Reduced padding from 32 -> 16 for mobile fit
         alignItems: 'center',
         borderWidth: 1,
         borderColor: '#333',
@@ -515,11 +516,12 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     header: {
-        marginBottom: 30,
+        marginBottom: 10, // Reduced from 30 -> 10
         alignItems: 'center',
+        marginTop: 10,
     },
     title: {
-        fontSize: 26,
+        fontSize: 22, // Reduced from 26 -> 22
         fontWeight: '900',
         color: '#fbbf24',
         letterSpacing: 3,
@@ -530,9 +532,9 @@ const styles = StyleSheet.create({
     wheelContainer: {
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 20,
+        marginBottom: 10, // Reduced from 20 -> 10
         position: 'relative',
-        paddingTop: 10,
+        paddingTop: 5,
         // Removed fixed width/height here to let SVG determine size naturally
         // aspectRatio: 1, // Not needed if SVG defines intrinsic size
     },
@@ -563,7 +565,7 @@ const styles = StyleSheet.create({
         aspectRatio: 1, // FORCE SQUARE
     },
     resultContainer: {
-        marginBottom: 16,
+        marginBottom: 10, // Reduced from 16
         alignItems: 'center',
         backgroundColor: 'rgba(255,255,255,0.05)',
         padding: 15,
@@ -581,11 +583,11 @@ const styles = StyleSheet.create({
         fontSize: 32,
         fontWeight: '900',
         color: '#fff',
-        marginTop: 5,
+        marginTop: 2,
     },
     spinButton: {
         backgroundColor: '#f59e0b',
-        paddingVertical: 12, // Reduced padding to fit rows
+        paddingVertical: 10, // Reduced from 12
         paddingHorizontal: 32,
         borderRadius: 50,
         width: '100%',
@@ -627,7 +629,7 @@ const styles = StyleSheet.create({
     multiplierContainer: {
         flexDirection: 'row',
         gap: 10,
-        marginBottom: 15,
+        marginBottom: 10, // Reduced from 15
         width: '100%',
         justifyContent: 'center',
     },

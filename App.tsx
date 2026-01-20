@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, View, SafeAreaView, TouchableOpacity, Text, Dimensions, ImageBackground, Platform } from 'react-native';
 import { useGame, GameProvider } from './gameState';
+import { SoundProvider } from './components/SoundContext';
 import { GameHUD } from './components/GameHUD';
 import { Tree } from './components/Tree';
 import { UpgradeShop } from './components/UpgradeShop';
@@ -29,11 +30,31 @@ const { width, height } = Dimensions.get('window');
 
 
 
+import { useSound } from './components/SoundContext';
+
 const GameContent = () => {
     const { state, saveGame, loadGame, resetGame, addResources, getClaimableQuestsCount, advanceTutorial } = useGame();
+    const { playMusic } = useSound();
     const [activeTab, setActiveTab] = useState<'shop' | 'tree' | 'quests' | 'collection' | 'prestige' | 'lab' | 'casino'>('tree');
     const [showWelcome, setShowWelcome] = useState(true);
     const [offlineEarnings, setOfflineEarnings] = useState<{ money: number, energy: number } | null>(null);
+
+    // Dynamic Music Switching
+    useEffect(() => {
+        if (showWelcome) {
+            playMusic('menu_theme');
+        } else if (activeTab === 'casino') {
+            // Casino Lobby Defaults to Roulette Theme for now, sub-games can override
+            playMusic('casino_roulette');
+        } else if (activeTab === 'lab') {
+            playMusic('lab_common');
+        } else {
+            // Main Tree View - Play specific tree theme
+            // Ensure we check if the tree theme exists, otherwise play default
+            const treeTheme = `${state.currentTreeId}_theme`;
+            playMusic(treeTheme);
+        }
+    }, [activeTab, showWelcome, state.currentTreeId, playMusic]);
 
 
     // Loading and initialization logic...
@@ -300,10 +321,12 @@ const GameContent = () => {
 
 export default function App() {
     return (
-        <GameProvider>
-            <GlobalStyles />
-            <GameContent />
-        </GameProvider>
+        <SoundProvider>
+            <GameProvider>
+                <GlobalStyles />
+                <GameContent />
+            </GameProvider>
+        </SoundProvider>
     );
 }
 

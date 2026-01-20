@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity, Dimensions } from 'react-nati
 import { RouletteWheel } from './RouletteWheel';
 import { SlotMachine } from './SlotMachine';
 import { CasinoIcon, GemIcon, SlotIcon } from './Icons';
+import { useSound } from './SoundContext';
 
 const { width } = Dimensions.get('window');
 
@@ -14,6 +15,19 @@ type CasinoGame = 'menu' | 'roulette' | 'slots';
 
 export const CasinoMenu: React.FC<CasinoMenuProps> = ({ onClose }) => {
     const [activeGame, setActiveGame] = useState<CasinoGame>('menu');
+    const { playMusic } = useSound();
+
+    // Music Effect
+    React.useEffect(() => {
+        if (activeGame === 'slots') {
+            playMusic('casino_slots');
+        } else if (activeGame === 'roulette') {
+            playMusic('casino_roulette');
+        } else {
+            // Menu
+            playMusic('casino_roulette'); // Revert to lobby/roulette theme
+        }
+    }, [activeGame, playMusic]);
 
     // If a sub-game is active, render it directly
     // Both sub-games should have a way to go back to this menu or close entirely
