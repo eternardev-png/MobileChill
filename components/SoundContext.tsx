@@ -1,9 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, AppState } from 'react-native';
 import { Audio } from 'expo-av';
-
-// Migrated to expo-av for better cross-platform support (iOS/Android/Web)
-// ensuring sound works reliability across devices and preventing "Autoplay prevented" errors.
 
 interface SoundContextType {
     playMusic: (trackName: string) => void;
@@ -18,7 +15,7 @@ interface SoundContextType {
 
 const SoundContext = createContext<SoundContextType | null>(null);
 
-// Local Asset Mapping
+// Маппинг ресурсов (оставляем твой)
 const SOUNDS: Record<string, any> = {
     // MUSIC
     menu_theme: require('../assets/sounds/music_menu.mp3'),
@@ -28,7 +25,6 @@ const SOUNDS: Record<string, any> = {
     cherry_theme: require('../assets/sounds/music_cherry.mp3'),
     baobab_theme: require('../assets/sounds/music_baobab.mp3'),
     money_theme: require('../assets/sounds/music_money.mp3'),
-
     // Lab & Casino
     lab_common: require('../assets/sounds/music_lab_common.mp3'),
     lab_rare: require('../assets/sounds/music_lab_rare.mp3'),
@@ -36,7 +32,6 @@ const SOUNDS: Record<string, any> = {
     lab_legendary: require('../assets/sounds/music_lab_legendary.mp3'),
     casino_roulette: require('../assets/sounds/music_roulette.mp3'),
     casino_slots: require('../assets/sounds/music_slots.mp3'),
-
     // SFX
     click: require('../assets/sounds/sfx_click.mp3'),
     success: require('../assets/sounds/sfx_success.mp3'),
@@ -53,60 +48,86 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const [musicVolume, setMusicVolume] = useState(0.5);
     const [sfxVolume, setSfxVolume] = useState(1.0);
     const [isMuted, setIsMuted] = useState(false);
+
+    // Состояние "нужен клик" для Web/Telegram
     const [needsInteraction, setNeedsInteraction] = useState(false);
 
-    // Track state
-    const [soundObject, setSoundObject] = useState<Audio.Sound | null>(null);
-    const [currentTrackName, setCurrentTrackName] = useState<string | null>(null);
+    const soundObject = useRef<Audio.Sound | null>(null);
+    const currentTrackName = useRef<string | null>(null);
+    const isChangingTrack = useRef(false); // Блокировка гонки запросов
 
-    // Initialize Audio Mode
+    // 1. Инициализация аудио режима
     useEffect(() => {
         const initAudio = async () => {
             try {
                 await Audio.setAudioModeAsync({
                     allowsRecordingIOS: false,
-                    staysActiveInBackground: false,
+                    staysActiveInBackground: false, // Важно для Telegram
                     playsInSilentModeIOS: true,
                     shouldDuckAndroid: true,
-                    playThroughEarpieceAndroid: false,
                 });
             } catch (error) {
                 console.log('Error initializing audio mode:', error);
             }
         };
         initAudio();
+
+        // 2. Обработка сворачивания (Visibility Change для Web)
+        if (Platform.OS === 'web') {
+            const handleVisibilityChange = () => {
+                if (document.hidden) {
+                    soundObject.current?.pauseAsync();
+                } else {
+                    soundObject.current?.playAsync();
+                }
+            };
+            document.addEventListener("visibilitychange", handleVisibilityChange);
+            return () => {
+                document.removeEventListener("visibilitychange", handleVisibilityChange);
+            };
+        } else {
+            // Для нативного iOS/Android
+            const subscription = AppState.addEventListener('change', nextAppState => {
+                if (nextAppState === 'active') {
+                    soundObject.current?.playAsync();
+                } else if (nextAppState.match(/inactive|background/)) {
+                    soundObject.current?.pauseAsync();
+                }
+            });
+            return () => subscription.remove();
+        }
     }, []);
 
-    // Update volume for active music
+    // 3. Реакция на изменение громкости
     useEffect(() => {
-        if (soundObject) {
-            soundObject.setVolumeAsync(isMuted ? 0 : musicVolume).catch(e => console.log('Volume update error', e));
-            soundObject.setIsMutedAsync(isMuted).catch(e => console.log('Mute update error', e));
+        if (soundObject.current) {
+            const volume = isMuted ? 0 : musicVolume;
+            soundObject.current.setVolumeAsync(volume).catch(() => { });
+            soundObject.current.setIsMutedAsync(isMuted).catch(() => { });
         }
-    }, [musicVolume, isMuted, soundObject]);
+    }, [musicVolume, isMuted]);
 
     const playMusic = async (trackName: string) => {
-        // If already playing this track, just return
-        if (currentTrackName === trackName && soundObject) {
-            const status = await soundObject.getStatusAsync();
-            if (status.isLoaded && status.isPlaying) {
-                return;
-            }
-        }
+        if (currentTrackName.current === trackName) return; // Уже играет
+        if (isChangingTrack.current) return; // Защита от частых переключений
 
+        isChangingTrack.current = true;
         const source = SOUNDS[trackName];
+
         if (!source) {
-            console.warn(`[Audio] Missing music asset for ${trackName}`);
+            console.warn(`[Audio] Missing music asset: ${trackName}`);
+            isChangingTrack.current = false;
             return;
         }
 
         try {
-            // Unload previous sound if exists
-            if (soundObject) {
-                await soundObject.unloadAsync();
-                setSoundObject(null);
+            // Выгружаем старое
+            if (soundObject.current) {
+                await soundObject.current.unloadAsync();
+                soundObject.current = null;
             }
 
+            // Загружаем новое
             const { sound } = await Audio.Sound.createAsync(
                 source,
                 {
@@ -114,84 +135,65 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                     isLooping: true,
                     volume: isMuted ? 0 : musicVolume,
                     isMuted: isMuted,
-                },
-                (status) => {
-                    // status update callback if needed
                 }
             );
 
-            setSoundObject(sound);
-            setCurrentTrackName(trackName);
-            console.log(`[Audio] Playing music: ${trackName}`);
+            soundObject.current = sound;
+            currentTrackName.current = trackName;
+            console.log(`[Audio] Playing: ${trackName}`);
 
-        } catch (error) {
-            // Check for specific error related to user interaction requirements
-            const errStr = String(error);
-            console.log(`[Audio] Playback error for ${trackName}:`, errStr);
+        } catch (error: any) {
+            console.log(`[Audio] Error playing ${trackName}:`, error);
 
-            // "The user has not interacted with the document yet" (Web specific)
-            // But expo-av on web might throw different errors. 
-            // We usually can detect this via status or catch.
-            if (Platform.OS === 'web' || errStr.includes('interact') || errStr.includes('NotAllowedError')) {
+            // Если ошибка связана с автоплеем в браузере
+            if (String(error).includes('NotAllowedError') || Platform.OS === 'web') {
                 setNeedsInteraction(true);
             }
+        } finally {
+            isChangingTrack.current = false;
         }
     };
 
     const playSfx = async (sfxName: string) => {
         if (isMuted || sfxVolume === 0) return;
-
         const source = SOUNDS[sfxName];
-        if (!source) {
-            console.warn(`[Audio] Missing SFX asset for ${sfxName}`);
-            return;
-        }
+        if (!source) return;
 
         try {
-            // For SFX "fire and forget" is often best, but creates many objects.
-            // A slightly better way for frequent SFX is to create and then auto-unload
+            // Создаем и сразу забываем, но ставим cleanup
             const { sound } = await Audio.Sound.createAsync(
                 source,
                 { shouldPlay: true, volume: sfxVolume }
             );
 
-            // Clean up after playback
+            // Важно: выгружать SFX после проигрывания, иначе утечка памяти
             sound.setOnPlaybackStatusUpdate(async (status) => {
                 if (status.isLoaded && status.didJustFinish) {
                     await sound.unloadAsync();
                 }
             });
-
         } catch (error) {
-            console.log('SFX play failed', error);
+            // Игнорируем ошибки SFX чтобы не спамить в консоль
         }
     };
 
     const handleUnlockAudio = async () => {
+        // Пробуем проиграть пустой звук или клик, чтобы браузер разблокировал AudioContext
         try {
-            // Play a silent or short sound to unlock context
-            // We'll use the tap sound as the trigger
-            const { sound } = await Audio.Sound.createAsync(SOUNDS.tap);
-            await sound.playAsync();
-
-            console.log("[Audio] Context unlocked");
-            setNeedsInteraction(false);
-
-            // Resume/Restart music if we have a track pending
-            if (currentTrackName) {
-                // We need to re-call playMusic because the previous attemp failed/unloaded
-                playMusic(currentTrackName);
+            if (soundObject.current) {
+                await soundObject.current.playAsync();
+            } else if (currentTrackName.current) {
+                // Если трек был выбран, но не загрузился из-за ошибки, пробуем снова
+                const track = currentTrackName.current;
+                currentTrackName.current = null; // Сбрасываем чтобы playMusic сработал
+                playMusic(track);
+            } else {
+                // Просто играем клик для разблокировки
+                playSfx('click');
             }
-
-            // Cleanup unlock sound
-            sound.setOnPlaybackStatusUpdate(async (status) => {
-                if (status.isLoaded && status.didJustFinish) {
-                    await sound.unloadAsync();
-                }
-            });
-
+            setNeedsInteraction(false);
         } catch (e) {
-            console.error("[Audio] Unlock failed", e);
+            console.log('Still locked:', e);
         }
     };
 
@@ -209,10 +211,11 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             isMuted
         }}>
             {children}
+            {/* Оверлей показывается только если браузер заблокировал звук */}
             {needsInteraction && (
                 <View style={styles.overlayContainer} pointerEvents="box-none">
-                    <TouchableOpacity onPress={handleUnlockAudio} style={styles.unlockButton}>
-                        <Text style={styles.unlockText}>🔇 Tap to Enable Sound</Text>
+                    <TouchableOpacity onPress={handleUnlockAudio} style={styles.unlockButton} activeOpacity={0.8}>
+                        <Text style={styles.unlockText}>🔇 Включить звук</Text>
                     </TouchableOpacity>
                 </View>
             )}
@@ -223,27 +226,20 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 const styles = StyleSheet.create({
     overlayContainer: {
         position: 'absolute',
-        bottom: 80, // Above bottom bar
-        right: 20,
+        bottom: 100, // Чуть выше таббара
+        alignSelf: 'center',
         zIndex: 9999,
-        // elevation: 5, // Elevation is Android only, but harmless here
     },
     unlockButton: {
-        backgroundColor: '#fbbf24',
-        paddingVertical: 12,
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        paddingVertical: 10,
         paddingHorizontal: 20,
-        borderRadius: 25,
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: '#fbbf24',
     },
     unlockText: {
-        color: '#000',
+        color: '#fbbf24',
         fontWeight: 'bold',
         fontSize: 14,
     }

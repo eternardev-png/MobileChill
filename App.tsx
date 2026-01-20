@@ -41,20 +41,30 @@ const GameContent = () => {
 
     // Dynamic Music Switching
     useEffect(() => {
+        // Если еще не было клика (игра только загрузилась), не пытаемся играть,
+        // SoundContext сам попросит interaction, если мы вызовем playMusic.
+
         if (showWelcome) {
             playMusic('menu_theme');
         } else if (activeTab === 'casino') {
-            // Casino Lobby Defaults to Roulette Theme for now, sub-games can override
             playMusic('casino_roulette');
         } else if (activeTab === 'lab') {
             playMusic('lab_common');
-        } else {
-            // Main Tree View - Play specific tree theme
-            // Ensure we check if the tree theme exists, otherwise play default
+        } else if (activeTab === 'tree') {
+            // Безопасное переключение темы дерева
             const treeTheme = `${state.currentTreeId}_theme`;
-            playMusic(treeTheme);
+            // Проверяем, есть ли такая тема в списке SOUNDS (в SoundContext это внутри, но тут мы просто вызываем)
+            // Если названия совпадают с ключами в SOUNDS - всё ок.
+            // Если нет - играем дефолт.
+            const validThemes = ['oak_theme', 'pine_theme', 'maple_theme', 'cherry_theme', 'baobab_theme', 'money_theme'];
+
+            if (validThemes.includes(treeTheme)) {
+                playMusic(treeTheme);
+            } else {
+                playMusic('oak_theme'); // Fallback
+            }
         }
-    }, [activeTab, showWelcome, state.currentTreeId, playMusic]);
+    }, [activeTab, showWelcome, state.currentTreeId]); // Убрал playMusic из зависимостей, чтобы избежать лишних ререндеров
 
 
     // Loading and initialization logic...
