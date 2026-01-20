@@ -528,7 +528,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const initialGemsLevel = state.prestige.upgradeLevels['initial_gems'] || 0;
 
         const startingCoins = 50 + (initialCoinsLevel * 500); // Base 50 + 500 per level
-        const startingGems = 0 + (initialGemsLevel * 15);     // Base 0 + 15 per level
+        const startingGems = 0 + (initialGemsLevel * 30);     // Base 0 + 30 per level
 
         setState(prev => ({
             ...initialState,

@@ -172,12 +172,12 @@ export const PRESTIGE_UPGRADES: Record<string, PrestigeUpgrade> = {
     initial_gems: {
         id: 'initial_gems',
         name: 'Head Start: Gems',
-        description: '+15 Starting Gems per level',
+        description: '+30 Starting Gems per level',
         icon: 'prestige_initial_gem',
         baseCost: 7,
         costIncrease: 5,
         category: 'core',
-        effect: { type: 'coin_bonus', valuePerLevel: 15 }, // valuePerLevel misused here but handled in gameState
+        effect: { type: 'coin_bonus', valuePerLevel: 30 }, // valuePerLevel misused here but handled in gameState
     },
 };
 
