@@ -5,12 +5,14 @@ import { Audio } from 'expo-av';
 interface SoundContextType {
     playMusic: (trackName: string) => void;
     playSfx: (sfxName: string) => void;
+    stopSfx: (sfxName: string) => void;
     musicVolume: number;
     sfxVolume: number;
     setMusicVolume: (vol: number) => void;
     setSfxVolume: (vol: number) => void;
     toggleMute: () => void;
     isMuted: boolean;
+    needsInteraction: boolean;
 }
 
 const SoundContext = createContext<SoundContextType | null>(null);
@@ -42,6 +44,31 @@ const SOUNDS: Record<string, any> = {
     level_up: require('../assets/sounds/sfx_level_up.mp3'),
     quest_claim: require('../assets/sounds/sfx_quest.mp3'),
     convert_resources: require('../assets/sounds/sfx_convert.mp3'),
+
+    // Casino Specific
+    slot_spin: require('../assets/sounds/sfx_slot_spin.mp3'),
+    roulette_spin: require('../assets/sounds/sfx_roulette_spin.mp3'),
+    // roulette_win removed
+};
+
+// Коэффициенты громкости для выравнивания треков (0.0 - 1.0)
+const TRACK_VOLUMES: Record<string, number> = {
+    // Nature (ambient background) - делаем мягче
+    menu_theme: 0.6,
+    oak_theme: 0.6,
+    pine_theme: 0.6,
+    maple_theme: 0.6,
+    cherry_theme: 0.6,
+    baobab_theme: 0.6,
+    money_theme: 0.6,
+    // Lab - таинственная атмосфера
+    lab_common: 0.5,
+    lab_rare: 0.5,
+    lab_epic: 0.5,
+    lab_legendary: 0.5,
+    // Casino - делаем тише, чтобы слышать звуки спинов и выигрышей
+    casino_roulette: 0.4,
+    casino_slots: 0.4,
 };
 
 export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -52,7 +79,13 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     // Состояние "нужен клик" для Web/Telegram
     const [needsInteraction, setNeedsInteraction] = useState(false);
 
+    // Audio Ducking State
+    const [isDucking, setIsDucking] = useState(false);
+
     const soundObject = useRef<Audio.Sound | null>(null);
+    const activeSfxObjects = useRef<Record<string, Audio.Sound>>({}); // Track playing SFX
+    const duckingTimeout = useRef<NodeJS.Timeout | null>(null);
+
     const currentTrackName = useRef<string | null>(null);
     const isChangingTrack = useRef(false); // Блокировка гонки запросов
 
@@ -77,6 +110,7 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             const handleVisibilityChange = () => {
                 if (document.hidden) {
                     soundObject.current?.pauseAsync();
+                    // Pause all SFX too?
                 } else {
                     soundObject.current?.playAsync();
                 }
@@ -98,14 +132,39 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
     }, []);
 
-    // 3. Реакция на изменение громкости
+    // 3. Реакция на изменение громкости (с учетом Ducking)
     useEffect(() => {
         if (soundObject.current) {
-            const volume = isMuted ? 0 : musicVolume;
+            const trackMultiplier = (currentTrackName.current && TRACK_VOLUMES[currentTrackName.current])
+                ? TRACK_VOLUMES[currentTrackName.current]
+                : 1.0;
+
+            // Apply Ducking: 30% volume if ducking
+            const duckingMultiplier = isDucking ? 0.3 : 1.0;
+
+            const volume = isMuted ? 0 : (musicVolume * trackMultiplier * duckingMultiplier);
             soundObject.current.setVolumeAsync(volume).catch(() => { });
             soundObject.current.setIsMutedAsync(isMuted).catch(() => { });
         }
-    }, [musicVolume, isMuted]);
+    }, [musicVolume, isMuted, isDucking]); // React to isDucking changes
+
+    // Stop SFX Helper
+    const stopSfx = async (sfxName: string) => {
+        const sound = activeSfxObjects.current[sfxName];
+        if (sound) {
+            try {
+                await sound.stopAsync();
+                await sound.unloadAsync();
+            } catch (e) { /* ignore */ }
+            delete activeSfxObjects.current[sfxName];
+        }
+
+        // If we stop a ducking sound, cancel ducking immediately
+        if (sfxName === 'slot_spin' || sfxName === 'roulette_spin' || sfxName === 'roulette_win') {
+            if (duckingTimeout.current) clearTimeout(duckingTimeout.current);
+            setIsDucking(false);
+        }
+    };
 
     const playMusic = async (trackName: string) => {
         if (currentTrackName.current === trackName) return; // Уже играет
@@ -127,13 +186,18 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 soundObject.current = null;
             }
 
+            const trackMultiplier = TRACK_VOLUMES[trackName] ?? 1.0;
+            // Apply ducking to initial volume too
+            const duckingMultiplier = isDucking ? 0.3 : 1.0;
+            const initialVolume = isMuted ? 0 : (musicVolume * trackMultiplier * duckingMultiplier);
+
             // Загружаем новое
             const { sound } = await Audio.Sound.createAsync(
                 source,
                 {
                     shouldPlay: true,
                     isLooping: true,
-                    volume: isMuted ? 0 : musicVolume,
+                    volume: initialVolume,
                     isMuted: isMuted,
                 }
             );
@@ -160,16 +224,36 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         if (!source) return;
 
         try {
-            // Создаем и сразу забываем, но ставим cleanup
+            // Ducking Logic for specific loud sounds
+            if (sfxName === 'slot_spin' || sfxName === 'roulette_spin' || sfxName === 'roulette_win') {
+                setIsDucking(true);
+                if (duckingTimeout.current) clearTimeout(duckingTimeout.current);
+
+                // Auto-reset ducking after expected sound duration (approx 3-4s is safe)
+                duckingTimeout.current = setTimeout(() => {
+                    setIsDucking(false);
+                }, 3500);
+            }
+
             const { sound } = await Audio.Sound.createAsync(
                 source,
-                { shouldPlay: true, volume: sfxVolume }
+                { shouldPlay: true, volume: isMuted ? 0 : sfxVolume }
             );
 
-            // Важно: выгружать SFX после проигрывания, иначе утечка памяти
+            // Track sound object specifically for stopping later
+            // Note: If multiple clicks happen fast, we overwrite the ref, which is acceptable for simple SFX.
+            // For slots/roulette, there's usually 1 instance at a time.
+            if (activeSfxObjects.current[sfxName]) {
+                try { await activeSfxObjects.current[sfxName].unloadAsync(); } catch (e) { }
+            }
+            activeSfxObjects.current[sfxName] = sound;
+
             sound.setOnPlaybackStatusUpdate(async (status) => {
                 if (status.isLoaded && status.didJustFinish) {
-                    await sound.unloadAsync();
+                    try {
+                        await sound.unloadAsync();
+                    } catch (e) { /* ignore */ }
+                    delete activeSfxObjects.current[sfxName];
                 }
             });
         } catch (error) {
@@ -203,12 +287,14 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         <SoundContext.Provider value={{
             playMusic,
             playSfx,
+            stopSfx,
             musicVolume,
             sfxVolume,
             setMusicVolume,
             setSfxVolume,
             toggleMute,
-            isMuted
+            isMuted,
+            needsInteraction
         }}>
             {children}
             {/* Оверлей показывается только если браузер заблокировал звук */}

@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Animated, Easing, Dimensions, ScrollView } from 'react-native';
 import Svg, { Rect, G, Text as SvgText, Defs, LinearGradient, Stop, ClipPath, Circle, RadialGradient } from 'react-native-svg';
 import { useGame } from '../gameState';
+import { useSound } from './SoundContext';
 import { GemIcon, CoinIcon, EnergyIcon, DiamondIcon, CasinoIcon } from './Icons';
 
 const { width, height } = Dimensions.get('window');
@@ -50,6 +51,7 @@ const generateReel = (length: number = 50) => {
 
 export const SlotMachine: React.FC<SlotMachineProps> = ({ onClose }) => {
     const { state, spendGems, awardRoulettePrize } = useGame();
+    const { playSfx } = useSound();
 
     // Animation values for 3 reels
     const reel1Anim = useRef(new Animated.Value(0)).current;
@@ -109,6 +111,11 @@ export const SlotMachine: React.FC<SlotMachineProps> = ({ onClose }) => {
         // Staggered spin animations - LONGER & STRONGER
         const spinDuration = 3500; // Increased duration
         const stagger = 300;
+
+        // Play sounds
+        playSfx('slot_spin');
+        // setTimeout(() => playSfx('slot_spin'), stagger);
+        // setTimeout(() => playSfx('slot_spin'), stagger * 2);
 
         Animated.sequence([
             Animated.parallel([

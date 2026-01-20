@@ -133,6 +133,28 @@ export const Tree: React.FC = () => {
   const level = state.treeStats[currentSpecies.id]?.level || 1;
   const currentHeight = state.treeStats[currentSpecies.id]?.height || 50;
 
+  // Level Up Animation State
+  const prevLevel = useRef(level);
+  const levelRipple1 = useRef(new Animated.Value(0)).current;
+  const levelRipple2 = useRef(new Animated.Value(0)).current;
+  const levelRipple3 = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (level > prevLevel.current) {
+      // Trigger Level Up Animation (Larger Ripples)
+      levelRipple1.setValue(0);
+      levelRipple2.setValue(0);
+      levelRipple3.setValue(0);
+
+      Animated.parallel([
+        Animated.timing(levelRipple1, { toValue: 1, duration: 2000, easing: Easing.out(Easing.ease), useNativeDriver: true }),
+        Animated.timing(levelRipple2, { toValue: 1, duration: 2000, delay: 300, easing: Easing.out(Easing.ease), useNativeDriver: true }),
+        Animated.timing(levelRipple3, { toValue: 1, duration: 2000, delay: 600, easing: Easing.out(Easing.ease), useNativeDriver: true }),
+      ]).start();
+    }
+    prevLevel.current = level;
+  }, [level]);
+
   // Complexity: Dynamic depth limit for performance (reduced for mobile FPS)
   const branchCount = currentSpecies.branchCount || 2;
   // FPS FIX: Reduced depth limits - binary:9, ternary:6, quaternary:5
@@ -187,6 +209,19 @@ export const Tree: React.FC = () => {
   const ripple2Opacity = ripple2.interpolate({ inputRange: [0, 0.01, 0.5, 1], outputRange: [0, 0.5, 0.25, 0] });
   const ripple3Scale = ripple3.interpolate({ inputRange: [0, 1], outputRange: [0.5, 3] });
   const ripple3Opacity = ripple3.interpolate({ inputRange: [0, 0.01, 0.5, 1], outputRange: [0, 0.4, 0.2, 0] });
+
+  // Level Up Ripple Interpolations (MASSIVE scale, Gold color logic handled in render)
+  const levelRipple1Scale = levelRipple1.interpolate({ inputRange: [0, 1], outputRange: [0.5, 12.0] });
+  const levelRipple1Opacity = levelRipple1.interpolate({ inputRange: [0, 0.2, 1], outputRange: [0.8, 0.6, 0] });
+
+  const levelRipple2Scale = levelRipple2.interpolate({ inputRange: [0, 1], outputRange: [0.5, 13.0] });
+  const levelRipple2Opacity = levelRipple2.interpolate({ inputRange: [0, 0.2, 1], outputRange: [0.7, 0.5, 0] });
+
+  const levelRipple3Scale = levelRipple3.interpolate({ inputRange: [0, 1], outputRange: [0.5, 14.0] });
+  const levelRipple3Opacity = levelRipple3.interpolate({ inputRange: [0, 0.2, 1], outputRange: [0.6, 0.4, 0] });
+
+  // Special Gold Color for Level Up
+  const levelUpColor = 'rgba(255, 215, 0, 1)'; // Gold
 
   // Zoom handlers
   const handleZoomIn = (e: any) => {
@@ -244,6 +279,17 @@ export const Tree: React.FC = () => {
             </View>
           </TouchableWithoutFeedback>
         </View>
+
+        {/* LEVEL UP Ripples (MASSIVE scale, Tree Color) */}
+        <Animated.View style={[styles.ripple, { left: centerX - 50, top: startY - 50, opacity: levelRipple1Opacity, transform: [{ scale: levelRipple1Scale }] }]}>
+          <View style={[styles.rippleCircle, { backgroundColor: rippleColor, shadowColor: rippleColor, shadowRadius: 20, shadowOpacity: 1, elevation: 10 }]} />
+        </Animated.View>
+        <Animated.View style={[styles.ripple, { left: centerX - 50, top: startY - 50, opacity: levelRipple2Opacity, transform: [{ scale: levelRipple2Scale }] }]}>
+          <View style={[styles.rippleCircle, { backgroundColor: rippleColor, shadowColor: rippleColor, shadowRadius: 20, shadowOpacity: 1, elevation: 10 }]} />
+        </Animated.View>
+        <Animated.View style={[styles.ripple, { left: centerX - 50, top: startY - 50, opacity: levelRipple3Opacity, transform: [{ scale: levelRipple3Scale }] }]}>
+          <View style={[styles.rippleCircle, { backgroundColor: rippleColor, shadowColor: rippleColor, shadowRadius: 20, shadowOpacity: 1, elevation: 10 }]} />
+        </Animated.View>
 
         {/* Ripple effects overlay (Outside scaled view to stay consistent) */}
         <Animated.View style={[styles.ripple, { left: centerX - 50, top: startY - 50, opacity: ripple1Opacity, transform: [{ scale: ripple1Scale }] }]}>

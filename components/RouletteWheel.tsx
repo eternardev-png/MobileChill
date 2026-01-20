@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Animated, Easing, Dimensions, ScrollView } from 'react-native';
 import Svg, { Path, G, Text as SvgText, Circle, Polygon, LinearGradient, RadialGradient, Stop, Defs, ClipPath, Rect } from 'react-native-svg';
 import { useGame } from '../gameState';
+import { useSound } from './SoundContext';
 import { GemIcon, EnergyIcon, CoinIcon, GrowthRateIcon, DiamondIcon } from './Icons'; // Updated import
 
 const { width, height } = Dimensions.get('window');
@@ -59,6 +60,7 @@ const TOTAL_CHANCE = BASE_PRIZES.reduce((sum, p) => sum + p.chance, 0);
 
 export const RouletteWheel: React.FC<RouletteWheelProps> = ({ onClose }) => {
     const { state, spendGems, awardRoulettePrize } = useGame();
+    const { playSfx } = useSound();
     const spinAnim = useRef(new Animated.Value(0)).current;
     const finalAngleRef = useRef(0); // Track total rotation to prevent reset glitches
     const pulseAnim = useRef(new Animated.Value(0)).current;
@@ -105,6 +107,7 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({ onClose }) => {
 
         setSpinning(true);
         setPrize(null);
+        playSfx('roulette_spin'); // Play spin sound
 
         const totalChance = currentPrizes.reduce((sum, p) => sum + p.chance, 0);
         let random = Math.random() * totalChance;
@@ -154,6 +157,8 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({ onClose }) => {
             setSpinning(false);
             // Animation finished -> Award prize
             if (pendingPrizeRef.current) {
+                // playSfx('roulette_win'); // Win sound removed as requested
+
                 awardRoulettePrize(pendingPrizeRef.current.type, pendingPrizeRef.current.value);
                 setPrize(pendingPrizeRef.current); // Show "YOU WON"
                 pendingPrizeRef.current = null; // Clear pending

@@ -15,7 +15,24 @@ type CasinoGame = 'menu' | 'roulette' | 'slots';
 
 export const CasinoMenu: React.FC<CasinoMenuProps> = ({ onClose }) => {
     const [activeGame, setActiveGame] = useState<CasinoGame>('menu');
-    const { playMusic } = useSound();
+    const { playMusic, stopSfx } = useSound();
+
+    // Helper to stop all casino SFX
+    const stopCasinoSounds = () => {
+        stopSfx('slot_spin');
+        stopSfx('roulette_spin');
+        stopSfx('roulette_win');
+    };
+
+    const handleClose = () => {
+        stopCasinoSounds();
+        onClose();
+    };
+
+    const handleBackToMenu = () => {
+        stopCasinoSounds();
+        setActiveGame('menu');
+    };
 
     // Music Effect
     React.useEffect(() => {
@@ -30,24 +47,18 @@ export const CasinoMenu: React.FC<CasinoMenuProps> = ({ onClose }) => {
     }, [activeGame, playMusic]);
 
     // If a sub-game is active, render it directly
-    // Both sub-games should have a way to go back to this menu or close entirely
-    // Ideally sub-games accept an onBack prop, but currently they only have onClose.
-    // We can wrap their onClose to return to menu instead of closing app entirely if desired,
-    // OR we can pass a specific onBack prop if we modify them.
-    // For now, let's treat "onClose" in sub-games as "Back to Menu".
-
     if (activeGame === 'roulette') {
-        return <RouletteWheel onClose={() => setActiveGame('menu')} />;
+        return <RouletteWheel onClose={handleBackToMenu} />;
     }
 
     if (activeGame === 'slots') {
-        return <SlotMachine onClose={() => setActiveGame('menu')} />;
+        return <SlotMachine onClose={handleBackToMenu} />;
     }
 
     return (
         <View style={styles.overlay}>
             <View style={styles.container}>
-                <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+                <TouchableOpacity onPress={handleClose} style={styles.closeBtn}>
                     <Text style={styles.closeBtnText}>✕</Text>
                 </TouchableOpacity>
 
